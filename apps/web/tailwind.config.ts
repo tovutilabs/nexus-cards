@@ -1,121 +1,144 @@
 import type { Config } from 'tailwindcss';
 
 const config: Config = {
-    darkMode: ['class'],
-    content: [
+  darkMode: ['class'],
+  content: [
     './src/pages/**/*.{js,ts,jsx,tsx,mdx}',
     './src/components/**/*.{js,ts,jsx,tsx,mdx}',
     './src/app/**/*.{js,ts,jsx,tsx,mdx}',
+    './components.json'
   ],
   theme: {
-  	extend: {
-  		borderRadius: {
-  			lg: 'var(--radius)',
-  			md: 'calc(var(--radius) - 2px)',
-  			sm: 'calc(var(--radius) - 4px)'
-  		},
-  		spacing: {
-  			'18': '4.5rem',
-  			'88': '22rem',
-  			'128': '32rem'
-  		},
-  		fontFamily: {
-  			sans: ['var(--font-inter)', 'system-ui', 'sans-serif'],
-  			display: ['var(--font-display)', 'system-ui', 'sans-serif']
-  		},
-  		fontSize: {
-  			'2xs': '0.625rem',
-  			'3xl': '1.75rem'
-  		},
-  		colors: {
-  			nexus: {
-  				blue: {
-  					50: '#eff6ff',
-  					100: '#dbeafe',
-  					200: '#bfdbfe',
-  					300: '#93c5fd',
-  					400: '#60a5fa',
-  					500: '#3b82f6',
-  					600: '#2563eb',
-  					700: '#1d4ed8',
-  					800: '#1e40af',
-  					900: '#1e3a8a',
-  					950: '#172554'
-  				},
-  				green: {
-  					50: '#f0fdf4',
-  					100: '#dcfce7',
-  					200: '#bbf7d0',
-  					300: '#86efac',
-  					400: '#4ade80',
-  					500: '#22c55e',
-  					600: '#16a34a',
-  					700: '#15803d',
-  					800: '#166534',
-  					900: '#14532d',
-  					950: '#052e16'
-  				},
-  				red: {
-  					50: '#fef2f2',
-  					100: '#fee2e2',
-  					200: '#fecaca',
-  					300: '#fca5a5',
-  					400: '#f87171',
-  					500: '#ef4444',
-  					600: '#dc2626',
-  					700: '#b91c1c',
-  					800: '#991b1b',
-  					900: '#7f1d1d',
-  					950: '#450a0a'
-  				}
-  			},
-  			success: 'hsl(var(--success))',
-  			warning: 'hsl(var(--warning))',
-  			danger: 'hsl(var(--danger))',
-  			background: 'hsl(var(--background))',
-  			foreground: 'hsl(var(--foreground))',
-  			card: {
-  				DEFAULT: 'hsl(var(--card))',
-  				foreground: 'hsl(var(--card-foreground))'
-  			},
-  			popover: {
-  				DEFAULT: 'hsl(var(--popover))',
-  				foreground: 'hsl(var(--popover-foreground))'
-  			},
-  			primary: {
-  				DEFAULT: 'hsl(var(--primary))',
-  				foreground: 'hsl(var(--primary-foreground))'
-  			},
-  			secondary: {
-  				DEFAULT: 'hsl(var(--secondary))',
-  				foreground: 'hsl(var(--secondary-foreground))'
-  			},
-  			muted: {
-  				DEFAULT: 'hsl(var(--muted))',
-  				foreground: 'hsl(var(--muted-foreground))'
-  			},
-  			accent: {
-  				DEFAULT: 'hsl(var(--accent))',
-  				foreground: 'hsl(var(--accent-foreground))'
-  			},
-  			destructive: {
-  				DEFAULT: 'hsl(var(--destructive))',
-  				foreground: 'hsl(var(--destructive-foreground))'
-  			},
-  			border: 'hsl(var(--border))',
-  			input: 'hsl(var(--input))',
-  			ring: 'hsl(var(--ring))',
-  			chart: {
-  				'1': 'hsl(var(--chart-1))',
-  				'2': 'hsl(var(--chart-2))',
-  				'3': 'hsl(var(--chart-3))',
-  				'4': 'hsl(var(--chart-4))',
-  				'5': 'hsl(var(--chart-5))'
-  			}
-  		}
-  	}
+    extend: {
+      colors: {
+        brand: {
+          primary: '#2D3494',
+          secondary: '#0784B5',
+          muted: '#BBDCF2',
+          dark: '#1A1E4D'
+        },
+        neutral: {
+          50: '#FAFAFA',
+          100: '#F5F5F5',
+          200: '#E5E5E5',
+          300: '#D4D4D4',
+          400: '#A3A3A3',
+          500: '#737373',
+          600: '#525252',
+          700: '#404040',
+          800: '#262626',
+          900: '#171717'
+        },
+        semantic: {
+          success: '#16A34A',
+          warning: '#F59E0B',
+          danger: '#DC2626',
+          info: '#2563EB'
+        },
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
+        primary: {
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))'
+        },
+        secondary: {
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))'
+        },
+        destructive: {
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))'
+        },
+        muted: {
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))'
+        },
+        accent: {
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))'
+        },
+        popover: {
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))'
+        },
+        card: {
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))'
+        },
+        success: 'hsl(var(--success))',
+        warning: 'hsl(var(--warning))',
+        danger: 'hsl(var(--danger))',
+        info: 'hsl(var(--info))',
+        chart: {
+          '1': 'hsl(var(--chart-1))',
+          '2': 'hsl(var(--chart-2))',
+          '3': 'hsl(var(--chart-3))',
+          '4': 'hsl(var(--chart-4))',
+          '5': 'hsl(var(--chart-5))'
+        }
+      },
+      borderRadius: {
+        sm: '4px',
+        md: '8px',
+        lg: '16px',
+        full: '9999px'
+      },
+      boxShadow: {
+        sm: '0 1px 2px rgba(0, 0, 0, 0.05)',
+        md: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        lg: '0 10px 15px rgba(0, 0, 0, 0.2)'
+      },
+      spacing: {
+        '1': '4px',
+        '2': '8px',
+        '4': '16px',
+        '6': '24px',
+        '8': '32px',
+        '12': '48px'
+      },
+      fontFamily: {
+        heading: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+        body: ['Inter', 'system-ui', 'sans-serif'],
+        sans: ['Inter', 'system-ui', 'sans-serif']
+      },
+      fontSize: {
+        h1: '32px',
+        h2: '28px',
+        h3: '24px',
+        subtitle: '18px',
+        body: '16px',
+        small: '14px',
+        caption: '12px'
+      },
+      lineHeight: {
+        tight: '1.2',
+        normal: '1.5',
+        relaxed: '1.7'
+      },
+      fontWeight: {
+        regular: '400',
+        medium: '500',
+        semibold: '600',
+        bold: '700'
+      },
+      zIndex: {
+        base: '0',
+        dropdown: '10',
+        modal: '20',
+        toast: '30',
+        overlay: '40'
+      },
+      transitionDuration: {
+        fast: '100ms',
+        normal: '200ms',
+        slow: '300ms'
+      }
+    }
   },
-  plugins: [require("tailwindcss-animate")],
+  plugins: [require('tailwindcss-animate')],
 };
 
 export default config;

@@ -53,14 +53,20 @@ export class NfcService {
       throw new BadRequestException('Cannot assign a deactivated tag');
     }
 
-    const user = await this.usersRepository.findById(assignDto.userId);
+    let user;
+    if (assignDto.userId) {
+      user = await this.usersRepository.findById(assignDto.userId);
+    } else if (assignDto.userEmail) {
+      user = await this.usersRepository.findByEmail(assignDto.userEmail);
+    } else {
+      throw new BadRequestException('Either userId or userEmail must be provided');
+    }
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
 
-    return this.nfcRepository.update(tagId, {
-      status: 'UNASSOCIATED',
-    });
+    return this.nfcRepository.assignToUser(tagId, user.id);
   }
 
   async revokeTag(tagId: string) {

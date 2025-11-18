@@ -209,4 +209,278 @@ export class AnalyticsRepository {
   async getDailyStats(cardId: string, startDate: Date, endDate: Date) {
     return this.findDailyStatsByCardId(cardId, startDate, endDate);
   }
+
+  async getGlobalOverview(startDate?: Date, endDate?: Date) {
+    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const end = endDate || new Date();
+
+    const result = await this.prisma.analyticsCardDaily.aggregate({
+      where: {
+        date: {
+          gte: start,
+          lte: end,
+        },
+      },
+      _sum: {
+        views: true,
+        contactExchanges: true,
+        linkClicks: true,
+        qrScans: true,
+        nfcTaps: true,
+        shares: true,
+        uniqueVisitors: true,
+      },
+    });
+
+    const [totalCards, totalUsers] = await Promise.all([
+      this.prisma.card.count(),
+      this.prisma.user.count(),
+    ]);
+
+    return {
+      overview: {
+        totalViews: result._sum.views || 0,
+        totalContactExchanges: result._sum.contactExchanges || 0,
+        totalLinkClicks: result._sum.linkClicks || 0,
+        totalQrScans: result._sum.qrScans || 0,
+        totalNfcTaps: result._sum.nfcTaps || 0,
+        totalShares: result._sum.shares || 0,
+        totalUniqueVisitors: result._sum.uniqueVisitors || 0,
+        totalCards,
+        totalUsers,
+      },
+      dateRange: {
+        start,
+        end,
+      },
+    };
+  }
+
+  async getDailyStatsAdmin(params: {
+    startDate?: Date;
+    endDate?: Date;
+    skip?: number;
+    take?: number;
+  }) {
+    const { startDate, endDate, skip = 0, take = 30 } = params;
+    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const end = endDate || new Date();
+
+    const dailyAggregates = await this.prisma.analyticsCardDaily.groupBy({
+      by: ['date'],
+      where: {
+        date: {
+          gte: start,
+          lte: end,
+        },
+      },
+      _sum: {
+        views: true,
+        contactExchanges: true,
+        linkClicks: true,
+        qrScans: true,
+        nfcTaps: true,
+        shares: true,
+        uniqueVisitors: true,
+      },
+      orderBy: {
+        date: 'desc',
+      },
+      skip,
+      take,
+    });
+
+    const total = await this.prisma.analyticsCardDaily.groupBy({
+      by: ['date'],
+      where: {
+        date: {
+          gte: start,
+          lte: end,
+        },
+      },
+    });
+
+    return {
+      data: dailyAggregates.map((day) => ({
+        date: day.date,
+        views: day._sum.views || 0,
+        contactExchanges: day._sum.contactExchanges || 0,
+        linkClicks: day._sum.linkClicks || 0,
+        qrScans: day._sum.qrScans || 0,
+        nfcTaps: day._sum.nfcTaps || 0,
+        shares: day._sum.shares || 0,
+        uniqueVisitors: day._sum.uniqueVisitors || 0,
+      })),
+      total: total.length,
+      skip,
+      take,
+    };
+  }
+
+  async getTopCards(params: {
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+  }) {
+    const { startDate, endDate, limit = 10 } = params;
+    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const end = endDate || new Date();
+
+    const topByViews = await this.prisma.analyticsCardDaily.groupBy({
+      by: ['cardId'],
+      where: {
+        date: {
+          gte: start,
+          lte: end,
+        },
+      },
+      _sum: {
+        views: true,
+        nfcTaps: true,
+        contactExchanges: true,
+      },
+      orderBy: {
+        _sum: {
+          views: 'desc',
+        },
+      },
+      take: limit,
+    });
+
+    const cardIds = topByViews.map((item) => item.cardId);
+    const cards = await this.prisma.card.findMany({
+      where: {
+        id: {
+          in: cardIds,
+        },
+      },
+      include: {
+        user: {
+          select: {
+            id: true,
+            email: true,
+            profile: {
+              select: {
+                firstName: true,
+                lastName: true,
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const cardMap = new Map(cards.map((card) => [card.id, card]));
+
+    return topByViews.map((item) => ({
+      card: cardMap.get(item.cardId),
+      stats: {
+        views: item._sum.views || 0,
+        nfcTaps: item._sum.nfcTaps || 0,
+        contactExchanges: item._sum.contactExchanges || 0,
+      },
+    }));
+  }
+
+  async getStatsByTier(params: { startDate?: Date; endDate?: Date }) {
+    const { startDate, endDate } = params;
+    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const end = endDate || new Date();
+
+    const tiers = ['FREE', 'PRO', 'PREMIUM'];
+    const statsByTier = await Promise.all(
+      tiers.map(async (tier) => {
+        const result = await this.prisma.analyticsCardDaily.aggregate({
+          where: {
+            date: {
+              gte: start,
+              lte: end,
+            },
+            card: {
+              user: {
+                subscription: {
+                  tier: tier as any,
+                },
+              },
+            },
+          },
+          _sum: {
+            views: true,
+            contactExchanges: true,
+            nfcTaps: true,
+          },
+        });
+
+        const cardCount = await this.prisma.card.count({
+          where: {
+            user: {
+              subscription: {
+                tier: tier as any,
+              },
+            },
+          },
+        });
+
+        return {
+          tier,
+          cardCount,
+          stats: {
+            views: result._sum.views || 0,
+            contactExchanges: result._sum.contactExchanges || 0,
+            nfcTaps: result._sum.nfcTaps || 0,
+          },
+        };
+      }),
+    );
+
+    return statsByTier;
+  }
+
+  async getRecentEvents(params: {
+    skip?: number;
+    take?: number;
+    eventType?: string;
+  }) {
+    const { skip = 0, take = 50, eventType } = params;
+
+    const where: Prisma.AnalyticsEventWhereInput = {};
+    if (eventType) {
+      where.eventType = eventType as any;
+    }
+
+    const [events, total] = await Promise.all([
+      this.prisma.analyticsEvent.findMany({
+        where,
+        include: {
+          card: {
+            select: {
+              id: true,
+              slug: true,
+              firstName: true,
+              lastName: true,
+              user: {
+                select: {
+                  id: true,
+                  email: true,
+                },
+              },
+            },
+          },
+        },
+        orderBy: {
+          timestamp: 'desc',
+        },
+        skip,
+        take,
+      }),
+      this.prisma.analyticsEvent.count({ where }),
+    ]);
+
+    return {
+      events,
+      total,
+      skip,
+      take,
+    };
+  }
 }

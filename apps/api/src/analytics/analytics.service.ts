@@ -40,4 +40,38 @@ export class AnalyticsService {
 
     return this.analyticsRepository.getDailyStats(cardId, startDate, endDate);
   }
+
+  async getGlobalOverview(params: { startDate?: Date; endDate?: Date }) {
+    const { startDate, endDate } = params;
+    return this.analyticsRepository.getGlobalOverview(startDate, endDate);
+  }
+
+  async getDailyStatsAdmin(params: {
+    startDate?: Date;
+    endDate?: Date;
+    skip?: number;
+    take?: number;
+  }) {
+    return this.analyticsRepository.getDailyStatsAdmin(params);
+  }
+
+  async getTopCardsAdmin(params: {
+    startDate?: Date;
+    endDate?: Date;
+    limit?: number;
+  }) {
+    return this.analyticsRepository.getTopCards(params);
+  }
+
+  async getStatsByTier(params: { startDate?: Date; endDate?: Date }) {
+    return this.analyticsRepository.getStatsByTier(params);
+  }
+
+  async getRecentEventsAdmin(params: {
+    skip?: number;
+    take?: number;
+    eventType?: string;
+  }) {
+    return this.analyticsRepository.getRecentEvents(params);
+  }
 }

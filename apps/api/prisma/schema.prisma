@@ -85,6 +85,7 @@ model User {
   apiKeys           ApiKey[]
   integrations      Integration[]
   activities        ActivityLog[]
+  assignedNfcTags   NfcTag[]        @relation("AssignedNfcTags")
 
   @@index([email])
   @@map("users")
@@ -186,17 +187,20 @@ model Card {
 }
 
 model NfcTag {
-  id          String        @id @default(cuid())
-  uid         String        @unique
-  cardId      String?
-  status      NfcTagStatus  @default(UNASSOCIATED)
-  lastTappedAt DateTime?
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
+  id              String        @id @default(cuid())
+  uid             String        @unique
+  assignedUserId  String?
+  cardId          String?
+  status          NfcTagStatus  @default(UNASSOCIATED)
+  lastTappedAt    DateTime?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
-  card        Card?         @relation(fields: [cardId], references: [id], onDelete: SetNull)
+  assignedUser    User?         @relation("AssignedNfcTags", fields: [assignedUserId], references: [id], onDelete: SetNull)
+  card            Card?         @relation(fields: [cardId], references: [id], onDelete: SetNull)
 
   @@index([uid])
+  @@index([assignedUserId])
   @@index([cardId])
   @@index([status])
   @@map("nfc_tags")
@@ -338,4 +342,19 @@ model ActivityLog {
   @@index([action])
   @@index([timestamp])
   @@map("activity_logs")
+}
+
+model SystemSettings {
+  id                    String   @id @default(cuid())
+  key                   String   @unique
+  value                 Json
+  description           String?
+  category              String?
+  updatedBy             String?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  @@index([key])
+  @@index([category])
+  @@map("system_settings")
 }

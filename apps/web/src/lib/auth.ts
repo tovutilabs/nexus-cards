@@ -19,9 +19,8 @@ export interface ResetPasswordData {
   password: string;
 }
 
-export interface AuthTokens {
-  accessToken: string;
-  tokenType: string;
+export interface AuthResponse {
+  user: User;
 }
 
 export interface User {
@@ -70,23 +69,4 @@ export interface UpdateProfileData {
   avatarUrl?: string;
   timezone?: string;
   language?: string;
-}
-
-export function setAuthToken(token: string): void {
-  if (typeof window === 'undefined') return;
-  localStorage.setItem('access_token', token);
-}
-
-export function getAuthToken(): string | null {
-  if (typeof window === 'undefined') return null;
-  return localStorage.getItem('access_token');
-}
-
-export function removeAuthToken(): void {
-  if (typeof window === 'undefined') return;
-  localStorage.removeItem('access_token');
-}
-
-export function isAuthenticated(): boolean {
-  return !!getAuthToken();
 }

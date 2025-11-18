@@ -8,30 +8,26 @@ export interface ApiError {
 
 export class ApiClient {
   private baseUrl: string;
-  private token: string | null;
 
-  constructor(token: string | null = null) {
+  constructor() {
     this.baseUrl = API_BASE_URL;
-    this.token = token;
   }
 
   private async request<T>(
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const url = `${this.baseUrl}${endpoint}`;
+    const apiEndpoint = endpoint.startsWith('/') ? `/api${endpoint}` : endpoint;
+    const url = `${this.baseUrl}${apiEndpoint}`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),
     };
 
-    if (this.token) {
-      headers['Authorization'] = `Bearer ${this.token}`;
-    }
-
     const response = await fetch(url, {
       ...options,
       headers,
+      credentials: 'include',
     });
 
     if (!response.ok) {
@@ -80,6 +76,6 @@ export class ApiClient {
   }
 }
 
-export function createApiClient(token?: string): ApiClient {
-  return new ApiClient(token || null);
+export function createApiClient(): ApiClient {
+  return new ApiClient();
 }

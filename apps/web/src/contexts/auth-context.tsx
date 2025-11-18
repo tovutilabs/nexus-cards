@@ -7,10 +7,6 @@ import {
   User,
   LoginData,
   RegisterData,
-  AuthTokens,
-  setAuthToken,
-  getAuthToken,
-  removeAuthToken,
   UpdateProfileData,
 } from '@/lib/auth';
 
@@ -31,63 +27,57 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
 
-  const fetchUser = useCallback(async (token: string) => {
+  const fetchUser = useCallback(async () => {
     try {
-      const apiClient = createApiClient(token);
+      const apiClient = createApiClient();
       const userData = await apiClient.get<User>('/users/me');
       setUser(userData);
+      return true;
     } catch (error) {
       console.error('Failed to fetch user:', error);
-      removeAuthToken();
       setUser(null);
+      return false;
     }
   }, []);
 
   useEffect(() => {
-    const token = getAuthToken();
-    if (token) {
-      fetchUser(token).finally(() => setLoading(false));
-    } else {
-      setLoading(false);
-    }
+    fetchUser().finally(() => setLoading(false));
   }, [fetchUser]);
 
   const login = async (data: LoginData) => {
     const apiClient = createApiClient();
-    const tokens = await apiClient.post<AuthTokens>('/auth/login', data);
-    setAuthToken(tokens.accessToken);
-    await fetchUser(tokens.accessToken);
+    const result = await apiClient.post<{ user: User }>('/auth/login', data);
+    setUser(result.user);
     router.push('/dashboard');
   };
 
   const register = async (data: RegisterData) => {
     const apiClient = createApiClient();
-    const tokens = await apiClient.post<AuthTokens>('/auth/register', data);
-    setAuthToken(tokens.accessToken);
-    await fetchUser(tokens.accessToken);
+    const result = await apiClient.post<{ user: User }>('/auth/register', data);
+    setUser(result.user);
     router.push('/dashboard');
   };
 
-  const logout = () => {
-    removeAuthToken();
-    setUser(null);
-    router.push('/auth/login');
+  const logout = async () => {
+    try {
+      const apiClient = createApiClient();
+      await apiClient.post('/auth/logout');
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      setUser(null);
+      router.push('/auth/login');
+    }
   };
 
   const updateProfile = async (data: UpdateProfileData) => {
-    const token = getAuthToken();
-    if (!token) throw new Error('Not authenticated');
-
-    const apiClient = createApiClient(token);
+    const apiClient = createApiClient();
     const updatedUser = await apiClient.patch<User>('/users/me/profile', data);
     setUser(updatedUser);
   };
 
   const refreshUser = async () => {
-    const token = getAuthToken();
-    if (token) {
-      await fetchUser(token);
-    }
+    await fetchUser();
   };
 
   const value: AuthContextType = {

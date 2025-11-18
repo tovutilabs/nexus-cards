@@ -1,9 +1,13 @@
 import { Module } from '@nestjs/common';
 import { PublicApiService } from './public-api.service';
 import { PublicApiController } from './public-api.controller';
+import { CardsModule } from '../cards/cards.module';
+import { AnalyticsModule } from '../analytics/analytics.module';
+import { ContactsModule } from '../contacts/contacts.module';
 
 @Module({
+  imports: [CardsModule, AnalyticsModule, ContactsModule],
   providers: [PublicApiService],
-  controllers: [PublicApiController]
+  controllers: [PublicApiController],
 })
 export class PublicApiModule {}

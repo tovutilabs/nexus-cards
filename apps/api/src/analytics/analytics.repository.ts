@@ -179,4 +179,34 @@ export class AnalyticsRepository {
     });
     return result.count;
   }
+
+  async logEvent(data: { cardId: string; eventType: string; metadata?: any }): Promise<AnalyticsEvent> {
+    const eventTypeMap: Record<string, string> = {
+      'VIEW': 'CARD_VIEW',
+      'CONTACT_SUBMISSION': 'CONTACT_EXCHANGE',
+      'SOCIAL_LINK_CLICK': 'LINK_CLICK',
+    };
+
+    const prismaEventType = eventTypeMap[data.eventType] || data.eventType;
+
+    return this.createEvent({
+      card: {
+        connect: { id: data.cardId },
+      },
+      eventType: prismaEventType as any,
+      metadata: data.metadata || {},
+      timestamp: new Date(),
+    });
+  }
+
+  async getCardStats(cardId: string, startDate?: Date, endDate?: Date) {
+    const start = startDate || new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const end = endDate || new Date();
+
+    return this.aggregateDailyStats(cardId, start, end);
+  }
+
+  async getDailyStats(cardId: string, startDate: Date, endDate: Date) {
+    return this.findDailyStatsByCardId(cardId, startDate, endDate);
+  }
 }

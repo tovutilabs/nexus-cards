@@ -140,7 +140,6 @@ export class AuthService {
 
     return {
       accessToken,
-      tokenType: 'Bearer',
     };
   }
 

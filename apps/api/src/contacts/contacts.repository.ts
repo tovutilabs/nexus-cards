@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
-import { Contact, Prisma } from '@prisma/client';
+import { Contact } from '@prisma/client';
 
 @Injectable()
 export class ContactsRepository {
@@ -9,22 +9,13 @@ export class ContactsRepository {
   async findById(id: string): Promise<Contact | null> {
     return this.prisma.contact.findUnique({
       where: { id },
-      include: {
-        user: {
-          include: {
-            profile: true,
-          },
-        },
-        card: true,
-      },
     });
   }
 
   async findByUserId(userId: string): Promise<Contact[]> {
     return this.prisma.contact.findMany({
-      where: { userId },
-      include: {
-        card: true,
+      where: {
+        userId,
       },
       orderBy: {
         exchangedAt: 'desc',
@@ -32,104 +23,57 @@ export class ContactsRepository {
     });
   }
 
-  async create(data: Prisma.ContactCreateInput): Promise<Contact> {
+  async createContact(data: {
+    firstName: string;
+    lastName: string;
+    email: string;
+    phone?: string;
+    company?: string;
+    notes?: string;
+    userId: string;
+    cardId: string;
+    metadata: Record<string, any>;
+  }): Promise<Contact> {
     return this.prisma.contact.create({
-      data,
-      include: {
-        user: {
-          include: {
-            profile: true,
-          },
-        },
-        card: true,
+      data: {
+        firstName: data.firstName,
+        lastName: data.lastName,
+        email: data.email,
+        phone: data.phone,
+        company: data.company,
+        notes: data.notes,
+        userId: data.userId,
+        cardId: data.cardId,
+        metadata: data.metadata,
       },
     });
   }
 
-  async update(id: string, data: Prisma.ContactUpdateInput): Promise<Contact> {
+  async updateContact(id: string, data: {
+    firstName?: string;
+    lastName?: string;
+    email?: string;
+    phone?: string;
+    company?: string;
+    notes?: string;
+    tags?: string[];
+  }): Promise<Contact> {
     return this.prisma.contact.update({
       where: { id },
       data,
-      include: {
-        user: {
-          include: {
-            profile: true,
-          },
-        },
-        card: true,
-      },
     });
   }
 
-  async delete(id: string): Promise<Contact> {
-    return this.prisma.contact.delete({
+  async deleteContact(id: string): Promise<void> {
+    await this.prisma.contact.delete({
       where: { id },
     });
   }
 
-  async findMany(params: {
-    skip?: number;
-    take?: number;
-    where?: Prisma.ContactWhereInput;
-    orderBy?: Prisma.ContactOrderByWithRelationInput;
-  }): Promise<Contact[]> {
-    const { skip, take, where, orderBy } = params;
-    return this.prisma.contact.findMany({
-      skip,
-      take,
-      where,
-      orderBy,
-      include: {
-        user: {
-          include: {
-            profile: true,
-          },
-        },
-        card: true,
-      },
-    });
-  }
-
-  async count(where?: Prisma.ContactWhereInput): Promise<number> {
-    return this.prisma.contact.count({ where });
-  }
-
-  async searchByEmail(userId: string, email: string): Promise<Contact[]> {
-    return this.prisma.contact.findMany({
+  async countByUserId(userId: string): Promise<number> {
+    return this.prisma.contact.count({
       where: {
         userId,
-        email: {
-          contains: email,
-          mode: 'insensitive',
-        },
-      },
-      include: {
-        card: true,
-      },
-    });
-  }
-
-  async searchByName(userId: string, name: string): Promise<Contact[]> {
-    return this.prisma.contact.findMany({
-      where: {
-        userId,
-        OR: [
-          {
-            firstName: {
-              contains: name,
-              mode: 'insensitive',
-            },
-          },
-          {
-            lastName: {
-              contains: name,
-              mode: 'insensitive',
-            },
-          },
-        ],
-      },
-      include: {
-        card: true,
       },
     });
   }

@@ -38,7 +38,12 @@ export class CardsRepository {
 
   async findByUserId(userId: string): Promise<Card[]> {
     return this.prisma.card.findMany({
-      where: { userId },
+      where: { 
+        userId,
+        status: {
+          not: 'ARCHIVED',
+        },
+      },
       include: {
         nfcTags: true,
       },
@@ -48,7 +53,7 @@ export class CardsRepository {
     });
   }
 
-  async create(data: Prisma.CardCreateInput): Promise<Card> {
+  async create(data: any): Promise<Card> {
     return this.prisma.card.create({
       data,
       include: {

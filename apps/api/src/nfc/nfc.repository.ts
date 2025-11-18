@@ -137,4 +137,22 @@ export class NfcRepository {
   async count(where?: Prisma.NfcTagWhereInput): Promise<number> {
     return this.prisma.nfcTag.count({ where });
   }
+
+  async assignToUser(tagId: string, userId: string): Promise<NfcTag> {
+    return this.prisma.nfcTag.update({
+      where: { id: tagId },
+      data: {
+        assignedUserId: userId,
+        status: 'UNASSOCIATED',
+      },
+      include: {
+        card: true,
+        assignedUser: {
+          include: {
+            profile: true,
+          },
+        },
+      },
+    });
+  }
 }

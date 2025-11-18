@@ -1,7 +1,8 @@
 import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
 import { UsersRepository, UserWithRelations } from './users.repository';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { SubscriptionTier } from '@prisma/client';
+import { SubscriptionTier, UserRole, SubscriptionStatus } from '@prisma/client';
+import { UpdateUserSubscriptionDto } from './dto/admin-user.dto';
 
 type TierLimits = {
   [key in SubscriptionTier]: {
@@ -117,6 +118,169 @@ export class UsersService {
         `Contact limit reached. Your ${tier} plan allows ${limit} contacts. Please upgrade to add more contacts.`
       );
     }
+  }
+
+  async listUsersAdmin(params: {
+    skip: number;
+    take: number;
+    search?: string;
+    role?: string;
+    tier?: string;
+  }) {
+    const { skip, take, search, role, tier } = params;
+    
+    const where: any = {};
+    
+    if (search) {
+      where.OR = [
+        { email: { contains: search, mode: 'insensitive' } },
+        { profile: { firstName: { contains: search, mode: 'insensitive' } } },
+        { profile: { lastName: { contains: search, mode: 'insensitive' } } },
+      ];
+    }
+    
+    if (role) {
+      where.role = role as UserRole;
+    }
+    
+    if (tier) {
+      where.subscription = { tier: tier as SubscriptionTier };
+    }
+    
+    const [users, total] = await Promise.all([
+      this.usersRepository.findMany({
+        where,
+        skip,
+        take,
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.usersRepository.count({ where }),
+    ]);
+    
+    return {
+      users: users.map(user => this.sanitizeUser(user)),
+      total,
+      skip,
+      take,
+    };
+  }
+
+  async getUserDetailsAdmin(userId: string) {
+    const user = await this.usersRepository.findById(userId);
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    
+    const [cardsCount, contactsCount] = await Promise.all([
+      this.usersRepository.countCards(userId),
+      this.usersRepository.countContacts(userId),
+    ]);
+    
+    return {
+      ...this.sanitizeUser(user),
+      stats: {
+        cardsCount,
+        contactsCount,
+      },
+    };
+  }
+
+  async updateUserRole(userId: string, newRole: UserRole) {
+    const user = await this.usersRepository.findById(userId);
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    
+    const updatedUser = await this.usersRepository.update(userId, {
+      role: newRole,
+    });
+    
+    return this.sanitizeUser(updatedUser);
+  }
+
+  async updateUserSubscription(userId: string, updateDto: UpdateUserSubscriptionDto) {
+    const user = await this.usersRepository.findById(userId);
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    
+    if (!user.subscription) {
+      throw new NotFoundException('User subscription not found');
+    }
+    
+    const updateData: any = {};
+    
+    if (updateDto.tier !== undefined) {
+      updateData.tier = updateDto.tier;
+    }
+    
+    if (updateDto.status !== undefined) {
+      updateData.status = updateDto.status;
+    }
+    
+    if (updateDto.stripeCustomerId !== undefined) {
+      updateData.stripeCustomerId = updateDto.stripeCustomerId;
+    }
+    
+    if (updateDto.stripeSubscriptionId !== undefined) {
+      updateData.stripeSubscriptionId = updateDto.stripeSubscriptionId;
+    }
+    
+    const updatedUser = await this.usersRepository.update(userId, {
+      subscription: {
+        update: updateData,
+      },
+    });
+    
+    return this.sanitizeUser(updatedUser);
+  }
+
+  async getUserUsageMetrics(userId: string) {
+    const user = await this.usersRepository.findById(userId);
+    
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+    
+    const [cardsCount, contactsCount, recentActivity] = await Promise.all([
+      this.usersRepository.countCards(userId),
+      this.usersRepository.countContacts(userId),
+      this.usersRepository.getRecentActivity(userId, 7),
+    ]);
+    
+    const tier = user.subscription?.tier || 'FREE';
+    const limits = TIER_LIMITS[tier as SubscriptionTier];
+    
+    return {
+      userId,
+      tier,
+      limits,
+      usage: {
+        cards: {
+          current: cardsCount,
+          limit: limits.maxCards,
+          percentage: limits.maxCards === Number.MAX_SAFE_INTEGER 
+            ? 0 
+            : (cardsCount / limits.maxCards) * 100,
+        },
+        contacts: {
+          current: contactsCount,
+          limit: limits.maxContacts,
+          percentage: limits.maxContacts === Number.MAX_SAFE_INTEGER 
+            ? 0 
+            : (contactsCount / limits.maxContacts) * 100,
+        },
+      },
+      recentActivity,
+    };
+  }
+
+  async getUserStatsAdmin() {
+    const stats = await this.usersRepository.getUserStats();
+    return stats;
   }
 
   private sanitizeUser(user: any) {

@@ -7,7 +7,16 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Upload, Search, Nfc } from 'lucide-react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Upload, Search, Nfc, UserPlus, XCircle } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 interface NfcTag {
   id: string;
@@ -44,6 +53,12 @@ export default function AdminNfcPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [bulkUids, setBulkUids] = useState('');
   const [uploading, setUploading] = useState(false);
+  const [selectedTag, setSelectedTag] = useState<NfcTag | null>(null);
+  const [assignDialogOpen, setAssignDialogOpen] = useState(false);
+  const [revokeDialogOpen, setRevokeDialogOpen] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+  const [assigning, setAssigning] = useState(false);
+  const { toast } = useToast();
 
   useEffect(() => {
     loadTags();
@@ -74,7 +89,11 @@ export default function AdminNfcPage() {
 
   const handleBulkImport = async () => {
     if (!bulkUids.trim()) {
-      alert('Please enter UIDs to import');
+      toast({
+        title: 'Error',
+        description: 'Please enter UIDs to import',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -84,7 +103,11 @@ export default function AdminNfcPage() {
       .filter((uid) => uid.length > 0);
 
     if (uids.length === 0) {
-      alert('No valid UIDs found');
+      toast({
+        title: 'Error',
+        description: 'No valid UIDs found',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -97,22 +120,103 @@ export default function AdminNfcPage() {
         errors: any[];
       }>('/nfc/admin/import', { uids });
 
-      alert(
-        `Import complete!\n` +
-        `Imported: ${result.imported.length}\n` +
-        `Skipped: ${result.skipped.length}\n` +
-        `Errors: ${result.errors.length}`
-      );
+      toast({
+        title: 'Import Complete',
+        description: `Imported: ${result.imported.length}, Skipped: ${result.skipped.length}, Errors: ${result.errors.length}`,
+      });
 
       setBulkUids('');
       loadTags();
       loadStats();
     } catch (error: any) {
       console.error('Failed to import tags:', error);
-      alert(error.message || 'Failed to import tags');
+      toast({
+        title: 'Import Failed',
+        description: error.message || 'Failed to import tags',
+        variant: 'destructive',
+      });
     } finally {
       setUploading(false);
     }
+  };
+
+  const handleAssignTag = async () => {
+    if (!selectedTag || !userEmail.trim()) {
+      toast({
+        title: 'Error',
+        description: 'Please enter a user email',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setAssigning(true);
+    try {
+      const apiClient = createApiClient();
+      await apiClient.patch(`/nfc/admin/tags/${selectedTag.id}/assign`, {
+        userEmail: userEmail.trim(),
+      });
+
+      toast({
+        title: 'Success',
+        description: `Tag ${selectedTag.uid} assigned to ${userEmail}`,
+      });
+
+      setAssignDialogOpen(false);
+      setUserEmail('');
+      setSelectedTag(null);
+      loadTags();
+      loadStats();
+    } catch (error: any) {
+      console.error('Failed to assign tag:', error);
+      toast({
+        title: 'Assignment Failed',
+        description: error.message || 'Failed to assign tag',
+        variant: 'destructive',
+      });
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const handleRevokeTag = async () => {
+    if (!selectedTag) return;
+
+    setAssigning(true);
+    try {
+      const apiClient = createApiClient();
+      await apiClient.delete(`/nfc/admin/tags/${selectedTag.id}/revoke`);
+
+      toast({
+        title: 'Success',
+        description: `Tag ${selectedTag.uid} has been revoked`,
+      });
+
+      setRevokeDialogOpen(false);
+      setSelectedTag(null);
+      loadTags();
+      loadStats();
+    } catch (error: any) {
+      console.error('Failed to revoke tag:', error);
+      toast({
+        title: 'Revoke Failed',
+        description: error.message || 'Failed to revoke tag',
+        variant: 'destructive',
+      });
+    } finally {
+      setAssigning(false);
+    }
+  };
+
+  const openAssignDialog = (tag: NfcTag) => {
+    setSelectedTag(tag);
+    setUserEmail('');
+    setAssignDialogOpen(true);
+  };
+
+  const openRevokeDialog = (tag: NfcTag) => {
+    setSelectedTag(tag);
+    setRevokeDialogOpen(true);
   };
 
   const getStatusColor = (status: string) => {
@@ -275,9 +379,28 @@ export default function AdminNfcPage() {
                       </div>
                     )}
 
-                    <Button variant="outline" size="sm">
-                      Manage
-                    </Button>
+                    <div className="flex gap-2">
+                      {!tag.userId && tag.status !== 'DEACTIVATED' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => openAssignDialog(tag)}
+                        >
+                          <UserPlus className="h-4 w-4 mr-1" />
+                          Assign
+                        </Button>
+                      )}
+                      {tag.userId && tag.status !== 'DEACTIVATED' && (
+                        <Button
+                          variant="destructive"
+                          size="sm"
+                          onClick={() => openRevokeDialog(tag)}
+                        >
+                          <XCircle className="h-4 w-4 mr-1" />
+                          Revoke
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               </Card>
@@ -285,6 +408,73 @@ export default function AdminNfcPage() {
           </div>
         )}
       </div>
+
+      <Dialog open={assignDialogOpen} onOpenChange={setAssignDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Assign NFC Tag to User</DialogTitle>
+            <DialogDescription>
+              Assign tag {selectedTag?.uid} to a user by entering their email address.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              User Email
+            </label>
+            <Input
+              type="email"
+              placeholder="user@example.com"
+              value={userEmail}
+              onChange={(e) => setUserEmail(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleAssignTag();
+                }
+              }}
+            />
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setAssignDialogOpen(false)}
+              disabled={assigning}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleAssignTag} disabled={assigning}>
+              {assigning ? 'Assigning...' : 'Assign Tag'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      <Dialog open={revokeDialogOpen} onOpenChange={setRevokeDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Revoke NFC Tag</DialogTitle>
+            <DialogDescription>
+              Are you sure you want to revoke tag {selectedTag?.uid}? This will
+              unassign it from the user and remove any card associations.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setRevokeDialogOpen(false)}
+              disabled={assigning}
+            >
+              Cancel
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={handleRevokeTag}
+              disabled={assigning}
+            >
+              {assigning ? 'Revoking...' : 'Revoke Tag'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

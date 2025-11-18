@@ -15,3 +15,15 @@ export type { NexusDialogProps } from './nexus-dialog';
 
 export { NexusLayoutShell } from './nexus-layout-shell';
 export type { NexusLayoutShellProps } from './nexus-layout-shell';
+
+export { StatsCard } from './stats-card';
+export type { StatsCardProps } from './stats-card';
+
+export { CardListItem } from './card-list-item';
+export type { CardListItemProps } from './card-list-item';
+
+export { CardPreview } from './card-preview';
+export type { CardPreviewProps } from './card-preview';
+
+export { DashboardShell } from './dashboard-shell';
+export type { DashboardShellProps } from './dashboard-shell';

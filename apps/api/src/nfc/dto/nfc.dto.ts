@@ -8,7 +8,12 @@ export class ImportNfcTagsDto {
 
 export class AssignNfcTagDto {
   @IsString()
-  userId: string;
+  @IsOptional()
+  userId?: string;
+
+  @IsString()
+  @IsOptional()
+  userEmail?: string;
 }
 
 export class AssociateNfcTagDto {

@@ -1,0 +1,341 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+enum SubscriptionTier {
+  FREE
+  PRO
+  PREMIUM
+}
+
+enum SubscriptionStatus {
+  ACTIVE
+  PAST_DUE
+  CANCELED
+  TRIALING
+  INCOMPLETE
+}
+
+enum CardStatus {
+  DRAFT
+  PUBLISHED
+  ARCHIVED
+}
+
+enum NfcTagStatus {
+  UNASSOCIATED
+  ASSOCIATED
+  DEACTIVATED
+}
+
+enum IntegrationProvider {
+  SALESFORCE
+  HUBSPOT
+  ZOHO
+  MAILCHIMP
+  SENDGRID
+  ZAPIER
+  GOOGLE_DRIVE
+  DROPBOX
+}
+
+enum IntegrationStatus {
+  ACTIVE
+  INACTIVE
+  ERROR
+}
+
+enum AnalyticsEventType {
+  CARD_VIEW
+  CONTACT_EXCHANGE
+  LINK_CLICK
+  QR_SCAN
+  NFC_TAP
+  SHARE
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  passwordHash      String
+  role              UserRole @default(USER)
+  emailVerified     Boolean  @default(false)
+  emailVerificationToken String?
+  passwordResetToken String?
+  passwordResetExpires DateTime?
+  twoFactorEnabled  Boolean  @default(false)
+  twoFactorSecret   String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  profile           UserProfile?
+  subscription      Subscription?
+  cards             Card[]
+  contacts          Contact[]
+  apiKeys           ApiKey[]
+  integrations      Integration[]
+  activities        ActivityLog[]
+
+  @@index([email])
+  @@map("users")
+}
+
+model UserProfile {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  firstName   String?
+  lastName    String?
+  phone       String?
+  company     String?
+  jobTitle    String?
+  avatarUrl   String?
+  timezone    String?
+  language    String   @default("en")
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("user_profiles")
+}
+
+model Subscription {
+  id                String             @id @default(cuid())
+  userId            String             @unique
+  tier              SubscriptionTier   @default(FREE)
+  status            SubscriptionStatus @default(ACTIVE)
+  stripeCustomerId  String?            @unique
+  stripeSubscriptionId String?         @unique
+  stripePriceId     String?
+  currentPeriodStart DateTime?
+  currentPeriodEnd   DateTime?
+  cancelAtPeriodEnd  Boolean           @default(false)
+  createdAt         DateTime           @default(now())
+  updatedAt         DateTime           @updatedAt
+
+  user              User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  invoices          Invoice[]
+
+  @@index([userId])
+  @@index([stripeCustomerId])
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id                String   @id @default(cuid())
+  subscriptionId    String
+  stripeInvoiceId   String?  @unique
+  amount            Int
+  currency          String   @default("usd")
+  status            String
+  invoiceUrl        String?
+  pdfUrl            String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+
+  subscription      Subscription @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@map("invoices")
+}
+
+model Card {
+  id              String      @id @default(cuid())
+  userId          String
+  slug            String      @unique
+  status          CardStatus  @default(DRAFT)
+  templateId      String?
+  firstName       String
+  lastName        String
+  jobTitle        String?
+  company         String?
+  email           String?
+  phone           String?
+  website         String?
+  bio             String?
+  avatarUrl       String?
+  coverImageUrl   String?
+  theme           Json?
+  customCss       String?
+  socialLinks     Json?
+  viewCount       Int         @default(0)
+  lastViewedAt    DateTime?
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  nfcTags         NfcTag[]
+  contacts        Contact[]
+  analyticsEvents AnalyticsEvent[]
+  analyticsDailies AnalyticsCardDaily[]
+
+  @@index([userId])
+  @@index([slug])
+  @@index([status])
+  @@map("cards")
+}
+
+model NfcTag {
+  id          String        @id @default(cuid())
+  uid         String        @unique
+  cardId      String?
+  status      NfcTagStatus  @default(UNASSOCIATED)
+  lastTappedAt DateTime?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  card        Card?         @relation(fields: [cardId], references: [id], onDelete: SetNull)
+
+  @@index([uid])
+  @@index([cardId])
+  @@index([status])
+  @@map("nfc_tags")
+}
+
+model Contact {
+  id              String   @id @default(cuid())
+  userId          String
+  cardId          String
+  firstName       String
+  lastName        String
+  email           String?
+  phone           String?
+  company         String?
+  jobTitle        String?
+  notes           String?
+  tags            String[]
+  metadata        Json?
+  exchangedAt     DateTime @default(now())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  card            Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([cardId])
+  @@index([email])
+  @@map("contacts")
+}
+
+model AnalyticsEvent {
+  id          String              @id @default(cuid())
+  cardId      String
+  eventType   AnalyticsEventType
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  referer     String?
+  country     String?
+  city        String?
+  device      String?
+  browser     String?
+  timestamp   DateTime            @default(now())
+
+  card        Card                @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId])
+  @@index([eventType])
+  @@index([timestamp])
+  @@map("analytics_events")
+}
+
+model AnalyticsCardDaily {
+  id              String   @id @default(cuid())
+  cardId          String
+  date            DateTime @db.Date
+  views           Int      @default(0)
+  contactExchanges Int     @default(0)
+  linkClicks      Int      @default(0)
+  qrScans         Int      @default(0)
+  nfcTaps         Int      @default(0)
+  shares          Int      @default(0)
+  uniqueVisitors  Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  card            Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@unique([cardId, date])
+  @@index([cardId])
+  @@index([date])
+  @@map("analytics_card_daily")
+}
+
+model Integration {
+  id          String              @id @default(cuid())
+  userId      String
+  provider    IntegrationProvider
+  status      IntegrationStatus   @default(ACTIVE)
+  credentials Json
+  settings    Json?
+  lastSyncAt  DateTime?
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
+
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([provider])
+  @@map("integrations")
+}
+
+model ApiKey {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  keyHash     String   @unique
+  keyPrefix   String
+  lastUsedAt  DateTime?
+  expiresAt   DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([keyHash])
+  @@map("api_keys")
+}
+
+model Webhook {
+  id          String   @id @default(cuid())
+  url         String
+  secret      String
+  events      String[]
+  active      Boolean  @default(true)
+  lastTriggeredAt DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("webhooks")
+}
+
+model ActivityLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  action      String
+  entityType  String?
+  entityId    String?
+  metadata    Json?
+  ipAddress   String?
+  userAgent   String?
+  timestamp   DateTime @default(now())
+
+  user        User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([timestamp])
+  @@map("activity_logs")
+}

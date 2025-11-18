@@ -1,0 +1,30 @@
+{
+  "name": "nexus-cards",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "docker compose up --build",
+    "dev:local": "concurrently \"pnpm run dev:api\" \"pnpm run dev:web\"",
+    "dev:api": "pnpm --filter @nexus-cards/api dev",
+    "dev:web": "pnpm --filter @nexus-cards/web dev",
+    "docker:up": "docker compose up -d",
+    "docker:down": "docker compose down",
+    "docker:logs": "docker compose logs -f",
+    "docker:restart": "docker compose restart",
+    "build": "pnpm -r build",
+    "build:api": "pnpm --filter @nexus-cards/api build",
+    "build:web": "pnpm --filter @nexus-cards/web build",
+    "lint": "pnpm -r lint",
+    "test": "pnpm -r test",
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
+  },
+  "devDependencies": {
+    "@typescript-eslint/eslint-plugin": "^6.21.0",
+    "@typescript-eslint/parser": "^6.21.0",
+    "concurrently": "^8.2.2",
+    "eslint": "^8.56.0",
+    "eslint-config-prettier": "^9.1.0",
+    "prettier": "^3.2.5",
+    "typescript": "^5.3.3"
+  }
+}

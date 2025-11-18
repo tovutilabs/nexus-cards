@@ -1,0 +1,24 @@
+FROM node:18-alpine
+
+# Install pnpm
+RUN npm install -g pnpm@10.22.0
+
+WORKDIR /app
+
+# Copy workspace configuration
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
+
+# Copy packages
+COPY packages ./packages
+
+# Copy web application
+COPY apps/web ./apps/web
+
+# Install all dependencies
+RUN pnpm install --frozen-lockfile
+
+WORKDIR /app/apps/web
+
+EXPOSE 3000
+
+CMD ["pnpm", "dev"]

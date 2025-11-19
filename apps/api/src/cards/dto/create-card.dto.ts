@@ -75,4 +75,34 @@ export class CreateCardDto {
   @IsOptional()
   @IsEnum(CardStatus)
   status?: CardStatus;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(10)
+  secondaryLanguage?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  firstName_es?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  lastName_es?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  jobTitle_es?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(100)
+  company_es?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(500)
+  bio_es?: string;
 }

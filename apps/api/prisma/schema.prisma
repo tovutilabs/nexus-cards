@@ -169,6 +169,15 @@ model Card {
   theme           Json?
   customCss       String?
   socialLinks     Json?
+  
+  // Bilingual support fields
+  secondaryLanguage String?   // 'es', 'fr', etc.
+  firstName_es      String?
+  lastName_es       String?
+  jobTitle_es       String?
+  company_es        String?
+  bio_es            String?
+  
   viewCount       Int         @default(0)
   lastViewedAt    DateTime?
   createdAt       DateTime    @default(now())
@@ -357,4 +366,65 @@ model SystemSettings {
   @@index([key])
   @@index([category])
   @@map("system_settings")
+}
+
+enum ExperimentStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  COMPLETED
+}
+
+model Experiment {
+  id              String            @id @default(cuid())
+  name            String
+  description     String?
+  status          ExperimentStatus  @default(DRAFT)
+  startDate       DateTime?
+  endDate         DateTime?
+  targetPath      String
+  variants        Json
+  conversionGoal  String
+  createdBy       String
+  createdAt       DateTime          @default(now())
+  updatedAt       DateTime          @updatedAt
+
+  assignments     ExperimentAssignment[]
+  events          ExperimentEvent[]
+
+  @@index([status])
+  @@index([targetPath])
+  @@map("experiments")
+}
+
+model ExperimentAssignment {
+  id              String      @id @default(cuid())
+  experimentId    String
+  userId          String?
+  sessionId       String
+  variant         String
+  assignedAt      DateTime    @default(now())
+
+  experiment      Experiment  @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+
+  @@index([experimentId])
+  @@index([sessionId])
+  @@map("experiment_assignments")
+}
+
+model ExperimentEvent {
+  id              String      @id @default(cuid())
+  experimentId    String
+  sessionId       String
+  variant         String
+  eventType       String
+  eventData       Json?
+  timestamp       DateTime    @default(now())
+
+  experiment      Experiment  @relation(fields: [experimentId], references: [id], onDelete: Cascade)
+
+  @@index([experimentId])
+  @@index([sessionId])
+  @@index([eventType])
+  @@map("experiment_events")
 }

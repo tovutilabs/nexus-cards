@@ -67,6 +67,11 @@ services:
       SMTP_USER: ''
       SMTP_PASSWORD: ''
       EMAIL_FROM: dev@nexus.cards
+      ENCRYPTION_KEY: 0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      STRIPE_SECRET_KEY: sk_test_your_key_here
+      STRIPE_WEBHOOK_SECRET: whsec_your_webhook_secret_here
+      STRIPE_PRICE_ID_PRO: price_pro_id_here
+      STRIPE_PRICE_ID_PREMIUM: price_premium_id_here
     volumes:
       - ./apps/api/src:/app/apps/api/src
       - ./apps/api/prisma:/app/apps/api/prisma

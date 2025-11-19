@@ -12,6 +12,7 @@ import { AnalyticsModule } from './analytics/analytics.module';
 import { BillingModule } from './billing/billing.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { PublicApiModule } from './public-api/public-api.module';
+import { ExperimentsModule } from './experiments/experiments.module';
 
 @Module({
   imports: [
@@ -29,6 +30,7 @@ import { PublicApiModule } from './public-api/public-api.module';
     BillingModule,
     IntegrationsModule,
     PublicApiModule,
+    ExperimentsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

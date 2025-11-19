@@ -483,4 +483,158 @@ export class AnalyticsRepository {
       take,
     };
   }
+
+  async getUserStats(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+    cardId?: string,
+  ) {
+    const where: Prisma.AnalyticsCardDailyWhereInput = {
+      card: {
+        userId,
+      },
+      date: {
+        gte: startDate,
+        lte: endDate,
+      },
+    };
+
+    if (cardId) {
+      where.cardId = cardId;
+    }
+
+    const result = await this.prisma.analyticsCardDaily.aggregate({
+      where,
+      _sum: {
+        views: true,
+        contactExchanges: true,
+        linkClicks: true,
+        uniqueVisitors: true,
+      },
+    });
+
+    return {
+      totalViews: result._sum.views || 0,
+      uniqueVisitors: result._sum.uniqueVisitors || 0,
+      contactExchanges: result._sum.contactExchanges || 0,
+      linkClicks: result._sum.linkClicks || 0,
+    };
+  }
+
+  async getDailyViewsForUser(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+    cardId?: string,
+  ) {
+    const where: Prisma.AnalyticsCardDailyWhereInput = {
+      card: {
+        userId,
+      },
+      date: {
+        gte: startDate,
+        lte: endDate,
+      },
+    };
+
+    if (cardId) {
+      where.cardId = cardId;
+    }
+
+    const dailyStats = await this.prisma.analyticsCardDaily.groupBy({
+      by: ['date'],
+      where,
+      _sum: {
+        views: true,
+      },
+      orderBy: {
+        date: 'asc',
+      },
+    });
+
+    return dailyStats.map((stat) => ({
+      date: stat.date.toISOString().split('T')[0],
+      count: stat._sum.views || 0,
+    }));
+  }
+
+  async getTopReferrersForUser(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+    cardId?: string,
+  ) {
+    const where: Prisma.AnalyticsEventWhereInput = {
+      card: {
+        userId,
+      },
+      timestamp: {
+        gte: startDate,
+        lte: endDate,
+      },
+      eventType: 'CARD_VIEW',
+    };
+
+    if (cardId) {
+      where.cardId = cardId;
+    }
+
+    const events = await this.prisma.analyticsEvent.findMany({
+      where,
+      select: {
+        metadata: true,
+      },
+    });
+
+    const referrerCounts = events.reduce((acc: Record<string, number>, event: any) => {
+      const referrer = event.metadata?.referrer || 'Direct';
+      acc[referrer] = (acc[referrer] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(referrerCounts)
+      .map(([referrer, count]) => ({ referrer, count }))
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+  }
+
+  async getDeviceBreakdownForUser(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+    cardId?: string,
+  ) {
+    const where: Prisma.AnalyticsEventWhereInput = {
+      card: {
+        userId,
+      },
+      timestamp: {
+        gte: startDate,
+        lte: endDate,
+      },
+      eventType: 'CARD_VIEW',
+    };
+
+    if (cardId) {
+      where.cardId = cardId;
+    }
+
+    const events = await this.prisma.analyticsEvent.findMany({
+      where,
+      select: {
+        metadata: true,
+      },
+    });
+
+    const deviceCounts = events.reduce((acc: Record<string, number>, event: any) => {
+      const device = event.metadata?.device_type || 'Unknown';
+      acc[device] = (acc[device] || 0) + 1;
+      return acc;
+    }, {});
+
+    return Object.entries(deviceCounts)
+      .map(([deviceType, count]) => ({ deviceType, count }))
+      .sort((a, b) => b.count - a.count);
+  }
 }

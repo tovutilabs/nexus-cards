@@ -38,6 +38,12 @@ interface CardData {
     secondaryColor?: string;
     backgroundColor?: string;
   };
+  secondaryLanguage?: string;
+  firstName_es?: string;
+  lastName_es?: string;
+  jobTitle_es?: string;
+  company_es?: string;
+  bio_es?: string;
 }
 
 export default function PublicCardPage() {
@@ -52,6 +58,7 @@ export default function PublicCardPage() {
   const [showQR, setShowQR] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
+  const [language, setLanguage] = useState<'primary' | 'secondary'>('primary');
 
   const [contactForm, setContactForm] = useState({
     firstName: '',
@@ -175,18 +182,51 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
   const cardUrl = typeof window !== 'undefined' ? window.location.origin + `/p/${slug}` : '';
   const primaryColor = card.theme?.primaryColor || '#4F46E5';
 
+  const hasSecondaryLanguage = card.secondaryLanguage && (
+    card.firstName_es || card.lastName_es || card.jobTitle_es || card.company_es || card.bio_es
+  );
+
+  const displayName = language === 'secondary' && card.firstName_es && card.lastName_es
+    ? `${card.firstName_es} ${card.lastName_es}`
+    : `${card.firstName} ${card.lastName}`;
+
+  const displayJobTitle = language === 'secondary' && card.jobTitle_es
+    ? card.jobTitle_es
+    : card.jobTitle;
+
+  const displayCompany = language === 'secondary' && card.company_es
+    ? card.company_es
+    : card.company;
+
+  const displayBio = language === 'secondary' && card.bio_es
+    ? card.bio_es
+    : card.bio;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       <div className="max-w-2xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Main Card */}
         <Card className="overflow-hidden shadow-xl">
-          {/* Header with gradient */}
+          {/* Header with gradient and language switcher */}
           <div 
-            className="h-32 bg-gradient-to-r from-indigo-600 to-purple-600"
+            className="relative h-32 bg-gradient-to-r from-indigo-600 to-purple-600"
             style={{
               background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}dd 100%)`
             }}
-          />
+          >
+            {hasSecondaryLanguage && (
+              <div className="absolute top-4 right-4">
+                <button
+                  onClick={() => setLanguage(language === 'primary' ? 'secondary' : 'primary')}
+                  className="px-3 py-1.5 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full hover:bg-white/30 transition-colors flex items-center gap-2"
+                  aria-label="Switch language"
+                >
+                  <Globe className="h-4 w-4" />
+                  {language === 'primary' ? 'ES' : 'EN'}
+                </button>
+              </div>
+            )}
+          </div>
 
           {/* Profile Section */}
           <div className="relative px-6 pb-6">
@@ -197,15 +237,15 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
               </div>
 
               <h1 className="mt-4 text-3xl font-bold text-gray-900">
-                {card.firstName} {card.lastName}
+                {displayName}
               </h1>
 
-              {card.jobTitle && (
-                <p className="text-lg text-gray-600 mt-1">{card.jobTitle}</p>
+              {displayJobTitle && (
+                <p className="text-lg text-gray-600 mt-1">{displayJobTitle}</p>
               )}
 
-              {card.company && (
-                <p className="text-md text-gray-500 mt-1">{card.company}</p>
+              {displayCompany && (
+                <p className="text-md text-gray-500 mt-1">{displayCompany}</p>
               )}
 
               {card.location && (
@@ -215,9 +255,9 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
                 </div>
               )}
 
-              {card.bio && (
+              {displayBio && (
                 <p className="text-center text-gray-600 mt-4 max-w-lg">
-                  {card.bio}
+                  {displayBio}
                 </p>
               )}
             </div>

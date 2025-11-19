@@ -74,4 +74,61 @@ export class AnalyticsService {
   }) {
     return this.analyticsRepository.getRecentEvents(params);
   }
+
+  async getUserAnalytics(
+    userId: string,
+    days: number = 7,
+    cardId?: string,
+  ) {
+    const endDate = new Date();
+    const startDate = new Date();
+    startDate.setDate(startDate.getDate() - days);
+
+    const stats = await this.analyticsRepository.getUserStats(
+      userId,
+      startDate,
+      endDate,
+      cardId,
+    );
+
+    const viewsOverTime = await this.analyticsRepository.getDailyViewsForUser(
+      userId,
+      startDate,
+      endDate,
+      cardId,
+    );
+
+    const topReferrers = await this.analyticsRepository.getTopReferrersForUser(
+      userId,
+      startDate,
+      endDate,
+      cardId,
+    );
+
+    const deviceBreakdown = await this.analyticsRepository.getDeviceBreakdownForUser(
+      userId,
+      startDate,
+      endDate,
+      cardId,
+    );
+
+    return {
+      views: stats.totalViews || 0,
+      uniqueVisitors: stats.uniqueVisitors || 0,
+      contactExchanges: stats.contactExchanges || 0,
+      linkClicks: stats.linkClicks || 0,
+      viewsOverTime: viewsOverTime.map((item) => ({
+        label: item.date,
+        value: item.count,
+      })),
+      topReferrers: topReferrers.map((item) => ({
+        label: item.referrer || 'Direct',
+        value: item.count,
+      })),
+      deviceBreakdown: deviceBreakdown.map((item) => ({
+        label: item.deviceType || 'Unknown',
+        value: item.count,
+      })),
+    };
+  }
 }

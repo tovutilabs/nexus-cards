@@ -1,0 +1,91 @@
+{
+  "common": {
+    "appName": "Nexus Cards",
+    "loading": "Cargando...",
+    "error": "Error",
+    "success": "Éxito",
+    "cancel": "Cancelar",
+    "save": "Guardar",
+    "delete": "Eliminar",
+    "edit": "Editar",
+    "create": "Crear",
+    "back": "Atrás",
+    "next": "Siguiente",
+    "submit": "Enviar",
+    "search": "Buscar",
+    "filter": "Filtrar",
+    "sort": "Ordenar",
+    "actions": "Acciones",
+    "confirm": "Confirmar",
+    "yes": "Sí",
+    "no": "No"
+  },
+  "dashboard": {
+    "title": "Panel",
+    "cards": "Tarjetas",
+    "contacts": "Contactos",
+    "analytics": "Analíticas",
+    "integrations": "Integraciones",
+    "settings": "Configuración",
+    "logout": "Cerrar Sesión",
+    "newCard": "Nueva Tarjeta",
+    "viewCard": "Ver Tarjeta",
+    "editCard": "Editar Tarjeta",
+    "deleteCard": "Eliminar Tarjeta",
+    "cardCreated": "Tarjeta creada exitosamente",
+    "cardUpdated": "Tarjeta actualizada exitosamente",
+    "cardDeleted": "Tarjeta eliminada exitosamente"
+  },
+  "publicCard": {
+    "saveContact": "Guardar Contacto",
+    "shareCard": "Compartir Tarjeta",
+    "downloadVCard": "Descargar vCard",
+    "contactSaved": "Contacto guardado exitosamente",
+    "offline": "Estás viendo una versión en caché",
+    "bio": "Acerca de",
+    "socialLinks": "Conectar",
+    "contactInfo": "Información de Contacto"
+  },
+  "settings": {
+    "account": "Cuenta",
+    "profile": "Perfil",
+    "billing": "Facturación",
+    "security": "Seguridad",
+    "preferences": "Preferencias",
+    "language": "Idioma",
+    "notifications": "Notificaciones",
+    "privacy": "Privacidad"
+  },
+  "billing": {
+    "currentPlan": "Plan Actual",
+    "upgrade": "Actualizar",
+    "downgrade": "Reducir",
+    "cancel": "Cancelar Suscripción",
+    "freePlan": "Gratis",
+    "proPlan": "Pro",
+    "premiumPlan": "Premium",
+    "perMonth": "por mes",
+    "usageLimit": "Límite de Uso",
+    "unlimited": "Ilimitado"
+  },
+  "analytics": {
+    "views": "Vistas",
+    "uniqueVisitors": "Visitantes Únicos",
+    "contactExchanges": "Intercambios de Contacto",
+    "linkClicks": "Clics en Enlaces",
+    "topReferrers": "Principales Referentes",
+    "deviceBreakdown": "Desglose por Dispositivo",
+    "timeRange": "Rango de Tiempo",
+    "last7Days": "Últimos 7 Días",
+    "last30Days": "Últimos 30 Días",
+    "last90Days": "Últimos 90 Días",
+    "allTime": "Todo el Tiempo"
+  },
+  "errors": {
+    "notFound": "Página no encontrada",
+    "unauthorized": "No autorizado",
+    "serverError": "Error del servidor",
+    "networkError": "Error de red",
+    "tryAgain": "Intentar de nuevo"
+  }
+}

@@ -1,0 +1,10 @@
+{
+  "extends": "../tsconfig.json",
+  "compilerOptions": {
+    "types": ["@playwright/test"],
+    "module": "esnext",
+    "moduleResolution": "node"
+  },
+  "include": ["*.spec.ts"],
+  "exclude": []
+}

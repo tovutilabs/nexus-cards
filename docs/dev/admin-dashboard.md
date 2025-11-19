@@ -15,11 +15,13 @@ The Nexus Cards admin dashboard provides comprehensive system management tools f
 ### Backend (NestJS)
 
 **RBAC Implementation**:
+
 - `RolesGuard` checks `@Roles()` decorator metadata
 - Applied to all admin controllers via `@UseGuards(JwtAuthGuard, RolesGuard)`
 - Returns `403 Forbidden` if user lacks admin role
 
 **Admin Controllers**:
+
 1. `AdminUsersController` - `/admin/users`
 2. `AdminAnalyticsController` - `/admin/analytics`
 3. `AdminSettingsController` - `/admin/settings`
@@ -28,19 +30,17 @@ The Nexus Cards admin dashboard provides comprehensive system management tools f
 ### Frontend (Next.js)
 
 **Protection Pattern**:
+
 ```tsx
 import { AdminGuard } from '@/components/admin/admin-guard';
 
 export default function AdminLayout({ children }) {
-  return (
-    <AdminGuard>
-      {/* Admin UI */}
-    </AdminGuard>
-  );
+  return <AdminGuard>{/* Admin UI */}</AdminGuard>;
 }
 ```
 
 **Admin Layout**: `/apps/web/src/app/admin/layout.tsx`
+
 - Sidebar navigation with active route highlighting
 - Role check on mount with loading state
 - Redirect to `/dashboard` if not admin
@@ -57,16 +57,17 @@ export default function AdminLayout({ children }) {
 
 #### Endpoints
 
-| Method | Path | Description | Query Params |
-|--------|------|-------------|--------------|
-| GET | `/admin/users` | List users with search/filters | `skip`, `take`, `search`, `role`, `tier` |
-| GET | `/admin/users/:userId` | Get user details with stats | - |
-| PATCH | `/admin/users/:userId/role` | Update user role | - |
-| PATCH | `/admin/users/:userId/subscription` | Update subscription tier | - |
-| GET | `/admin/users/:userId/usage` | Get usage metrics | - |
-| GET | `/admin/users/stats/overview` | Get user statistics | - |
+| Method | Path                                | Description                    | Query Params                             |
+| ------ | ----------------------------------- | ------------------------------ | ---------------------------------------- |
+| GET    | `/admin/users`                      | List users with search/filters | `skip`, `take`, `search`, `role`, `tier` |
+| GET    | `/admin/users/:userId`              | Get user details with stats    | -                                        |
+| PATCH  | `/admin/users/:userId/role`         | Update user role               | -                                        |
+| PATCH  | `/admin/users/:userId/subscription` | Update subscription tier       | -                                        |
+| GET    | `/admin/users/:userId/usage`        | Get usage metrics              | -                                        |
+| GET    | `/admin/users/stats/overview`       | Get user statistics            | -                                        |
 
 **DTOs**:
+
 ```typescript
 // apps/api/src/users/dto/admin-user.dto.ts
 
@@ -78,15 +79,15 @@ export class UpdateUserRoleDto {
 export class UpdateUserSubscriptionDto {
   @IsEnum(SubscriptionTier)
   tier: SubscriptionTier; // FREE | PRO | PREMIUM
-  
+
   @IsEnum(SubscriptionStatus)
   @IsOptional()
   status?: SubscriptionStatus; // ACTIVE | CANCELED | PAST_DUE
-  
+
   @IsString()
   @IsOptional()
   stripeCustomerId?: string;
-  
+
   @IsString()
   @IsOptional()
   stripeSubscriptionId?: string;
@@ -94,6 +95,7 @@ export class UpdateUserSubscriptionDto {
 ```
 
 **Example Response** (`GET /admin/users`):
+
 ```json
 {
   "users": [
@@ -121,6 +123,7 @@ export class UpdateUserSubscriptionDto {
 ```
 
 **Usage Metrics Response** (`GET /admin/users/:userId/usage`):
+
 ```json
 {
   "usage": {
@@ -151,15 +154,16 @@ export class UpdateUserSubscriptionDto {
 
 #### Endpoints
 
-| Method | Path | Description | Query Params |
-|--------|------|-------------|--------------|
-| GET | `/admin/analytics/overview` | Global overview stats | `days` (default: 7) |
-| GET | `/admin/analytics/daily` | Daily aggregates | `days`, `skip`, `take` |
-| GET | `/admin/analytics/top-cards` | Top performing cards | `limit` (default: 10) |
-| GET | `/admin/analytics/by-tier` | Stats by subscription tier | `days` |
-| GET | `/admin/analytics/events` | Recent events list | `skip`, `take`, `type`, `cardId` |
+| Method | Path                         | Description                | Query Params                     |
+| ------ | ---------------------------- | -------------------------- | -------------------------------- |
+| GET    | `/admin/analytics/overview`  | Global overview stats      | `days` (default: 7)              |
+| GET    | `/admin/analytics/daily`     | Daily aggregates           | `days`, `skip`, `take`           |
+| GET    | `/admin/analytics/top-cards` | Top performing cards       | `limit` (default: 10)            |
+| GET    | `/admin/analytics/by-tier`   | Stats by subscription tier | `days`                           |
+| GET    | `/admin/analytics/events`    | Recent events list         | `skip`, `take`, `type`, `cardId` |
 
 **Overview Response** (`GET /admin/analytics/overview?days=7`):
+
 ```json
 {
   "totalViews": 1234,
@@ -171,6 +175,7 @@ export class UpdateUserSubscriptionDto {
 ```
 
 **Daily Stats Response** (`GET /admin/analytics/daily?days=7`):
+
 ```json
 {
   "stats": [
@@ -186,6 +191,7 @@ export class UpdateUserSubscriptionDto {
 ```
 
 **Top Cards Response** (`GET /admin/analytics/top-cards?limit=5`):
+
 ```json
 {
   "cards": [
@@ -210,6 +216,7 @@ export class UpdateUserSubscriptionDto {
 ```
 
 **Tier Stats Response** (`GET /admin/analytics/by-tier?days=30`):
+
 ```json
 {
   "stats": [
@@ -245,17 +252,18 @@ export class UpdateUserSubscriptionDto {
 
 #### Endpoints
 
-| Method | Path | Description | Query Params |
-|--------|------|-------------|--------------|
-| GET | `/admin/settings` | List all settings | `category` (optional) |
-| GET | `/admin/settings/:key` | Get specific setting | - |
-| POST | `/admin/settings` | Create new setting | - |
-| PATCH | `/admin/settings/:key` | Update setting | - |
-| DELETE | `/admin/settings/:key` | Delete setting | - |
-| GET | `/admin/settings/feature-flags/all` | Get feature flags | - |
-| GET | `/admin/settings/limits/all` | Get system limits | - |
+| Method | Path                                | Description          | Query Params          |
+| ------ | ----------------------------------- | -------------------- | --------------------- |
+| GET    | `/admin/settings`                   | List all settings    | `category` (optional) |
+| GET    | `/admin/settings/:key`              | Get specific setting | -                     |
+| POST   | `/admin/settings`                   | Create new setting   | -                     |
+| PATCH  | `/admin/settings/:key`              | Update setting       | -                     |
+| DELETE | `/admin/settings/:key`              | Delete setting       | -                     |
+| GET    | `/admin/settings/feature-flags/all` | Get feature flags    | -                     |
+| GET    | `/admin/settings/limits/all`        | Get system limits    | -                     |
 
 **DTOs**:
+
 ```typescript
 // apps/api/src/users/dto/system-settings.dto.ts
 
@@ -263,14 +271,14 @@ export class CreateSettingDto {
   @IsString()
   @MinLength(1)
   key: string;
-  
+
   @IsNotEmpty()
   value: any; // JSON value
-  
+
   @IsString()
   @IsOptional()
   description?: string;
-  
+
   @IsString()
   @MinLength(1)
   category: string; // feature_flags, limits, export_options, etc.
@@ -279,11 +287,11 @@ export class CreateSettingDto {
 export class UpdateSettingDto {
   @IsNotEmpty()
   value: any;
-  
+
   @IsString()
   @IsOptional()
   description?: string;
-  
+
   @IsString()
   @IsOptional()
   category?: string;
@@ -291,6 +299,7 @@ export class UpdateSettingDto {
 ```
 
 **Settings Response** (`GET /admin/settings`):
+
 ```json
 {
   "settings": [
@@ -316,6 +325,7 @@ export class UpdateSettingDto {
 ```
 
 **Categories**:
+
 - `feature_flags` - Boolean flags for features
 - `limits` - Numeric limits (rate limits, tier limits)
 - `export_options` - Export format configurations
@@ -331,12 +341,13 @@ export class UpdateSettingDto {
 See `/docs/dev/dashboard-frontend.md` for existing NFC endpoint documentation. Key enhancements in Prompt 6:
 
 **Enhanced DTO** (`apps/api/src/nfc/dto/nfc.dto.ts`):
+
 ```typescript
 export class AssignNfcTagDto {
   @IsString()
   @IsOptional()
   userId?: string; // Option 1: Direct user ID
-  
+
   @IsEmail()
   @IsOptional()
   userEmail?: string; // Option 2: Lookup by email
@@ -354,6 +365,7 @@ Admins can now assign tags by either `userId` or `userEmail` (service will resol
 **File**: `apps/web/src/app/admin/users/page.tsx`
 
 **Features**:
+
 - User list table with role/tier badges
 - Stats cards (total users, tier distribution, active subscriptions, admins)
 - Search by email/name with live filtering
@@ -365,6 +377,7 @@ Admins can now assign tags by either `userId` or `userEmail` (service will resol
 - Toast notifications for all actions
 
 **API Integration**:
+
 ```typescript
 // Load users
 const data = await apiClient.get<{ users: User[]; total: number }>(
@@ -382,6 +395,7 @@ const usage = await apiClient.get(`/admin/users/${userId}/usage`);
 ```
 
 **UI Components**:
+
 - `Card` - Container for user entries
 - `Badge` - Role/tier/status indicators
 - `Dialog` - Modal forms for role/tier changes
@@ -394,6 +408,7 @@ const usage = await apiClient.get(`/admin/users/${userId}/usage`);
 **File**: `apps/web/src/app/admin/analytics/page.tsx`
 
 **Features**:
+
 - Overview stats cards (views, taps, exchanges, cards, users)
 - Date range selector (7/30/90/365 days)
 - Daily activity timeline with metrics breakdown
@@ -402,17 +417,23 @@ const usage = await apiClient.get(`/admin/users/${userId}/usage`);
 - Icon-coded metrics (Eye=views, Zap=taps, TrendingUp=exchanges)
 
 **API Integration**:
+
 ```typescript
 // Load all analytics in parallel
 const [overviewData, dailyData, topCardsData, tierData] = await Promise.all([
   apiClient.get<Overview>(`/admin/analytics/overview?days=${dateRange}`),
-  apiClient.get<{ stats: DailyStat[] }>(`/admin/analytics/daily?days=${dateRange}`),
+  apiClient.get<{ stats: DailyStat[] }>(
+    `/admin/analytics/daily?days=${dateRange}`
+  ),
   apiClient.get<{ cards: TopCard[] }>('/admin/analytics/top-cards?limit=10'),
-  apiClient.get<{ stats: TierStats[] }>(`/admin/analytics/by-tier?days=${dateRange}`),
+  apiClient.get<{ stats: TierStats[] }>(
+    `/admin/analytics/by-tier?days=${dateRange}`
+  ),
 ]);
 ```
 
 **Data Visualization**:
+
 - Daily activity: Timeline list with date labels and metric columns
 - Top cards: Numbered list with rank badges, user details, metric breakdown
 - Tier stats: Grid cards with tier badges and metric totals
@@ -422,6 +443,7 @@ const [overviewData, dailyData, topCardsData, tierData] = await Promise.all([
 **File**: `apps/web/src/app/admin/settings/page.tsx`
 
 **Features**:
+
 - Tabbed interface by category (All, Feature Flags, Limits, Export, Email)
 - Settings list with key/value display
 - Create dialog with key/value/description/category inputs
@@ -432,6 +454,7 @@ const [overviewData, dailyData, topCardsData, tierData] = await Promise.all([
 - "Updated by" and timestamp display
 
 **API Integration**:
+
 ```typescript
 // Load settings
 const data = await apiClient.get<{ settings: Setting[] }>(
@@ -443,14 +466,14 @@ await apiClient.post('/admin/settings', {
   key: 'ENABLE_FEATURE_X',
   value: true,
   description: 'Enable feature X',
-  category: 'feature_flags'
+  category: 'feature_flags',
 });
 
 // Update setting
 await apiClient.patch(`/admin/settings/${key}`, {
   value: false,
   description: 'Updated description',
-  category: 'feature_flags'
+  category: 'feature_flags',
 });
 
 // Delete setting
@@ -458,6 +481,7 @@ await apiClient.delete(`/admin/settings/${key}`);
 ```
 
 **Value Handling**:
+
 - Simple values: String input (e.g., `true`, `"hello"`, `42`)
 - Complex values: JSON textarea (e.g., `{"key": "value", "count": 10}`)
 - Auto-parsing: Attempts `JSON.parse()`, falls back to string if invalid
@@ -470,10 +494,11 @@ await apiClient.delete(`/admin/settings/${key}`);
 Enhanced in Prompt 6 with email-based assignment:
 
 **Assign Dialog**:
+
 ```typescript
 // Assign by email (new in Prompt 6)
 await apiClient.patch(`/admin/nfc/tags/${tag.uid}/assign`, {
-  userEmail: 'user@example.com'
+  userEmail: 'user@example.com',
 });
 ```
 
@@ -509,11 +534,12 @@ model SystemSettings {
 ### NfcTag Enhancement
 
 **Added Field**:
+
 ```prisma
 model NfcTag {
   // ... existing fields
   assignedUserId String? @map("assigned_user_id") @db.Uuid
-  
+
   // Relations
   assignedUser User? @relation("AssignedNfcTags", fields: [assignedUserId], references: [id])
 }
@@ -522,6 +548,7 @@ model NfcTag {
 **Migration**: `20251118155834_add_nfc_assigned_user`
 
 **User Relation**:
+
 ```prisma
 model User {
   // ... existing relations
@@ -533,17 +560,18 @@ model User {
 
 ## Access Control Matrix
 
-| Endpoint | Role Required | Action |
-|----------|--------------|--------|
-| `/admin/*` | ADMIN | Access admin dashboard |
-| `/admin/users` | ADMIN | List users, view details |
-| `/admin/users/:id/role` | ADMIN | Change user role (USER ↔ ADMIN) |
-| `/admin/users/:id/subscription` | ADMIN | Modify subscription tier |
-| `/admin/analytics` | ADMIN | View global analytics |
-| `/admin/settings` | ADMIN | Manage system configuration |
-| `/admin/nfc` | ADMIN | Manage NFC tag inventory |
+| Endpoint                        | Role Required | Action                           |
+| ------------------------------- | ------------- | -------------------------------- |
+| `/admin/*`                      | ADMIN         | Access admin dashboard           |
+| `/admin/users`                  | ADMIN         | List users, view details         |
+| `/admin/users/:id/role`         | ADMIN         | Change user role (USER ↔ ADMIN) |
+| `/admin/users/:id/subscription` | ADMIN         | Modify subscription tier         |
+| `/admin/analytics`              | ADMIN         | View global analytics            |
+| `/admin/settings`               | ADMIN         | Manage system configuration      |
+| `/admin/nfc`                    | ADMIN         | Manage NFC tag inventory         |
 
 **Enforcement**:
+
 - Backend: `@UseGuards(JwtAuthGuard, RolesGuard)` + `@Roles('ADMIN')`
 - Frontend: `AdminGuard` component wraps admin layout
 - Redirect: Non-admin users sent to `/dashboard`
@@ -585,6 +613,7 @@ model User {
 ### Change User Role to Admin
 
 **API Request**:
+
 ```bash
 curl -X PATCH http://localhost:3001/admin/users/{userId}/role \
   -H "Authorization: Bearer <admin-jwt>" \
@@ -593,6 +622,7 @@ curl -X PATCH http://localhost:3001/admin/users/{userId}/role \
 ```
 
 **Frontend Flow**:
+
 1. Click "Role" button on user row
 2. Select "Admin" in dialog dropdown
 3. Click "Update Role"
@@ -603,12 +633,14 @@ curl -X PATCH http://localhost:3001/admin/users/{userId}/role \
 ### View User Usage Metrics
 
 **API Request**:
+
 ```bash
 curl -X GET http://localhost:3001/admin/users/{userId}/usage \
   -H "Authorization: Bearer <admin-jwt>"
 ```
 
 **Frontend Flow**:
+
 1. Click "Usage" button on user row
 2. Modal opens with loading skeletons
 3. Service calls `GET /admin/users/:id/usage`
@@ -618,6 +650,7 @@ curl -X GET http://localhost:3001/admin/users/{userId}/usage \
 ### Create System Setting
 
 **API Request**:
+
 ```bash
 curl -X POST http://localhost:3001/admin/settings \
   -H "Authorization: Bearer <admin-jwt>" \
@@ -631,6 +664,7 @@ curl -X POST http://localhost:3001/admin/settings \
 ```
 
 **Frontend Flow**:
+
 1. Click "New Setting" button
 2. Fill form (key, value, description, category)
 3. Click "Create"
@@ -645,6 +679,7 @@ curl -X POST http://localhost:3001/admin/settings \
 ### Loading States
 
 All admin pages use this pattern:
+
 ```typescript
 const [loading, setLoading] = useState(true);
 
@@ -672,6 +707,7 @@ if (loading && data.length === 0) {
 ### Dialog Forms
 
 Common pattern for edit/create dialogs:
+
 ```typescript
 const [dialogOpen, setDialogOpen] = useState(false);
 const [saving, setSaving] = useState(false);
@@ -695,6 +731,7 @@ const handleSave = async () => {
 ### API Error Handling
 
 Consistent error display:
+
 ```typescript
 catch (error: any) {
   console.error('Operation failed:', error);

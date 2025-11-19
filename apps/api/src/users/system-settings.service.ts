@@ -8,7 +8,7 @@ export class SystemSettingsService {
 
   async getAllSettings(category?: string) {
     const where = category ? { category } : {};
-    
+
     return this.prisma.systemSettings.findMany({
       where,
       orderBy: [{ category: 'asc' }, { key: 'asc' }],
@@ -36,7 +36,11 @@ export class SystemSettingsService {
     });
   }
 
-  async updateSetting(key: string, updateDto: UpdateSettingDto, updatedBy: string) {
+  async updateSetting(
+    key: string,
+    updateDto: UpdateSettingDto,
+    updatedBy: string
+  ) {
     const setting = await this.prisma.systemSettings.findUnique({
       where: { key },
     });

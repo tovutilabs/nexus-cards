@@ -8,20 +8,22 @@ export class PayPalProvider implements PaymentProvider {
 
   async createCheckoutSession(
     userId: string,
-    amount: number,
-    currency: string,
+    _amount: number,
+    _currency: string
   ): Promise<{ url: string }> {
     this.logger.log(`PayPal checkout session requested for user ${userId}`);
     throw new Error('PayPal integration not yet implemented');
   }
 
-  async processWebhook(signature: string, rawBody: Buffer): Promise<void> {
+  async processWebhook(_signature: string, _rawBody: Buffer): Promise<void> {
     this.logger.log('PayPal webhook received');
     throw new Error('PayPal webhook processing not yet implemented');
   }
 
   async cancelSubscription(subscriptionId: string): Promise<void> {
-    this.logger.log(`PayPal subscription cancellation requested: ${subscriptionId}`);
+    this.logger.log(
+      `PayPal subscription cancellation requested: ${subscriptionId}`
+    );
     throw new Error('PayPal cancellation not yet implemented');
   }
 }

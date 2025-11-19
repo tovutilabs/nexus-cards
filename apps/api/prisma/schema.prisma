@@ -83,6 +83,7 @@ model User {
   cards             Card[]
   contacts          Contact[]
   apiKeys           ApiKey[]
+  webhookSubscriptions WebhookSubscription[]
   integrations      Integration[]
   activities        ActivityLog[]
   assignedNfcTags   NfcTag[]        @relation("AssignedNfcTags")
@@ -311,6 +312,7 @@ model ApiKey {
   keyPrefix   String
   lastUsedAt  DateTime?
   expiresAt   DateTime?
+  revokedAt   DateTime?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
@@ -321,18 +323,7 @@ model ApiKey {
   @@map("api_keys")
 }
 
-model Webhook {
-  id          String   @id @default(cuid())
-  url         String
-  secret      String
-  events      String[]
-  active      Boolean  @default(true)
-  lastTriggeredAt DateTime?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
 
-  @@map("webhooks")
-}
 
 model ActivityLog {
   id          String   @id @default(cuid())
@@ -427,4 +418,52 @@ model ExperimentEvent {
   @@index([sessionId])
   @@index([eventType])
   @@map("experiment_events")
+}
+
+enum WebhookEventType {
+  CARD_VIEW
+  CONTACT_CREATED
+  PAYMENT_SUCCESS
+  NFC_TAG_SCAN
+  EXPERIMENT_EVENT
+}
+
+model WebhookSubscription {
+  id              String              @id @default(cuid())
+  userId          String
+  url             String
+  events          WebhookEventType[]
+  secret          String
+  isActive        Boolean             @default(true)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  user            User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  deliveries      WebhookDelivery[]
+
+  @@index([userId])
+  @@index([isActive])
+  @@map("webhook_subscriptions")
+}
+
+model WebhookDelivery {
+  id                    String              @id @default(cuid())
+  webhookSubscriptionId String
+  eventType             WebhookEventType
+  payload               Json
+  responseStatus        Int?
+  responseBody          String?
+  attemptCount          Int                 @default(1)
+  deliveredAt           DateTime?
+  failedAt              DateTime?
+  nextRetryAt           DateTime?
+  createdAt             DateTime            @default(now())
+
+  webhookSubscription   WebhookSubscription @relation(fields: [webhookSubscriptionId], references: [id], onDelete: Cascade)
+
+  @@index([webhookSubscriptionId])
+  @@index([eventType])
+  @@index([deliveredAt])
+  @@index([nextRetryAt])
+  @@map("webhook_deliveries")
 }

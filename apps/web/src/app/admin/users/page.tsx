@@ -79,7 +79,7 @@ export default function AdminUsersPage() {
       const params = new URLSearchParams();
       if (roleFilter !== 'all') params.append('role', roleFilter);
       if (tierFilter !== 'all') params.append('tier', tierFilter);
-      
+
       const data = await apiClient.get<{ users: User[]; total: number }>(
         `/admin/users?${params.toString()}`
       );
@@ -99,7 +99,9 @@ export default function AdminUsersPage() {
   const loadStats = async () => {
     try {
       const apiClient = createApiClient();
-      const data = await apiClient.get<UserStats>('/admin/users/stats/overview');
+      const data = await apiClient.get<UserStats>(
+        '/admin/users/stats/overview'
+      );
       setStats(data);
     } catch (error) {
       console.error('Failed to load stats:', error);
@@ -219,7 +221,12 @@ export default function AdminUsersPage() {
       PREMIUM: 'bg-purple-100 text-purple-800',
     };
     return (
-      <Badge className={tierColors[tier as keyof typeof tierColors] || 'bg-gray-100 text-gray-800'}>
+      <Badge
+        className={
+          tierColors[tier as keyof typeof tierColors] ||
+          'bg-gray-100 text-gray-800'
+        }
+      >
         {tier || 'FREE'}
       </Badge>
     );
@@ -232,7 +239,12 @@ export default function AdminUsersPage() {
       PAST_DUE: 'bg-yellow-100 text-yellow-800',
     };
     return (
-      <Badge className={statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}>
+      <Badge
+        className={
+          statusColors[status as keyof typeof statusColors] ||
+          'bg-gray-100 text-gray-800'
+        }
+      >
         {status || 'ACTIVE'}
       </Badge>
     );
@@ -241,7 +253,9 @@ export default function AdminUsersPage() {
   const filteredUsers = users.filter(
     (user) =>
       user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      user.profile?.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.profile?.firstName
+        ?.toLowerCase()
+        .includes(searchTerm.toLowerCase()) ||
       user.profile?.lastName?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -263,14 +277,18 @@ export default function AdminUsersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-        <p className="text-gray-600 mt-1">Manage user accounts and subscriptions</p>
+        <p className="text-gray-600 mt-1">
+          Manage user accounts and subscriptions
+        </p>
       </div>
 
       {stats && (
         <div className="grid gap-4 md:grid-cols-4">
           <Card className="p-4">
             <p className="text-sm text-gray-600">Total Users</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{stats.totalUsers}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {stats.totalUsers}
+            </p>
           </Card>
           <Card className="p-4">
             <p className="text-sm text-gray-600">FREE / PRO / PREMIUM</p>
@@ -280,11 +298,15 @@ export default function AdminUsersPage() {
           </Card>
           <Card className="p-4">
             <p className="text-sm text-gray-600">Active Subscriptions</p>
-            <p className="text-2xl font-bold text-green-600 mt-1">{stats.activeSubscriptions}</p>
+            <p className="text-2xl font-bold text-green-600 mt-1">
+              {stats.activeSubscriptions}
+            </p>
           </Card>
           <Card className="p-4">
             <p className="text-sm text-gray-600">Admins</p>
-            <p className="text-2xl font-bold text-red-600 mt-1">{stats.adminUsers}</p>
+            <p className="text-2xl font-bold text-red-600 mt-1">
+              {stats.adminUsers}
+            </p>
           </Card>
         </div>
       )}
@@ -331,7 +353,9 @@ export default function AdminUsersPage() {
             {searchTerm ? 'No users found' : 'No users yet'}
           </h3>
           <p className="text-gray-600">
-            {searchTerm ? 'Try adjusting your search' : 'Users will appear here'}
+            {searchTerm
+              ? 'Try adjusting your search'
+              : 'Users will appear here'}
           </p>
         </Card>
       ) : (
@@ -399,8 +423,13 @@ export default function AdminUsersPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Role</label>
-            <Select value={newRole} onValueChange={(value: any) => setNewRole(value)}>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Role
+            </label>
+            <Select
+              value={newRole}
+              onValueChange={(value: any) => setNewRole(value)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -434,8 +463,13 @@ export default function AdminUsersPage() {
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">
-            <label className="block text-sm font-medium text-gray-700 mb-2">Tier</label>
-            <Select value={newTier} onValueChange={(value: any) => setNewTier(value)}>
+            <label className="block text-sm font-medium text-gray-700 mb-2">
+              Tier
+            </label>
+            <Select
+              value={newTier}
+              onValueChange={(value: any) => setNewTier(value)}
+            >
               <SelectTrigger>
                 <SelectValue />
               </SelectTrigger>
@@ -481,13 +515,18 @@ export default function AdminUsersPage() {
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-600">Cards</p>
                   <p className="text-xl font-bold text-gray-900">
-                    {userUsage.usage.cards.current} / {userUsage.usage.cards.limit === 9007199254740991 ? '∞' : userUsage.usage.cards.limit}
+                    {userUsage.usage.cards.current} /{' '}
+                    {userUsage.usage.cards.limit === 9007199254740991
+                      ? '∞'
+                      : userUsage.usage.cards.limit}
                   </p>
                   {userUsage.usage.cards.limit !== 9007199254740991 && (
                     <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-blue-600 h-2 rounded-full"
-                        style={{ width: `${Math.min(userUsage.usage.cards.percentage, 100)}%` }}
+                        style={{
+                          width: `${Math.min(userUsage.usage.cards.percentage, 100)}%`,
+                        }}
                       />
                     </div>
                   )}
@@ -496,32 +535,45 @@ export default function AdminUsersPage() {
                 <div className="p-3 bg-gray-50 rounded-lg">
                   <p className="text-sm text-gray-600">Contacts</p>
                   <p className="text-xl font-bold text-gray-900">
-                    {userUsage.usage.contacts.current} / {userUsage.usage.contacts.limit === 9007199254740991 ? '∞' : userUsage.usage.contacts.limit}
+                    {userUsage.usage.contacts.current} /{' '}
+                    {userUsage.usage.contacts.limit === 9007199254740991
+                      ? '∞'
+                      : userUsage.usage.contacts.limit}
                   </p>
                   {userUsage.usage.contacts.limit !== 9007199254740991 && (
                     <div className="mt-2 w-full bg-gray-200 rounded-full h-2">
                       <div
                         className="bg-green-600 h-2 rounded-full"
-                        style={{ width: `${Math.min(userUsage.usage.contacts.percentage, 100)}%` }}
+                        style={{
+                          width: `${Math.min(userUsage.usage.contacts.percentage, 100)}%`,
+                        }}
                       />
                     </div>
                   )}
                 </div>
 
                 <div className="p-3 bg-gray-50 rounded-lg">
-                  <p className="text-sm text-gray-600 mb-2">Recent Activity (Last 7 Days)</p>
+                  <p className="text-sm text-gray-600 mb-2">
+                    Recent Activity (Last 7 Days)
+                  </p>
                   <div className="space-y-1 text-sm">
                     <div className="flex justify-between">
                       <span>Card Views:</span>
-                      <span className="font-semibold">{userUsage.recentActivity.cardViews}</span>
+                      <span className="font-semibold">
+                        {userUsage.recentActivity.cardViews}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>NFC Taps:</span>
-                      <span className="font-semibold">{userUsage.recentActivity.nfcTaps}</span>
+                      <span className="font-semibold">
+                        {userUsage.recentActivity.nfcTaps}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span>Contact Submissions:</span>
-                      <span className="font-semibold">{userUsage.recentActivity.contactSubmissions}</span>
+                      <span className="font-semibold">
+                        {userUsage.recentActivity.contactSubmissions}
+                      </span>
                     </div>
                   </div>
                 </div>

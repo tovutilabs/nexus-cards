@@ -75,11 +75,14 @@ GET    /api/contacts/export/csv         # Export as CSV
 
 ```typescript
 // In ContactsService.submitContact()
-const currentContactCount = await this.contactsRepository.countByUserId(card.userId);
+const currentContactCount = await this.contactsRepository.countByUserId(
+  card.userId
+);
 await this.usersService.canAddContact(card.userId, currentContactCount);
 ```
 
 FREE users hitting their 50-contact limit will receive:
+
 ```json
 {
   "statusCode": 403,
@@ -90,6 +93,7 @@ FREE users hitting their 50-contact limit will receive:
 ### Export Formats
 
 #### VCF (vCard 3.0)
+
 ```
 BEGIN:VCARD
 VERSION:3.0
@@ -103,6 +107,7 @@ END:VCARD
 ```
 
 #### CSV
+
 ```
 First Name,Last Name,Email,Phone,Company,Notes,Job Title,Exchanged At
 John,Doe,john@example.com,+1234567890,Company Name,Notes,,2025-11-18T13:20:20.329Z
@@ -117,6 +122,7 @@ John,Doe,john@example.com,+1234567890,Company Name,Notes,,2025-11-18T13:20:20.32
 ### Analytics Integration
 
 Every contact submission logs a `CONTACT_EXCHANGE` event with metadata:
+
 ```typescript
 {
   source: uid ? 'NFC' : 'WEB',
@@ -127,6 +133,7 @@ Every contact submission logs a `CONTACT_EXCHANGE` event with metadata:
 ## Testing
 
 ### Submit Contact (Web)
+
 ```bash
 curl -X POST http://localhost:3001/api/public/cards/john-doe/contacts \
   -H "Content-Type: application/json" \
@@ -134,6 +141,7 @@ curl -X POST http://localhost:3001/api/public/cards/john-doe/contacts \
 ```
 
 ### Submit Contact (NFC)
+
 ```bash
 curl -X POST 'http://localhost:3001/api/public/cards/john-doe/contacts?uid=04A1B2C3D4E5F6' \
   -H "Content-Type: application/json" \
@@ -141,11 +149,13 @@ curl -X POST 'http://localhost:3001/api/public/cards/john-doe/contacts?uid=04A1B
 ```
 
 ### List User's Contacts
+
 ```bash
 curl -b /tmp/cookies.txt http://localhost:3001/api/contacts
 ```
 
 ### Update Contact Tags
+
 ```bash
 curl -b /tmp/cookies.txt -X PATCH http://localhost:3001/api/contacts/{contactId} \
   -H "Content-Type: application/json" \
@@ -153,11 +163,13 @@ curl -b /tmp/cookies.txt -X PATCH http://localhost:3001/api/contacts/{contactId}
 ```
 
 ### Export as VCF
+
 ```bash
 curl -b /tmp/cookies.txt http://localhost:3001/api/contacts/export/vcf > contacts.vcf
 ```
 
 ### Export as CSV
+
 ```bash
 curl -b /tmp/cookies.txt http://localhost:3001/api/contacts/export/csv > contacts.csv
 ```
@@ -175,6 +187,7 @@ curl -b /tmp/cookies.txt http://localhost:3001/api/contacts/export/csv > contact
 ## Next Steps
 
 Frontend implementation needed:
+
 1. **Public Card Page** (`/p/[slug]`) - Contact submission form
 2. **Dashboard Contacts** (`/dashboard/contacts`) - List view with search/filter
 3. **Contact Detail View** - Edit tags, notes, view metadata

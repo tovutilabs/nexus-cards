@@ -14,6 +14,7 @@ This document covers the implementation of Progressive Web App features, interna
 ### Features Implemented
 
 #### Service Worker (`/public/sw.js`)
+
 - **Cache Strategies:**
   - **Cache-First:** Static assets (`/_next/static/`, `/icons/`, `manifest.json`)
   - **Network-First:** Dynamic content and dashboard pages
@@ -31,6 +32,7 @@ This document covers the implementation of Progressive Web App features, interna
   - Service worker update notification with user prompt
 
 #### Manifest (`/public/manifest.json`)
+
 - **App Identity:**
   - Name: "Nexus Cards"
   - Short name: "Nexus"
@@ -42,6 +44,7 @@ This document covers the implementation of Progressive Web App features, interna
 - **Categories:** business, productivity, social
 
 #### PWA Metadata (`/apps/web/src/app/layout.tsx`)
+
 ```typescript
 metadata: {
   manifest: '/manifest.json',
@@ -52,11 +55,13 @@ metadata: {
 ```
 
 #### Service Worker Registration (`/apps/web/src/components/service-worker-registration.tsx`)
+
 - Auto-registration on page load
 - Update detection with user confirmation
 - Automatic reload on controller change
 
 #### Next.js Configuration
+
 ```javascript
 headers: [
   { source: '/sw.js', Cache-Control: 'no-cache, no-store, must-revalidate' },
@@ -67,6 +72,7 @@ headers: [
 ### Testing PWA
 
 1. **Lighthouse PWA Audit:**
+
    ```bash
    npx lighthouse http://localhost:3000 --view
    ```
@@ -87,15 +93,18 @@ headers: [
 ### Architecture
 
 #### Framework
+
 - **next-intl** v4.5.3 with App Router
 - Locale detection via middleware
 - Cookie-based locale persistence
 
 #### Supported Locales
+
 - English (`en`) - Default
 - Spanish (`es`)
 
 #### Translation Structure
+
 ```
 apps/web/messages/
   en.json  # English translations
@@ -103,6 +112,7 @@ apps/web/messages/
 ```
 
 #### Namespaces
+
 - `common` - Shared UI strings (loading, error, actions)
 - `dashboard` - Dashboard-specific strings
 - `publicCard` - Public card page strings
@@ -112,15 +122,17 @@ apps/web/messages/
 - `errors` - Error messages
 
 ### Middleware Configuration (`/apps/web/src/middleware.ts`)
+
 ```typescript
 createMiddleware({
   locales: ['en', 'es'],
   defaultLocale: 'en',
-  localePrefix: 'as-needed' // No /en prefix for default locale
-})
+  localePrefix: 'as-needed', // No /en prefix for default locale
+});
 ```
 
 ### Language Switcher Component
+
 - **Location:** `/apps/web/src/components/language-switcher.tsx`
 - **Features:**
   - Dropdown menu with flag icons
@@ -129,6 +141,7 @@ createMiddleware({
   - Accessible with ARIA labels
 
 ### Usage in Components
+
 ```typescript
 import { useTranslations } from 'next-intl';
 
@@ -145,6 +158,7 @@ function MyComponent() {
 ### Database Schema
 
 #### Migration: `20251119082142_add_bilingual_card_fields`
+
 ```sql
 ALTER TABLE "cards"
 ADD COLUMN "secondaryLanguage" TEXT,
@@ -156,6 +170,7 @@ ADD COLUMN "bio_es" TEXT;
 ```
 
 #### Card Model Fields
+
 - `secondaryLanguage` - ISO 639-1 code (e.g., 'es', 'fr')
 - `firstName_es` - Spanish first name
 - `lastName_es` - Spanish last name
@@ -166,6 +181,7 @@ ADD COLUMN "bio_es" TEXT;
 ### DTOs Updated
 
 #### CreateCardDto (`/apps/api/src/cards/dto/create-card.dto.ts`)
+
 ```typescript
 @IsOptional()
 @IsString()
@@ -180,6 +196,7 @@ firstName_es?: string;
 ```
 
 ### Shared Types (`/packages/shared/src/types/index.ts`)
+
 ```typescript
 export interface Card {
   // ... primary fields
@@ -193,6 +210,7 @@ export interface Card {
 ```
 
 ### Implementation Notes
+
 - Bilingual fields follow naming convention: `fieldName_languageCode`
 - Only Spanish (`_es`) implemented currently
 - Can be extended to support additional languages (e.g., `_fr`, `_de`)
@@ -206,6 +224,7 @@ export interface Card {
 ### WCAG 2.1 AA Compliance
 
 #### Skip Navigation
+
 - **Component:** `/apps/web/src/components/skip-to-content.tsx`
 - Visually hidden by default, visible on keyboard focus
 - Jumps to `#main-content` anchor
@@ -214,34 +233,48 @@ export interface Card {
 #### Accessibility Hooks (`/apps/web/src/hooks/useAccessibility.ts`)
 
 ##### `useFocusTrap(isActive: boolean)`
+
 - Traps keyboard focus within modals/dialogs
 - Cycles focus between first and last focusable elements
 - Prevents Tab key from escaping container
 
 ##### `useAnnouncement()`
+
 - Creates live region announcements for screen readers
 - Supports `polite` and `assertive` priority levels
 - Auto-removes announcement after 1 second
 
 ##### `useKeyboardNavigation(onEscape?, onEnter?)`
+
 - Global keyboard event handlers
 - Escape key for closing modals
 - Enter key for form submission
 
 #### CSS Utilities (`/apps/web/src/app/globals.css`)
+
 ```css
-.sr-only { /* Screen reader only */ }
-.not-sr-only { /* Undo sr-only */ }
-.focus-visible-ring { /* Focus indicator */ }
-.focus-within-ring { /* Focus-within indicator */ }
+.sr-only {
+  /* Screen reader only */
+}
+.not-sr-only {
+  /* Undo sr-only */
+}
+.focus-visible-ring {
+  /* Focus indicator */
+}
+.focus-within-ring {
+  /* Focus-within indicator */
+}
 ```
 
 #### Focus States
+
 - All interactive elements have visible focus indicators
 - 2px ring with 2px offset
 - High contrast (black ring on white background)
 
 #### Semantic HTML
+
 - Proper heading hierarchy (h1 → h2 → h3)
 - `<main>` for primary content area
 - `<nav>` for navigation
@@ -249,6 +282,7 @@ export interface Card {
 - `<section>` for distinct content areas
 
 #### ARIA Attributes
+
 - `aria-label` on icon-only buttons
 - `aria-labelledby` for section headings
 - `aria-live` regions for dynamic content updates
@@ -257,11 +291,13 @@ export interface Card {
 - `role="img"` with `aria-label` for chart SVGs
 
 #### Color Contrast
+
 - All text meets 4.5:1 contrast ratio minimum
 - Large text (18pt+) meets 3:1 ratio
 - Interactive elements meet 3:1 ratio
 
 #### Keyboard Navigation
+
 - All functionality accessible via keyboard
 - Logical tab order
 - No keyboard traps (except intentional focus traps in modals)
@@ -272,29 +308,34 @@ export interface Card {
 ## 5. Analytics Dashboard UI
 
 ### Page Location
+
 `/apps/web/src/app/dashboard/analytics/page.tsx`
 
 ### Features
 
 #### Overview Metrics Cards
+
 - **Views:** Total card views
 - **Unique Visitors:** Unique session count
 - **Contact Exchanges:** Contact form submissions
 - **Link Clicks:** Social link clicks
 
 #### Time Range Filter
+
 - Last 7 Days
 - Last 30 Days
 - Last 90 Days
 - All Time
 
 #### Card Filter
+
 - All Cards (default)
 - Individual card selection (dropdown populated from user's cards)
 
 #### Charts (`/apps/web/src/components/charts.tsx`)
 
 ##### LineChart
+
 - Shows views over time
 - SVG-based for performance
 - Gradient fill under line
@@ -302,28 +343,33 @@ export interface Card {
 - Date labels on x-axis
 
 ##### BarChart
+
 - Horizontal bars for top referrers
 - Animated width transitions
 - Percentage-based scaling
 - Value labels on right
 
 ##### PieChart
+
 - Device breakdown (desktop, mobile, tablet)
 - SVG path generation
 - Color-coded legend
 - Percentage labels
 
 #### Tabs
+
 1. **Overview:** Views over time line chart
 2. **Referrers:** Top referral sources bar chart
 3. **Devices:** Device breakdown pie chart
 
 #### API Integration
+
 - Fetches data from `/api/analytics?timeRange=7d&cardId=all`
 - Loading states with skeleton UI
 - Error handling with fallback messages
 
 #### Accessibility
+
 - All charts have `role="img"` and descriptive `aria-label`
 - Tab navigation between chart types
 - Select dropdowns have `aria-label`
@@ -338,6 +384,7 @@ export interface Card {
 #### Migration: `20251119082756_add_ab_testing`
 
 ##### Experiment Model
+
 ```prisma
 model Experiment {
   id              String            @id @default(cuid())
@@ -363,6 +410,7 @@ enum ExperimentStatus {
 ```
 
 ##### ExperimentAssignment Model
+
 ```prisma
 model ExperimentAssignment {
   id              String      @id @default(cuid())
@@ -375,6 +423,7 @@ model ExperimentAssignment {
 ```
 
 ##### ExperimentEvent Model
+
 ```prisma
 model ExperimentEvent {
   id              String      @id @default(cuid())
@@ -388,15 +437,18 @@ model ExperimentEvent {
 ```
 
 ### Frontend Hook: `useExperiment`
+
 **Location:** `/apps/web/src/hooks/useExperiment.tsx`
 
 #### Features
+
 - Session ID generation and persistence
 - Variant selection based on weights
 - Assignment caching in localStorage
 - Event tracking API
 
 #### Usage Example
+
 ```typescript
 import { useExperiment } from '@/hooks/useExperiment';
 
@@ -415,12 +467,14 @@ function PublicCardPage() {
 ```
 
 #### Variant Selection Algorithm
+
 1. Calculate total weight of all variants
 2. Generate random number between 0 and total weight
 3. Subtract each variant's weight from random number
 4. When random number <= 0, select that variant
 
 #### ExperimentProvider Component
+
 ```typescript
 <ExperimentProvider experimentId="hero_test">
   {(variant, trackEvent) => (
@@ -432,21 +486,25 @@ function PublicCardPage() {
 ### Backend API Endpoints (To Be Implemented)
 
 #### GET `/api/experiments/:id`
+
 - Returns experiment configuration
 - Checks if experiment is ACTIVE
 - Returns variants array
 
 #### POST `/api/experiments/:id/assign`
+
 ```json
 {
   "sessionId": "session_123",
   "variant": "variant_a"
 }
 ```
+
 - Saves assignment to database
 - Returns confirmation
 
 #### POST `/api/experiments/:id/event`
+
 ```json
 {
   "sessionId": "session_123",
@@ -455,19 +513,21 @@ function PublicCardPage() {
   "eventData": { "cardId": "abc123" }
 }
 ```
+
 - Logs event for analytics
 - Used to calculate conversion rates
 
 ### Analytics Queries (Example)
+
 ```sql
 -- Conversion rate by variant
-SELECT 
+SELECT
   variant,
   COUNT(DISTINCT session_id) as total_sessions,
   COUNT(DISTINCT CASE WHEN event_type = 'conversion' THEN session_id END) as conversions,
   ROUND(
-    COUNT(DISTINCT CASE WHEN event_type = 'conversion' THEN session_id END)::numeric / 
-    COUNT(DISTINCT session_id) * 100, 
+    COUNT(DISTINCT CASE WHEN event_type = 'conversion' THEN session_id END)::numeric /
+    COUNT(DISTINCT session_id) * 100,
     2
   ) as conversion_rate
 FROM experiment_events
@@ -482,11 +542,14 @@ GROUP BY variant;
 ### PWA Testing
 
 #### Lighthouse Audit
+
 ```bash
 # From project root
 npx lighthouse http://localhost:3000 --view
 ```
+
 **Target Scores:**
+
 - PWA: 100
 - Performance: 90+
 - Accessibility: 100
@@ -494,12 +557,14 @@ npx lighthouse http://localhost:3000 --view
 - SEO: 100
 
 #### Service Worker Testing
+
 1. Open DevTools → Application → Service Workers
 2. Verify "Status: activated and is running"
 3. Check "Update on reload" checkbox
 4. Reload page multiple times to test cache
 
 #### Offline Mode Testing
+
 1. Visit `/p/test-card` while online
 2. Open DevTools → Network tab
 3. Toggle "Offline" checkbox
@@ -507,6 +572,7 @@ npx lighthouse http://localhost:3000 --view
 5. Try navigating to new page - should show `/offline` page
 
 #### Manifest Validation
+
 ```bash
 # Check manifest is accessible
 curl http://localhost:3000/manifest.json
@@ -515,6 +581,7 @@ curl http://localhost:3000/manifest.json
 ### i18n Testing
 
 #### Language Switching
+
 1. Visit any page on site
 2. Click language switcher in header
 3. Select "Español"
@@ -523,12 +590,14 @@ curl http://localhost:3000/manifest.json
 6. Verify language persists after page refresh
 
 #### Translation Coverage
+
 ```bash
 # Check for missing translations
 grep -r "t(" apps/web/src/ | wc -l
 ```
 
 #### Bilingual Card Testing
+
 1. Create a card with primary fields (English)
 2. Add Spanish fields (`firstName_es`, etc.)
 3. Visit public card page with `?lang=es`
@@ -538,12 +607,15 @@ grep -r "t(" apps/web/src/ | wc -l
 ### Accessibility Testing
 
 #### Lighthouse Accessibility Audit
+
 ```bash
 npx lighthouse http://localhost:3000 --only-categories=accessibility --view
 ```
+
 **Target: 100 score**
 
 #### Keyboard Navigation Test
+
 1. Tab through entire page
 2. Verify all interactive elements are reachable
 3. Verify focus indicators are visible
@@ -551,19 +623,23 @@ npx lighthouse http://localhost:3000 --only-categories=accessibility --view
 5. Test Enter key on buttons
 
 #### Screen Reader Testing
+
 **macOS:**
+
 ```bash
 # Enable VoiceOver
 Cmd + F5
 ```
 
 **Windows:**
+
 ```bash
 # Enable NVDA (install from nvaccess.org)
 Ctrl + Alt + N
 ```
 
 **Test Checklist:**
+
 - [ ] Page title announced on load
 - [ ] Headings navigable with H key
 - [ ] Form labels read correctly
@@ -572,12 +648,14 @@ Ctrl + Alt + N
 - [ ] Live region announcements work
 
 #### Color Contrast Testing
+
 ```bash
 # Use WebAIM Contrast Checker
 # https://webaim.org/resources/contrastchecker/
 ```
 
 **Check:**
+
 - Primary text (#262626 on #ffffff)
 - Secondary text (#737373 on #ffffff)
 - Links (#2d3494 on #ffffff)
@@ -586,6 +664,7 @@ Ctrl + Alt + N
 ### Analytics Dashboard Testing
 
 #### Functional Testing
+
 1. Visit `/dashboard/analytics`
 2. Select different time ranges
 3. Verify charts update
@@ -593,12 +672,14 @@ Ctrl + Alt + N
 5. Select individual cards from dropdown
 
 #### Chart Rendering
+
 1. Verify line chart renders with data
 2. Verify bar chart horizontal bars render
 3. Verify pie chart segments render correctly
 4. Verify chart legends display
 
 #### Responsive Testing
+
 ```bash
 # Test on different screen sizes
 # Mobile: 375px
@@ -609,6 +690,7 @@ Ctrl + Alt + N
 ### A/B Testing Scaffolding
 
 #### Database Testing
+
 ```sql
 -- Verify tables created
 SELECT tablename FROM pg_tables WHERE schemaname = 'public';
@@ -628,6 +710,7 @@ VALUES (
 ```
 
 #### Hook Testing
+
 ```typescript
 // Test component
 import { useExperiment } from '@/hooks/useExperiment';
@@ -654,35 +737,41 @@ function TestComponent() {
 ## 8. Known Limitations & Future Improvements
 
 ### PWA
+
 - [ ] Icon files need to be generated (currently placeholder references)
 - [ ] Screenshot images need to be captured
 - [ ] Push notification support not implemented
 - [ ] Background sync not implemented
 
 ### i18n
+
 - [ ] Only 2 languages supported (en, es)
 - [ ] No RTL language support
 - [ ] Date/time formatting not localized
 - [ ] Currency formatting hardcoded to USD
 
 ### Bilingual Cards
+
 - [ ] Only Spanish secondary language implemented
 - [ ] No UI for editing bilingual fields in card editor
 - [ ] No automatic translation suggestions
 - [ ] Language switcher on public card page not implemented
 
 ### Accessibility
+
 - [ ] No high contrast mode
 - [ ] No text resizing support beyond browser defaults
 - [ ] No reduced motion preference detection
 
 ### Analytics Dashboard
+
 - [ ] Mock data only - no real backend integration
 - [ ] No date picker for custom ranges
 - [ ] No export functionality
 - [ ] No real-time updates
 
 ### A/B Testing
+
 - [ ] Backend API endpoints not implemented
 - [ ] No admin UI for creating experiments
 - [ ] No statistical significance calculation
@@ -693,6 +782,7 @@ function TestComponent() {
 ## 9. Deployment Checklist
 
 ### PWA
+
 - [ ] Generate all icon sizes (72x72 to 512x512)
 - [ ] Capture and add screenshot images
 - [ ] Verify manifest.json accessible at `/manifest.json`
@@ -700,30 +790,35 @@ function TestComponent() {
 - [ ] Test offline mode on mobile devices
 
 ### i18n
+
 - [ ] Complete all translation strings in `en.json` and `es.json`
 - [ ] Add language switcher to all page headers
 - [ ] Test language switching on all pages
 - [ ] Verify SEO meta tags include language alternates
 
 ### Bilingual Cards
+
 - [ ] Add UI for bilingual field editing in card form
 - [ ] Implement language detection on public card page
 - [ ] Add language switcher button to public card page
 - [ ] Test with real multilingual content
 
 ### Accessibility
+
 - [ ] Run full WCAG 2.1 AA audit
 - [ ] Test with real screen reader users
 - [ ] Verify keyboard navigation on all pages
 - [ ] Test with browser zoom at 200%
 
 ### Analytics Dashboard
+
 - [ ] Implement backend API endpoint
 - [ ] Connect to real analytics data
 - [ ] Add error handling and loading states
 - [ ] Test with production-scale data
 
 ### A/B Testing
+
 - [ ] Implement backend API endpoints
 - [ ] Create admin UI for experiment management
 - [ ] Add conversion tracking to key pages
@@ -734,18 +829,21 @@ function TestComponent() {
 ## 10. References
 
 ### Documentation
+
 - [Next.js PWA](https://ducanh-next-pwa.vercel.app/)
 - [next-intl Documentation](https://next-intl-docs.vercel.app/)
 - [WCAG 2.1 Guidelines](https://www.w3.org/WAI/WCAG21/quickref/)
 - [Prisma Schema Reference](https://www.prisma.io/docs/reference/api-reference/prisma-schema-reference)
 
 ### Tools
+
 - [Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci)
 - [axe DevTools](https://www.deque.com/axe/devtools/)
 - [WebAIM Contrast Checker](https://webaim.org/resources/contrastchecker/)
 - [PWA Builder](https://www.pwabuilder.com/)
 
 ### House Rules Compliance
+
 - ✅ Full file contents provided (no snippets)
 - ✅ ASCII characters only in code
 - ✅ Repo-relative paths used throughout

@@ -1,4 +1,9 @@
-import { PrismaClient, UserRole, SubscriptionTier, SubscriptionStatus } from '@prisma/client';
+import {
+  PrismaClient,
+  UserRole,
+  SubscriptionTier,
+  SubscriptionStatus,
+} from '@prisma/client';
 import * as argon2 from 'argon2';
 
 const prisma = new PrismaClient();
@@ -168,7 +173,9 @@ async function seedDevelopmentUsers() {
         },
       },
     });
-    console.log(`✓ Created USER (PREMIUM): ${premiumUserEmail} (password: User123!)`);
+    console.log(
+      `✓ Created USER (PREMIUM): ${premiumUserEmail} (password: User123!)`
+    );
   } else {
     console.log(`- USER (PREMIUM) already exists: ${premiumUserEmail}`);
   }

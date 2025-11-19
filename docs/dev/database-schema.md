@@ -14,12 +14,14 @@ The Nexus Cards domain model is implemented using Prisma ORM with PostgreSQL. Th
 ## Critical Constraints
 
 ### NFC Tag Mapping (1:1 Relationship)
+
 - **One tag can only link to ONE card at any time**
 - `NfcTag.cardId` is a direct foreign key (nullable when unassociated)
 - **NO join table** exists or should be created
 - A card CAN have multiple tags, but a tag CANNOT link to multiple cards
 
 ### Analytics Granularity (Daily Only)
+
 - Raw events stored in `AnalyticsEvent` table
 - Aggregated daily into `AnalyticsCardDaily`
 - **No hourly or sub-daily buckets**
@@ -30,9 +32,11 @@ The Nexus Cards domain model is implemented using Prisma ORM with PostgreSQL. Th
 ### Core Entities
 
 #### User
+
 Primary user account with authentication and profile data.
 
 **Fields:**
+
 - `id` (cuid) - Primary key
 - `email` (unique) - Authentication email
 - `passwordHash` - Argon2id hashed password
@@ -42,6 +46,7 @@ Primary user account with authentication and profile data.
 - `twoFactorSecret` - TOTP secret (encrypted)
 
 **Relations:**
+
 - `profile` - One-to-one with UserProfile
 - `subscription` - One-to-one with Subscription
 - `cards` - One-to-many with Card
@@ -50,9 +55,11 @@ Primary user account with authentication and profile data.
 - `integrations` - One-to-many with Integration
 
 #### UserProfile
+
 Extended user profile information.
 
 **Fields:**
+
 - `userId` (unique FK) - Links to User
 - `firstName`, `lastName` - Display name
 - `phone`, `company`, `jobTitle` - Contact info
@@ -60,9 +67,11 @@ Extended user profile information.
 - `timezone`, `language` - Localization preferences
 
 #### Subscription
+
 User subscription tier and billing status.
 
 **Fields:**
+
 - `userId` (unique FK) - Links to User
 - `tier` (FREE | PRO | PREMIUM) - Subscription level
 - `status` (ACTIVE | PAST_DUE | CANCELED | TRIALING | INCOMPLETE)
@@ -70,14 +79,17 @@ User subscription tier and billing status.
 - `currentPeriodStart`, `currentPeriodEnd` - Billing cycle dates
 
 **Tier Limits:**
+
 - FREE: 1 card, 7-day analytics, 50 contacts
 - PRO: 5 cards, 90-day analytics, unlimited contacts
 - PREMIUM: Unlimited cards, unlimited analytics, API access, custom CSS
 
 #### Card
+
 Digital business card with customization options.
 
 **Fields:**
+
 - `id` (cuid) - Primary key
 - `userId` (FK) - Card owner
 - `slug` (unique) - URL-friendly identifier (e.g., `john-doe`)
@@ -92,6 +104,7 @@ Digital business card with customization options.
 - `lastViewedAt` - Most recent view timestamp
 
 **Relations:**
+
 - `user` - Many-to-one with User
 - `nfcTags` - One-to-many with NfcTag
 - `contacts` - One-to-many with Contact
@@ -99,9 +112,11 @@ Digital business card with customization options.
 - `analyticsDailies` - One-to-many with AnalyticsCardDaily
 
 #### NfcTag
+
 Physical NFC tag inventory and associations.
 
 **Fields:**
+
 - `id` (cuid) - Primary key
 - `uid` (unique) - NFC tag unique identifier (hex string)
 - `cardId` (FK, nullable) - Associated card (null when unassociated)
@@ -111,12 +126,15 @@ Physical NFC tag inventory and associations.
 **Critical:** `cardId` is a direct FK, not a join table. One tag → one card.
 
 **Relations:**
+
 - `card` - Many-to-one with Card (nullable)
 
 #### Contact
+
 Contact information exchanged via cards.
 
 **Fields:**
+
 - `id` (cuid) - Primary key
 - `userId` (FK) - Contact owner (who received the card)
 - `cardId` (FK) - Source card that was shared
@@ -127,13 +145,16 @@ Contact information exchanged via cards.
 - `exchangedAt` - Exchange timestamp
 
 **Relations:**
+
 - `user` - Many-to-one with User
 - `card` - Many-to-one with Card
 
 #### AnalyticsEvent
+
 Raw analytics events for detailed tracking.
 
 **Fields:**
+
 - `id` (cuid) - Primary key
 - `cardId` (FK) - Card being tracked
 - `eventType` (CARD_VIEW | CONTACT_EXCHANGE | LINK_CLICK | QR_SCAN | NFC_TAP | SHARE)
@@ -146,9 +167,11 @@ Raw analytics events for detailed tracking.
 **Retention:** Tier-based (7d for FREE, 90d for PRO, unlimited for PREMIUM)
 
 #### AnalyticsCardDaily
+
 Aggregated daily analytics per card.
 
 **Fields:**
+
 - `cardId` (FK) - Card being tracked
 - `date` (date) - Aggregation date
 - `views`, `contactExchanges`, `linkClicks`, `qrScans`, `nfcTaps`, `shares` - Event counters
@@ -157,23 +180,28 @@ Aggregated daily analytics per card.
 **Unique Index:** `(cardId, date)` - One record per card per day
 
 **Relations:**
+
 - `card` - Many-to-one with Card
 
 ### Supporting Entities
 
 #### Invoice
+
 Billing invoices from Stripe.
 
 **Fields:**
+
 - `subscriptionId` (FK) - Links to Subscription
 - `stripeInvoiceId` (unique) - Stripe invoice ID
 - `amount`, `currency`, `status` - Invoice details
 - `invoiceUrl`, `pdfUrl` - Stripe-hosted URLs
 
 #### Integration
+
 Third-party service integrations.
 
 **Fields:**
+
 - `userId` (FK) - Integration owner
 - `provider` (SALESFORCE | HUBSPOT | ZOHO | MAILCHIMP | SENDGRID | ZAPIER | GOOGLE_DRIVE | DROPBOX)
 - `status` (ACTIVE | INACTIVE | ERROR)
@@ -182,9 +210,11 @@ Third-party service integrations.
 - `lastSyncAt` - Last successful sync
 
 #### ApiKey
+
 API keys for PREMIUM tier programmatic access.
 
 **Fields:**
+
 - `userId` (FK) - Key owner
 - `name` - Descriptive name
 - `keyHash` (unique) - SHA-256 hashed key
@@ -192,9 +222,11 @@ API keys for PREMIUM tier programmatic access.
 - `lastUsedAt`, `expiresAt` - Usage tracking
 
 #### Webhook
+
 Webhook subscriptions for event notifications.
 
 **Fields:**
+
 - `url` - Webhook endpoint URL
 - `secret` - HMAC signature secret
 - `events` (array) - Subscribed event types
@@ -202,9 +234,11 @@ Webhook subscriptions for event notifications.
 - `lastTriggeredAt` - Last invocation
 
 #### ActivityLog
+
 Audit trail for user and admin actions.
 
 **Fields:**
+
 - `userId` (FK, nullable) - Actor (null for system actions)
 - `action` - Action type (e.g., `USER_LOGIN`, `CARD_CREATED`)
 - `entityType`, `entityId` - Affected entity
@@ -230,15 +264,16 @@ src/
 ```
 
 **Example Repository Methods:**
+
 ```typescript
 class UsersRepository {
-  async findById(id: string): Promise<User | null>
-  async findByEmail(email: string): Promise<User | null>
-  async create(data: Prisma.UserCreateInput): Promise<User>
-  async update(id: string, data: Prisma.UserUpdateInput): Promise<User>
-  async delete(id: string): Promise<User>
-  async findMany(params): Promise<User[]>
-  async count(where?: Prisma.UserWhereInput): Promise<number>
+  async findById(id: string): Promise<User | null>;
+  async findByEmail(email: string): Promise<User | null>;
+  async create(data: Prisma.UserCreateInput): Promise<User>;
+  async update(id: string, data: Prisma.UserUpdateInput): Promise<User>;
+  async delete(id: string): Promise<User>;
+  async findMany(params): Promise<User[]>;
+  async count(where?: Prisma.UserWhereInput): Promise<number>;
 }
 ```
 
@@ -268,6 +303,7 @@ npx prisma migrate reset
 ## Seeding (Future)
 
 Seed scripts will be added in `apps/api/prisma/seed.ts` for:
+
 - Admin user creation
 - Sample cards and templates
 - NFC tag bulk import
@@ -295,6 +331,7 @@ Performance-critical indexes:
 Prisma automatically generates TypeScript types in `node_modules/@prisma/client`.
 
 **Usage in services:**
+
 ```typescript
 import { User, Card, Prisma } from '@prisma/client';
 
@@ -318,8 +355,10 @@ Prisma is integrated via `PrismaModule` and `PrismaService`:
 ```typescript
 // prisma.service.ts
 @Injectable()
-export class PrismaService extends PrismaClient
-  implements OnModuleInit, OnModuleDestroy {
+export class PrismaService
+  extends PrismaClient
+  implements OnModuleInit, OnModuleDestroy
+{
   async onModuleInit() {
     await this.$connect();
   }

@@ -23,9 +23,7 @@ export class AdminSettingsController {
   constructor(private readonly systemSettingsService: SystemSettingsService) {}
 
   @Get()
-  async getAllSettings(
-    @Query('category') category?: string,
-  ) {
+  async getAllSettings(@Query('category') category?: string) {
     return this.systemSettingsService.getAllSettings(category);
   }
 
@@ -37,7 +35,7 @@ export class AdminSettingsController {
   @Post()
   async createSetting(
     @Body() createDto: CreateSettingDto,
-    @CurrentUser() user: { id: string },
+    @CurrentUser() user: { id: string }
   ) {
     return this.systemSettingsService.createSetting(createDto, user.id);
   }
@@ -46,7 +44,7 @@ export class AdminSettingsController {
   async updateSetting(
     @Param('key') key: string,
     @Body() updateDto: UpdateSettingDto,
-    @CurrentUser() user: { id: string },
+    @CurrentUser() user: { id: string }
   ) {
     return this.systemSettingsService.updateSetting(key, updateDto, user.id);
   }

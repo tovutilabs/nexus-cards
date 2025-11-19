@@ -1,9 +1,17 @@
-import { IsString, IsOptional, IsUrl, IsObject, MaxLength, MinLength, IsEnum } from 'class-validator';
+import {
+  IsString,
+  IsOptional,
+  IsUrl,
+  IsObject,
+  MaxLength,
+  MinLength,
+  IsEnum,
+} from 'class-validator';
 
 enum CardStatus {
   DRAFT = 'DRAFT',
   PUBLISHED = 'PUBLISHED',
-  ARCHIVED = 'ARCHIVED'
+  ARCHIVED = 'ARCHIVED',
 }
 
 export class CreateCardDto {

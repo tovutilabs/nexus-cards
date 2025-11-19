@@ -15,7 +15,13 @@ export interface StatsCardProps {
   className?: string;
 }
 
-export function StatsCard({ title, value, trend, icon: Icon, className }: StatsCardProps) {
+export function StatsCard({
+  title,
+  value,
+  trend,
+  icon: Icon,
+  className,
+}: StatsCardProps) {
   return (
     <Card className={cn('', className)}>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -29,7 +35,9 @@ export function StatsCard({ title, value, trend, icon: Icon, className }: StatsC
             <span
               className={cn(
                 'font-medium',
-                trend.isPositive ? 'text-semantic-success' : 'text-semantic-danger'
+                trend.isPositive
+                  ? 'text-semantic-success'
+                  : 'text-semantic-danger'
               )}
             >
               {trend.isPositive ? '+' : ''}

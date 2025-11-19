@@ -1,4 +1,5 @@
 # Nexus Design System
+
 Version 2.0.0
 
 This document defines the visual and interaction language for the Nexus web application (dashboard, public cards, admin). All frontend implementation MUST conform to this design system to ensure UI consistency.
@@ -9,27 +10,27 @@ This document defines the visual and interaction language for the Nexus web appl
 
 These principles guide every UI decision:
 
-1. **Clarity**  
+1. **Clarity**
    - Interfaces must be easy to scan and understand.
    - Clear hierarchy, minimal clutter, obvious calls to action.
 
-2. **Consistency**  
+2. **Consistency**
    - Use the same patterns, components, spacing, and labels for the same concepts.
    - Never restyle primitives ad-hoc; always use tokens and Nexus components.
 
-3. **Efficiency**  
+3. **Efficiency**
    - Fewer clicks, fewer decisions, clear shortcuts.
    - Reduce cognitive load through predictable layouts and behaviors.
 
-4. **Scalability**  
+4. **Scalability**
    - Components and patterns must work for current features and future growth.
    - Consider multiple languages, themes, and new modules.
 
-5. **Accessibility**  
+5. **Accessibility**
    - WCAG 2.1 AA or better.
    - Keyboard-first, screen-reader-friendly, sufficient contrast.
 
-6. **Professional and Minimal**  
+6. **Professional and Minimal**
    - Clean, modern, understated visual style.
    - Avoid excessive decoration; function over flourish.
 
@@ -231,6 +232,7 @@ Primitives should be based on shadcn/ui components but themed with Nexus tokens:
 - Pagination
 
 Each component must support:
+
 - Size variants: `sm`, `md`, `lg`.
 - Semantic variants: `primary`, `secondary`, `ghost`, `outline`, `danger`, etc.
 - Disabled and loading states where applicable.
@@ -327,117 +329,115 @@ This section shows concrete code for Tailwind, CSS variables, and shadcn configu
 Place this in `apps/web/tailwind.config.ts` (adjust `content` paths according to your monorepo setup):
 
 ```ts
-import type { Config } from "tailwindcss";
+import type { Config } from 'tailwindcss';
 
 const config: Config = {
-  darkMode: ["class"],
+  darkMode: ['class'],
   content: [
-    "./app/**/*.{ts,tsx}",
-    "./components/**/*.{ts,tsx}",
-    "./components.json"
+    './app/**/*.{ts,tsx}',
+    './components/**/*.{ts,tsx}',
+    './components.json',
   ],
   theme: {
     extend: {
       colors: {
         brand: {
-          primary: "#2D3494",
-          secondary: "#0784B5",
-          muted: "#BBDCF2",
-          dark: "#1A1E4D"
+          primary: '#2D3494',
+          secondary: '#0784B5',
+          muted: '#BBDCF2',
+          dark: '#1A1E4D',
         },
         neutral: {
-          50: "#FAFAFA",
-          100: "#F5F5F5",
-          200: "#E5E5E5",
-          300: "#D4D4D4",
-          400: "#A3A3A3",
-          500: "#737373",
-          600: "#525252",
-          700: "#404040",
-          800: "#262626",
-          900: "#171717"
+          50: '#FAFAFA',
+          100: '#F5F5F5',
+          200: '#E5E5E5',
+          300: '#D4D4D4',
+          400: '#A3A3A3',
+          500: '#737373',
+          600: '#525252',
+          700: '#404040',
+          800: '#262626',
+          900: '#171717',
         },
         semantic: {
-          success: "#16A34A",
-          warning: "#F59E0B",
-          danger: "#DC2626",
-          info: "#2563EB"
+          success: '#16A34A',
+          warning: '#F59E0B',
+          danger: '#DC2626',
+          info: '#2563EB',
         },
         // shadcn/ui variables mapped for convenience
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
         primary: {
-          DEFAULT: "hsl(var(--primary))",
-          foreground: "hsl(var(--primary-foreground))"
+          DEFAULT: 'hsl(var(--primary))',
+          foreground: 'hsl(var(--primary-foreground))',
         },
         secondary: {
-          DEFAULT: "hsl(var(--secondary))",
-          foreground: "hsl(var(--secondary-foreground))"
+          DEFAULT: 'hsl(var(--secondary))',
+          foreground: 'hsl(var(--secondary-foreground))',
         },
         destructive: {
-          DEFAULT: "hsl(var(--destructive))",
-          foreground: "hsl(var(--destructive-foreground))"
+          DEFAULT: 'hsl(var(--destructive))',
+          foreground: 'hsl(var(--destructive-foreground))',
         },
         muted: {
-          DEFAULT: "hsl(var(--muted))",
-          foreground: "hsl(var(--muted-foreground))"
+          DEFAULT: 'hsl(var(--muted))',
+          foreground: 'hsl(var(--muted-foreground))',
         },
         accent: {
-          DEFAULT: "hsl(var(--accent))",
-          foreground: "hsl(var(--accent-foreground))"
+          DEFAULT: 'hsl(var(--accent))',
+          foreground: 'hsl(var(--accent-foreground))',
         },
         popover: {
-          DEFAULT: "hsl(var(--popover))",
-          foreground: "hsl(var(--popover-foreground))"
+          DEFAULT: 'hsl(var(--popover))',
+          foreground: 'hsl(var(--popover-foreground))',
         },
         card: {
-          DEFAULT: "hsl(var(--card))",
-          foreground: "hsl(var(--card-foreground))"
-        }
+          DEFAULT: 'hsl(var(--card))',
+          foreground: 'hsl(var(--card-foreground))',
+        },
       },
       borderRadius: {
-        sm: "4px",
-        md: "8px",
-        lg: "16px",
-        full: "9999px"
+        sm: '4px',
+        md: '8px',
+        lg: '16px',
+        full: '9999px',
       },
       boxShadow: {
-        sm: "0 1px 2px rgba(0, 0, 0, 0.05)",
-        md: "0 4px 6px rgba(0, 0, 0, 0.1)",
-        lg: "0 10px 15px rgba(0, 0, 0, 0.2)"
+        sm: '0 1px 2px rgba(0, 0, 0, 0.05)',
+        md: '0 4px 6px rgba(0, 0, 0, 0.1)',
+        lg: '0 10px 15px rgba(0, 0, 0, 0.2)',
       },
       spacing: {
-        "1": "4px",
-        "2": "8px",
-        "4": "16px",
-        "6": "24px",
-        "8": "32px",
-        "12": "48px"
+        '1': '4px',
+        '2': '8px',
+        '4': '16px',
+        '6': '24px',
+        '8': '32px',
+        '12': '48px',
       },
       fontFamily: {
-        heading: ["Poppins", "Inter", "system-ui", "sans-serif"],
-        body: ["Inter", "system-ui", "sans-serif"]
+        heading: ['Poppins', 'Inter', 'system-ui', 'sans-serif'],
+        body: ['Inter', 'system-ui', 'sans-serif'],
       },
       zIndex: {
-        base: "0",
-        dropdown: "10",
-        modal: "20",
-        toast: "30",
-        overlay: "40"
+        base: '0',
+        dropdown: '10',
+        modal: '20',
+        toast: '30',
+        overlay: '40',
       },
       transitionDuration: {
-        fast: "100ms",
-        normal: "200ms",
-        slow: "300ms"
-      }
-    }
+        fast: '100ms',
+        normal: '200ms',
+        slow: '300ms',
+      },
+    },
   },
-  plugins: [
-    require("tailwindcss-animate")
-  ]
+  plugins: [require('tailwindcss-animate')],
 };
 
 export default config;
@@ -471,8 +471,8 @@ In `apps/web/app/globals.css` (or your global stylesheet), define CSS variables 
   --color-semantic-danger: #dc2626;
   --color-semantic-info: #2563eb;
 
-  --font-heading: "Poppins", "Inter", system-ui, sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  --font-heading: 'Poppins', 'Inter', system-ui, sans-serif;
+  --font-body: 'Inter', system-ui, sans-serif;
 
   --radius-sm: 4px;
   --radius-md: 8px;

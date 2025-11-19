@@ -2,6 +2,7 @@
 
 import { useEffect } from 'react';
 
+/* eslint-disable no-console */
 export function usePWA() {
   useEffect(() => {
     if ('serviceWorker' in navigator) {
@@ -14,9 +15,16 @@ export function usePWA() {
             const newWorker = registration.installing;
             if (newWorker) {
               newWorker.addEventListener('statechange', () => {
-                if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                if (
+                  newWorker.state === 'installed' &&
+                  navigator.serviceWorker.controller
+                ) {
                   console.log('New service worker available, update pending');
-                  if (window.confirm('A new version is available. Reload to update?')) {
+                  if (
+                    window.confirm(
+                      'A new version is available. Reload to update?'
+                    )
+                  ) {
                     newWorker.postMessage({ type: 'SKIP_WAITING' });
                     window.location.reload();
                   }

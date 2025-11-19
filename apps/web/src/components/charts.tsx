@@ -24,8 +24,12 @@ export function LineChart({
   showLabels = true,
 }: LineChartProps) {
   const prefersReducedMotion = useReducedMotion();
-  
-  const { points, maxValue, minValue } = useMemo(() => {
+
+  const {
+    points,
+    maxValue: _maxValue,
+    minValue: _minValue,
+  } = useMemo(() => {
     if (!data.length) return { points: '', maxValue: 0, minValue: 0 };
 
     const values = data.map((d) => d.value);
@@ -123,9 +127,13 @@ interface BarChartProps {
   color?: string;
 }
 
-export function BarChart({ data, height = 200, color = '#2d3494' }: BarChartProps) {
+export function BarChart({
+  data,
+  height: _height = 200,
+  color = '#2d3494',
+}: BarChartProps) {
   const prefersReducedMotion = useReducedMotion();
-  
+
   const maxValue = useMemo(() => {
     if (!data.length) return 0;
     return Math.max(...data.map((d) => d.value));
@@ -140,7 +148,11 @@ export function BarChart({ data, height = 200, color = '#2d3494' }: BarChartProp
   }
 
   return (
-    <div className="space-y-2" role="img" aria-label="Bar chart showing data distribution">
+    <div
+      className="space-y-2"
+      role="img"
+      aria-label="Bar chart showing data distribution"
+    >
       {data.map((item, index) => (
         <div key={index} className="flex items-center gap-3">
           <span className="text-sm text-gray-600 w-24 text-right truncate">
@@ -176,8 +188,8 @@ export function PieChart({
   colors = ['#2d3494', '#0784b5', '#16a34a', '#f59e0b', '#dc2626'],
 }: PieChartProps) {
   const prefersReducedMotion = useReducedMotion();
-  
-  const { paths, total } = useMemo(() => {
+
+  const { paths, total: _total } = useMemo(() => {
     if (!data.length) return { paths: [], total: 0 };
 
     const total = data.reduce((sum, d) => sum + d.value, 0);
@@ -191,8 +203,10 @@ export function PieChart({
       const angle = (item.value / total) * 360;
       const endAngle = currentAngle + angle;
 
-      const startX = centerX + radius * Math.cos((currentAngle * Math.PI) / 180);
-      const startY = centerY + radius * Math.sin((currentAngle * Math.PI) / 180);
+      const startX =
+        centerX + radius * Math.cos((currentAngle * Math.PI) / 180);
+      const startY =
+        centerY + radius * Math.sin((currentAngle * Math.PI) / 180);
       const endX = centerX + radius * Math.cos((endAngle * Math.PI) / 180);
       const endY = centerY + radius * Math.sin((endAngle * Math.PI) / 180);
 
@@ -232,11 +246,13 @@ export function PieChart({
         aria-label="Pie chart showing data distribution"
       >
         {paths.map((item, index) => (
-          <path 
-            key={index} 
-            d={item.path} 
+          <path
+            key={index}
+            d={item.path}
             fill={item.color}
-            className={prefersReducedMotion ? '' : 'transition-all duration-300'}
+            className={
+              prefersReducedMotion ? '' : 'transition-all duration-300'
+            }
           />
         ))}
       </svg>

@@ -14,7 +14,7 @@ export class ExperimentsRepository {
   async findAssignment(
     experimentId: string,
     sessionId: string,
-    userId?: string,
+    userId?: string
   ) {
     return this.prisma.experimentAssignment.findFirst({
       where: {

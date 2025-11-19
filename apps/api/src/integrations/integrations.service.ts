@@ -10,11 +10,13 @@ export class IntegrationsService {
 
   constructor(
     private readonly prisma: PrismaService,
-    private readonly crypto: CryptoService,
+    private readonly crypto: CryptoService
   ) {}
 
   async connectIntegration(userId: string, dto: ConnectIntegrationDto) {
-    const encryptedCredentials = this.crypto.encrypt(JSON.stringify(dto.credentials));
+    const encryptedCredentials = this.crypto.encrypt(
+      JSON.stringify(dto.credentials)
+    );
 
     const existing = await this.prisma.integration.findFirst({
       where: {
@@ -86,7 +88,9 @@ export class IntegrationsService {
       throw new BadRequestException('Integration not found');
     }
 
-    const credentials = JSON.parse(this.crypto.decrypt(integration.credentials as string));
+    const credentials = JSON.parse(
+      this.crypto.decrypt(integration.credentials as string)
+    );
 
     switch (provider) {
       case IntegrationProvider.SALESFORCE:
@@ -110,7 +114,11 @@ export class IntegrationsService {
     }
   }
 
-  private async syncSalesforce(userId: string, credentials: any, integrationId: string) {
+  private async syncSalesforce(
+    userId: string,
+    credentials: any,
+    integrationId: string
+  ) {
     this.logger.log(`Salesforce sync requested for user ${userId}`);
 
     await this.prisma.integration.update({
@@ -125,7 +133,11 @@ export class IntegrationsService {
     };
   }
 
-  private async syncHubspot(userId: string, credentials: any, integrationId: string) {
+  private async syncHubspot(
+    userId: string,
+    credentials: any,
+    integrationId: string
+  ) {
     this.logger.log(`HubSpot sync requested for user ${userId}`);
 
     await this.prisma.integration.update({
@@ -140,7 +152,11 @@ export class IntegrationsService {
     };
   }
 
-  private async syncZoho(userId: string, credentials: any, integrationId: string) {
+  private async syncZoho(
+    userId: string,
+    credentials: any,
+    integrationId: string
+  ) {
     this.logger.log(`Zoho sync requested for user ${userId}`);
 
     await this.prisma.integration.update({
@@ -155,7 +171,11 @@ export class IntegrationsService {
     };
   }
 
-  private async syncMailchimp(userId: string, credentials: any, integrationId: string) {
+  private async syncMailchimp(
+    userId: string,
+    credentials: any,
+    integrationId: string
+  ) {
     this.logger.log(`Mailchimp sync requested for user ${userId}`);
 
     await this.prisma.integration.update({
@@ -170,7 +190,11 @@ export class IntegrationsService {
     };
   }
 
-  private async syncSendgrid(userId: string, credentials: any, integrationId: string) {
+  private async syncSendgrid(
+    userId: string,
+    credentials: any,
+    integrationId: string
+  ) {
     this.logger.log(`SendGrid sync requested for user ${userId}`);
 
     await this.prisma.integration.update({
@@ -185,7 +209,11 @@ export class IntegrationsService {
     };
   }
 
-  private async triggerZapier(userId: string, credentials: any, integrationId: string) {
+  private async triggerZapier(
+    userId: string,
+    credentials: any,
+    integrationId: string
+  ) {
     this.logger.log(`Zapier webhook trigger requested for user ${userId}`);
 
     await this.prisma.integration.update({
@@ -200,7 +228,11 @@ export class IntegrationsService {
     };
   }
 
-  private async syncGoogleDrive(userId: string, credentials: any, integrationId: string) {
+  private async syncGoogleDrive(
+    userId: string,
+    credentials: any,
+    integrationId: string
+  ) {
     this.logger.log(`Google Drive sync requested for user ${userId}`);
 
     await this.prisma.integration.update({
@@ -215,7 +247,11 @@ export class IntegrationsService {
     };
   }
 
-  private async syncDropbox(userId: string, credentials: any, integrationId: string) {
+  private async syncDropbox(
+    userId: string,
+    credentials: any,
+    integrationId: string
+  ) {
     this.logger.log(`Dropbox sync requested for user ${userId}`);
 
     await this.prisma.integration.update({

@@ -33,31 +33,41 @@ export default function DashboardPage() {
           <p className="text-3xl font-bold text-indigo-600">0</p>
           <p className="text-sm text-gray-600 mt-2">
             {user?.subscription?.tier === 'FREE' && 'Limit: 50 contacts'}
-            {(user?.subscription?.tier === 'PRO' || user?.subscription?.tier === 'PREMIUM') && 'Unlimited contacts'}
+            {(user?.subscription?.tier === 'PRO' ||
+              user?.subscription?.tier === 'PREMIUM') &&
+              'Unlimited contacts'}
           </p>
         </NexusCard>
 
         <NexusCard>
-          <h3 className="text-lg font-semibold text-gray-900 mb-2">Analytics</h3>
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            Analytics
+          </h3>
           <p className="text-3xl font-bold text-indigo-600">0</p>
           <p className="text-sm text-gray-600 mt-2">views today</p>
         </NexusCard>
       </div>
 
       <NexusCard>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          Quick Actions
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <Link href="/dashboard/cards/new">
             <NexusButton fullWidth>Create Card</NexusButton>
           </Link>
           <Link href="/dashboard/settings/account">
-            <NexusButton fullWidth variant="outline">Edit Profile</NexusButton>
+            <NexusButton fullWidth variant="outline">
+              Edit Profile
+            </NexusButton>
           </Link>
         </div>
       </NexusCard>
 
       <NexusCard>
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Account Information</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          Account Information
+        </h2>
         <div className="space-y-3">
           <div>
             <p className="text-sm text-gray-600">Email</p>

@@ -1,6 +1,20 @@
-import { Controller, Get, Post, Body, Param, Query, UseGuards, Delete, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  UseGuards,
+  Delete,
+  Patch,
+} from '@nestjs/common';
 import { NfcService } from './nfc.service';
-import { ImportNfcTagsDto, AssignNfcTagDto, AssociateNfcTagDto } from './dto/nfc.dto';
+import {
+  ImportNfcTagsDto,
+  AssignNfcTagDto,
+  AssociateNfcTagDto,
+} from './dto/nfc.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
@@ -25,7 +39,7 @@ export class NfcController {
   @UseGuards(JwtAuthGuard)
   getCardTags(
     @Param('cardId') cardId: string,
-    @CurrentUser() user: { id: string },
+    @CurrentUser() user: { id: string }
   ) {
     return this.nfcService.getCardTags(cardId, user.id);
   }
@@ -35,7 +49,7 @@ export class NfcController {
   associateTag(
     @Param('tagId') tagId: string,
     @CurrentUser() user: { id: string },
-    @Body() associateDto: AssociateNfcTagDto,
+    @Body() associateDto: AssociateNfcTagDto
   ) {
     return this.nfcService.associateTagWithCard(tagId, user.id, associateDto);
   }
@@ -44,7 +58,7 @@ export class NfcController {
   @UseGuards(JwtAuthGuard)
   disassociateTag(
     @Param('tagId') tagId: string,
-    @CurrentUser() user: { id: string },
+    @CurrentUser() user: { id: string }
   ) {
     return this.nfcService.disassociateTag(tagId, user.id);
   }
@@ -59,10 +73,7 @@ export class NfcController {
   @Patch('admin/tags/:tagId/assign')
   @UseGuards(JwtAuthGuard, RolesGuard)
   @Roles('ADMIN')
-  assignTag(
-    @Param('tagId') tagId: string,
-    @Body() assignDto: AssignNfcTagDto,
-  ) {
+  assignTag(@Param('tagId') tagId: string, @Body() assignDto: AssignNfcTagDto) {
     return this.nfcService.assignTagToUser(tagId, assignDto);
   }
 
@@ -79,7 +90,7 @@ export class NfcController {
   getAllTags(
     @Query('status') status?: string,
     @Query('skip') skip?: string,
-    @Query('take') take?: string,
+    @Query('take') take?: string
   ) {
     return this.nfcService.getAllTags({
       status,

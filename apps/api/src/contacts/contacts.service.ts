@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { ContactsRepository } from './contacts.repository';
 import { CardsRepository } from '../cards/cards.repository';
 import { UsersService } from '../users/users.service';
@@ -10,10 +15,14 @@ export class ContactsService {
   constructor(
     private readonly contactsRepository: ContactsRepository,
     private readonly cardsRepository: CardsRepository,
-    private readonly usersService: UsersService,
+    private readonly usersService: UsersService
   ) {}
 
-  async submitContact(slug: string, dto: SubmitContactDto, metadata?: Record<string, any>) {
+  async submitContact(
+    slug: string,
+    dto: SubmitContactDto,
+    metadata?: Record<string, any>
+  ) {
     const card = await this.cardsRepository.findBySlug(slug);
     if (!card) {
       throw new NotFoundException('Card not found');
@@ -23,7 +32,9 @@ export class ContactsService {
       throw new BadRequestException('This card is not accepting contacts');
     }
 
-    const currentContactCount = await this.contactsRepository.countByUserId(card.userId);
+    const currentContactCount = await this.contactsRepository.countByUserId(
+      card.userId
+    );
     await this.usersService.canAddContact(card.userId, currentContactCount);
 
     return this.contactsRepository.createContact({
@@ -80,19 +91,19 @@ export class ContactsService {
 
   async exportContacts(userId: string, format: 'VCF' | 'CSV') {
     const contacts = await this.contactsRepository.findByUserId(userId);
-    
+
     if (format === 'VCF') {
       return this.generateVCF(contacts);
     } else if (format === 'CSV') {
       return this.generateCSV(contacts);
     }
-    
+
     throw new BadRequestException('Invalid export format');
   }
 
   private generateVCF(contacts: any[]): string {
     return contacts
-      .map(contact => {
+      .map((contact) => {
         const vcf = [
           'BEGIN:VCARD',
           'VERSION:3.0',
@@ -120,8 +131,17 @@ export class ContactsService {
   }
 
   private generateCSV(contacts: any[]): string {
-    const headers = ['First Name', 'Last Name', 'Email', 'Phone', 'Company', 'Notes', 'Job Title', 'Exchanged At'];
-    const rows = contacts.map(contact => [
+    const headers = [
+      'First Name',
+      'Last Name',
+      'Email',
+      'Phone',
+      'Company',
+      'Notes',
+      'Job Title',
+      'Exchanged At',
+    ];
+    const rows = contacts.map((contact) => [
       this.escapeCsvValue(contact.firstName),
       this.escapeCsvValue(contact.lastName),
       this.escapeCsvValue(contact.email || ''),
@@ -132,7 +152,7 @@ export class ContactsService {
       contact.exchangedAt.toISOString(),
     ]);
 
-    return [headers.join(','), ...rows.map(row => row.join(','))].join('\n');
+    return [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
   }
 
   private escapeCsvValue(value: string): string {

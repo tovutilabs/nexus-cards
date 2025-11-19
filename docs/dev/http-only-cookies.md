@@ -13,11 +13,11 @@ Nexus Cards uses HTTP-only cookies for secure token storage instead of localStor
 ```typescript
 // Cookie settings in auth.controller.ts
 res.cookie('access_token', token, {
-  httpOnly: true,                              // Cannot be accessed by JavaScript
+  httpOnly: true, // Cannot be accessed by JavaScript
   secure: process.env.NODE_ENV === 'production', // HTTPS only in production
-  sameSite: 'lax',                             // CSRF protection
-  maxAge: 7 * 24 * 60 * 60 * 1000,            // 7 days
-  path: '/',                                   // Available site-wide
+  sameSite: 'lax', // CSRF protection
+  maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+  path: '/', // Available site-wide
 });
 ```
 
@@ -32,7 +32,7 @@ jwtFromRequest: ExtractJwt.fromExtractors([
     return request?.cookies?.access_token;
   },
   ExtractJwt.fromAuthHeaderAsBearerToken(), // Fallback for API clients
-])
+]);
 ```
 
 #### CORS Configuration
@@ -43,7 +43,7 @@ CORS is configured to allow credentials (cookies):
 // apps/api/src/main.ts
 app.enableCors({
   origin: process.env.WEB_URL || 'http://localhost:3000',
-  credentials: true,  // Required for cookie-based auth
+  credentials: true, // Required for cookie-based auth
 });
 ```
 
@@ -68,7 +68,7 @@ All API requests include credentials to send/receive cookies:
 const response = await fetch(`${this.baseUrl}${endpoint}`, {
   ...options,
   headers,
-  credentials: 'include',  // Send cookies with every request
+  credentials: 'include', // Send cookies with every request
 });
 ```
 
@@ -139,21 +139,25 @@ Set-Cookie: access_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT
 ## Security Benefits
 
 ### HTTP-Only Flag
+
 - **Protection**: JavaScript cannot access the token
 - **Benefit**: Prevents XSS attacks from stealing tokens
 - **Trade-off**: Token cannot be read by client-side code
 
 ### SameSite Attribute
+
 - **Setting**: `lax` in development, `strict` in production
 - **Protection**: Prevents CSRF attacks
 - **Behavior**: Cookie only sent with same-site requests
 
 ### Secure Flag
+
 - **Setting**: Enabled in production only
 - **Protection**: Cookie only sent over HTTPS
 - **Development**: Disabled to allow HTTP testing
 
 ### Max-Age
+
 - **Duration**: 7 days (604800 seconds)
 - **Benefit**: Automatic token expiration
 - **Behavior**: Browser automatically deletes expired cookies
@@ -186,7 +190,7 @@ curl -b cookies.txt http://localhost:3001/api/users/me
 3. Observe `access_token` cookie with `HttpOnly` flag
 4. Try accessing cookie via console:
    ```javascript
-   document.cookie // Should NOT show access_token
+   document.cookie; // Should NOT show access_token
    ```
 5. Logout and verify cookie is removed
 
@@ -229,6 +233,7 @@ Authorization: Bearer <JWT>
 ```
 
 This allows:
+
 - Web frontend to use secure HTTP-only cookies
 - API clients to use Bearer tokens
 - Mobile apps to use Bearer tokens

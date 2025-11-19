@@ -1,15 +1,25 @@
-import { Injectable, NotFoundException, ForbiddenException, ConflictException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+  ConflictException,
+  BadRequestException,
+} from '@nestjs/common';
 import { NfcRepository } from './nfc.repository';
 import { CardsRepository } from '../cards/cards.repository';
 import { UsersRepository } from '../users/users.repository';
-import { ImportNfcTagsDto, AssignNfcTagDto, AssociateNfcTagDto } from './dto/nfc.dto';
+import {
+  ImportNfcTagsDto,
+  AssignNfcTagDto,
+  AssociateNfcTagDto,
+} from './dto/nfc.dto';
 
 @Injectable()
 export class NfcService {
   constructor(
     private nfcRepository: NfcRepository,
     private cardsRepository: CardsRepository,
-    private usersRepository: UsersRepository,
+    private usersRepository: UsersRepository
   ) {}
 
   async importTags(importDto: ImportNfcTagsDto) {
@@ -59,7 +69,9 @@ export class NfcService {
     } else if (assignDto.userEmail) {
       user = await this.usersRepository.findByEmail(assignDto.userEmail);
     } else {
-      throw new BadRequestException('Either userId or userEmail must be provided');
+      throw new BadRequestException(
+        'Either userId or userEmail must be provided'
+      );
     }
 
     if (!user) {
@@ -81,7 +93,11 @@ export class NfcService {
     });
   }
 
-  async associateTagWithCard(tagId: string, userId: string, associateDto: AssociateNfcTagDto) {
+  async associateTagWithCard(
+    tagId: string,
+    userId: string,
+    associateDto: AssociateNfcTagDto
+  ) {
     const tag = await this.nfcRepository.findById(tagId);
     if (!tag) {
       throw new NotFoundException('NFC tag not found');
@@ -97,11 +113,15 @@ export class NfcService {
     }
 
     if (card.userId !== userId) {
-      throw new ForbiddenException('You can only associate tags with your own cards');
+      throw new ForbiddenException(
+        'You can only associate tags with your own cards'
+      );
     }
 
     if (tag.cardId) {
-      throw new ConflictException('This tag is already associated with another card. Please disassociate it first.');
+      throw new ConflictException(
+        'This tag is already associated with another card. Please disassociate it first.'
+      );
     }
 
     await this.nfcRepository.associateWithCard(tagId, associateDto.cardId);
@@ -125,7 +145,9 @@ export class NfcService {
     }
 
     if (card.userId !== userId) {
-      throw new ForbiddenException('You can only disassociate tags from your own cards');
+      throw new ForbiddenException(
+        'You can only disassociate tags from your own cards'
+      );
     }
 
     await this.nfcRepository.disassociateFromCard(tagId);
@@ -179,13 +201,11 @@ export class NfcService {
 
   async getUserTags(userId: string) {
     const userCards = await this.cardsRepository.findByUserId(userId);
-    const cardIds = userCards.map(card => card.id);
+    const cardIds = userCards.map((card) => card.id);
 
     const tags = await this.nfcRepository.findMany({
       where: {
-        OR: [
-          { cardId: { in: cardIds } },
-        ],
+        OR: [{ cardId: { in: cardIds } }],
       },
     });
 
@@ -205,8 +225,14 @@ export class NfcService {
     return this.nfcRepository.findByCardId(cardId);
   }
 
-  async getAllTags(filters?: { status?: string; skip?: number; take?: number }) {
-    const where = filters?.status ? { status: filters.status as any } : undefined;
+  async getAllTags(filters?: {
+    status?: string;
+    skip?: number;
+    take?: number;
+  }) {
+    const where = filters?.status
+      ? { status: filters.status as any }
+      : undefined;
 
     return this.nfcRepository.findMany({
       where,
@@ -218,9 +244,13 @@ export class NfcService {
 
   async getTagStats() {
     const total = await this.nfcRepository.count();
-    const unassociated = await this.nfcRepository.count({ status: 'UNASSOCIATED' });
+    const unassociated = await this.nfcRepository.count({
+      status: 'UNASSOCIATED',
+    });
     const associated = await this.nfcRepository.count({ status: 'ASSOCIATED' });
-    const deactivated = await this.nfcRepository.count({ status: 'DEACTIVATED' });
+    const deactivated = await this.nfcRepository.count({
+      status: 'DEACTIVATED',
+    });
 
     return {
       total,

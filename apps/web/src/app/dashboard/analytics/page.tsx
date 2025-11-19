@@ -107,7 +107,10 @@ export default function AnalyticsPage() {
 
       <div className="flex flex-col sm:flex-row gap-4 mb-6">
         <Select value={timeRange} onValueChange={setTimeRange}>
-          <SelectTrigger className="w-full sm:w-[200px]" aria-label="Select time range">
+          <SelectTrigger
+            className="w-full sm:w-[200px]"
+            aria-label="Select time range"
+          >
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -119,7 +122,10 @@ export default function AnalyticsPage() {
         </Select>
 
         <Select value={selectedCard} onValueChange={setSelectedCard}>
-          <SelectTrigger className="w-full sm:w-[200px]" aria-label="Select card">
+          <SelectTrigger
+            className="w-full sm:w-[200px]"
+            aria-label="Select card"
+          >
             <SelectValue placeholder="All Cards" />
           </SelectTrigger>
           <SelectContent>

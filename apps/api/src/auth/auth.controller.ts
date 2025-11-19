@@ -1,7 +1,20 @@
-import { Controller, Post, Body, HttpCode, HttpStatus, Res, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Post,
+  Body,
+  HttpCode,
+  HttpStatus,
+  Res,
+  UseGuards,
+} from '@nestjs/common';
 import { Response } from 'express';
 import { AuthService } from './auth.service';
-import { RegisterDto, LoginDto, ForgotPasswordDto, ResetPasswordDto } from './dto/auth.dto';
+import {
+  RegisterDto,
+  LoginDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from './dto/auth.dto';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
 import { CurrentUser } from './decorators/current-user.decorator';
 import { User } from '@prisma/client';
@@ -13,13 +26,13 @@ export class AuthController {
   @Post('register')
   async register(
     @Body() registerDto: RegisterDto,
-    @Res({ passthrough: true }) res: Response,
+    @Res({ passthrough: true }) res: Response
   ) {
     const result = await this.authService.register(registerDto);
-    
+
     this.setAuthCookie(res, result.accessToken);
-    
-    const { accessToken, ...userData } = result;
+
+    const { accessToken: _accessToken, ...userData } = result;
     return userData;
   }
 
@@ -27,13 +40,13 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() loginDto: LoginDto,
-    @Res({ passthrough: true }) res: Response,
+    @Res({ passthrough: true }) res: Response
   ) {
     const result = await this.authService.login(loginDto);
-    
+
     this.setAuthCookie(res, result.accessToken);
-    
-    const { accessToken, ...userData } = result;
+
+    const { accessToken: _accessToken, ...userData } = result;
     return userData;
   }
 
@@ -54,7 +67,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   async logout(
     @Res({ passthrough: true }) res: Response,
-    @CurrentUser() user: User,
+    @CurrentUser() _user: User
   ) {
     this.clearAuthCookie(res);
     return { message: 'Logged out successfully' };
@@ -62,7 +75,7 @@ export class AuthController {
 
   private setAuthCookie(res: Response, token: string): void {
     const isProduction = process.env.NODE_ENV === 'production';
-    
+
     res.cookie('access_token', token, {
       httpOnly: true,
       secure: isProduction,

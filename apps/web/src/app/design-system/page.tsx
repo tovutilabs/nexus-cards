@@ -42,11 +42,26 @@ export default function DesignSystemPage() {
                       <span className="text-sm">nexus-blue-500</span>
                     </div>
                     <div className="grid grid-cols-5 gap-1">
-                      <div className="h-8 rounded bg-nexus-blue-50" title="50" />
-                      <div className="h-8 rounded bg-nexus-blue-100" title="100" />
-                      <div className="h-8 rounded bg-nexus-blue-300" title="300" />
-                      <div className="h-8 rounded bg-nexus-blue-500" title="500" />
-                      <div className="h-8 rounded bg-nexus-blue-700" title="700" />
+                      <div
+                        className="h-8 rounded bg-nexus-blue-50"
+                        title="50"
+                      />
+                      <div
+                        className="h-8 rounded bg-nexus-blue-100"
+                        title="100"
+                      />
+                      <div
+                        className="h-8 rounded bg-nexus-blue-300"
+                        title="300"
+                      />
+                      <div
+                        className="h-8 rounded bg-nexus-blue-500"
+                        title="500"
+                      />
+                      <div
+                        className="h-8 rounded bg-nexus-blue-700"
+                        title="700"
+                      />
                     </div>
                   </div>
                 </NexusCard>
@@ -58,11 +73,26 @@ export default function DesignSystemPage() {
                       <span className="text-sm">nexus-green-500</span>
                     </div>
                     <div className="grid grid-cols-5 gap-1">
-                      <div className="h-8 rounded bg-nexus-green-50" title="50" />
-                      <div className="h-8 rounded bg-nexus-green-100" title="100" />
-                      <div className="h-8 rounded bg-nexus-green-300" title="300" />
-                      <div className="h-8 rounded bg-nexus-green-500" title="500" />
-                      <div className="h-8 rounded bg-nexus-green-700" title="700" />
+                      <div
+                        className="h-8 rounded bg-nexus-green-50"
+                        title="50"
+                      />
+                      <div
+                        className="h-8 rounded bg-nexus-green-100"
+                        title="100"
+                      />
+                      <div
+                        className="h-8 rounded bg-nexus-green-300"
+                        title="300"
+                      />
+                      <div
+                        className="h-8 rounded bg-nexus-green-500"
+                        title="500"
+                      />
+                      <div
+                        className="h-8 rounded bg-nexus-green-700"
+                        title="700"
+                      />
                     </div>
                   </div>
                 </NexusCard>
@@ -75,10 +105,22 @@ export default function DesignSystemPage() {
                     </div>
                     <div className="grid grid-cols-5 gap-1">
                       <div className="h-8 rounded bg-nexus-red-50" title="50" />
-                      <div className="h-8 rounded bg-nexus-red-100" title="100" />
-                      <div className="h-8 rounded bg-nexus-red-300" title="300" />
-                      <div className="h-8 rounded bg-nexus-red-500" title="500" />
-                      <div className="h-8 rounded bg-nexus-red-700" title="700" />
+                      <div
+                        className="h-8 rounded bg-nexus-red-100"
+                        title="100"
+                      />
+                      <div
+                        className="h-8 rounded bg-nexus-red-300"
+                        title="300"
+                      />
+                      <div
+                        className="h-8 rounded bg-nexus-red-500"
+                        title="500"
+                      />
+                      <div
+                        className="h-8 rounded bg-nexus-red-700"
+                        title="700"
+                      />
                     </div>
                   </div>
                 </NexusCard>
@@ -107,11 +149,15 @@ export default function DesignSystemPage() {
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">text-base</p>
-                    <p className="text-base">Body text for paragraphs and content</p>
+                    <p className="text-base">
+                      Body text for paragraphs and content
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">text-sm</p>
-                    <p className="text-sm">Small text for captions and labels</p>
+                    <p className="text-sm">
+                      Small text for captions and labels
+                    </p>
                   </div>
                   <div className="space-y-1">
                     <p className="text-xs text-muted-foreground">text-xs</p>
@@ -195,7 +241,10 @@ export default function DesignSystemPage() {
             <TabsContent value="inputs" className="space-y-4">
               <NexusCard title="Input Variants">
                 <div className="space-y-4">
-                  <NexusInput label="Default Input" placeholder="Enter text..." />
+                  <NexusInput
+                    label="Default Input"
+                    placeholder="Enter text..."
+                  />
                   <NexusInput
                     label="Success Input"
                     variant="success"
@@ -309,7 +358,8 @@ export default function DesignSystemPage() {
                   hover="glow"
                 >
                   <p className="text-sm">
-                    This card has a subtle gradient background and glows on hover.
+                    This card has a subtle gradient background and glows on
+                    hover.
                   </p>
                 </NexusCard>
               </div>
@@ -321,7 +371,8 @@ export default function DesignSystemPage() {
                 hover="scale"
               >
                 <p className="text-sm">
-                  This card has a frosted glass effect with backdrop blur and scales on hover.
+                  This card has a frosted glass effect with backdrop blur and
+                  scales on hover.
                 </p>
               </NexusCard>
             </TabsContent>
@@ -385,7 +436,9 @@ export default function DesignSystemPage() {
                   <p className="text-sm text-muted-foreground">
                     Click the button below to open a dialog modal.
                   </p>
-                  <NexusButton onClick={() => setDialogOpen(true)}>Open Dialog</NexusButton>
+                  <NexusButton onClick={() => setDialogOpen(true)}>
+                    Open Dialog
+                  </NexusButton>
                 </div>
               </NexusCard>
 
@@ -396,19 +449,27 @@ export default function DesignSystemPage() {
                 description="This is an example dialog using the NexusDialog component."
                 footer={
                   <div className="flex gap-2">
-                    <NexusButton variant="outline" onClick={() => setDialogOpen(false)}>
+                    <NexusButton
+                      variant="outline"
+                      onClick={() => setDialogOpen(false)}
+                    >
                       Cancel
                     </NexusButton>
-                    <NexusButton onClick={() => setDialogOpen(false)}>Confirm</NexusButton>
+                    <NexusButton onClick={() => setDialogOpen(false)}>
+                      Confirm
+                    </NexusButton>
                   </div>
                 }
               >
                 <div className="space-y-4">
                   <p className="text-sm">
-                    This dialog demonstrates the Nexus-branded dialog component with custom
-                    header, content, and footer sections.
+                    This dialog demonstrates the Nexus-branded dialog component
+                    with custom header, content, and footer sections.
                   </p>
-                  <NexusInput label="Example Input" placeholder="Enter something..." />
+                  <NexusInput
+                    label="Example Input"
+                    placeholder="Enter something..."
+                  />
                 </div>
               </NexusDialog>
             </TabsContent>
@@ -422,8 +483,8 @@ export default function DesignSystemPage() {
           </p>
           <NexusCard variant="outlined">
             <p className="text-sm">
-              Toggle your system dark mode or use the theme switcher (to be implemented) to see
-              components adapt automatically.
+              Toggle your system dark mode or use the theme switcher (to be
+              implemented) to see components adapt automatically.
             </p>
           </NexusCard>
         </section>

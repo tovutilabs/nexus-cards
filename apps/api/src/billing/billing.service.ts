@@ -11,11 +11,13 @@ export class BillingService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly prisma: PrismaService,
+    private readonly prisma: PrismaService
   ) {
     const stripeSecretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
     if (!stripeSecretKey) {
-      this.logger.warn('STRIPE_SECRET_KEY not configured - payment features disabled');
+      this.logger.warn(
+        'STRIPE_SECRET_KEY not configured - payment features disabled'
+      );
       this.stripe = null;
     } else {
       this.stripe = new Stripe(stripeSecretKey, {
@@ -28,7 +30,7 @@ export class BillingService {
     userId: string,
     tier: SubscriptionTier,
     successUrl: string,
-    cancelUrl: string,
+    cancelUrl: string
   ): Promise<{ sessionId: string; url: string }> {
     if (!this.stripe) {
       throw new Error('Stripe not configured');
@@ -104,22 +106,30 @@ export class BillingService {
       throw new Error('Stripe not configured');
     }
 
-    const webhookSecret = this.configService.get<string>('STRIPE_WEBHOOK_SECRET');
+    const webhookSecret = this.configService.get<string>(
+      'STRIPE_WEBHOOK_SECRET'
+    );
     if (!webhookSecret) {
       throw new Error('STRIPE_WEBHOOK_SECRET not configured');
     }
 
     let event: Stripe.Event;
     try {
-      event = this.stripe.webhooks.constructEvent(rawBody, signature, webhookSecret);
+      event = this.stripe.webhooks.constructEvent(
+        rawBody,
+        signature,
+        webhookSecret
+      );
     } catch (err) {
-      this.logger.error(`Webhook signature verification failed: ${err.message}`);
+      this.logger.error(
+        `Webhook signature verification failed: ${err.message}`
+      );
       throw new Error('Invalid signature');
     }
 
     this.logger.log(`Processing webhook event: ${event.type} (${event.id})`);
 
-    const idempotencyKey = `webhook:${event.id}`;
+    const _idempotencyKey = `webhook:${event.id}`;
     const existingLog = await this.prisma.activityLog.findFirst({
       where: {
         action: 'webhook_processed',
@@ -138,19 +148,29 @@ export class BillingService {
     try {
       switch (event.type) {
         case 'customer.subscription.created':
-          await this.handleSubscriptionCreated(event.data.object as Stripe.Subscription);
+          await this.handleSubscriptionCreated(
+            event.data.object as Stripe.Subscription
+          );
           break;
         case 'customer.subscription.updated':
-          await this.handleSubscriptionUpdated(event.data.object as Stripe.Subscription);
+          await this.handleSubscriptionUpdated(
+            event.data.object as Stripe.Subscription
+          );
           break;
         case 'customer.subscription.deleted':
-          await this.handleSubscriptionDeleted(event.data.object as Stripe.Subscription);
+          await this.handleSubscriptionDeleted(
+            event.data.object as Stripe.Subscription
+          );
           break;
         case 'invoice.payment_succeeded':
-          await this.handleInvoicePaymentSucceeded(event.data.object as Stripe.Invoice);
+          await this.handleInvoicePaymentSucceeded(
+            event.data.object as Stripe.Invoice
+          );
           break;
         case 'invoice.payment_failed':
-          await this.handleInvoicePaymentFailed(event.data.object as Stripe.Invoice);
+          await this.handleInvoicePaymentFailed(
+            event.data.object as Stripe.Invoice
+          );
           break;
         default:
           this.logger.log(`Unhandled event type: ${event.type}`);
@@ -168,12 +188,16 @@ export class BillingService {
         },
       });
     } catch (error) {
-      this.logger.error(`Failed to process webhook ${event.id}: ${error.message}`);
+      this.logger.error(
+        `Failed to process webhook ${event.id}: ${error.message}`
+      );
       throw error;
     }
   }
 
-  private async handleSubscriptionCreated(subscription: Stripe.Subscription): Promise<void> {
+  private async handleSubscriptionCreated(
+    subscription: Stripe.Subscription
+  ): Promise<void> {
     const userId = subscription.metadata?.userId;
     if (!userId) {
       this.logger.error('No userId in subscription metadata');
@@ -190,8 +214,12 @@ export class BillingService {
         stripePriceId: subscription.items.data[0]?.price?.id,
         tier,
         status,
-        currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
-        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+        currentPeriodStart: new Date(
+          (subscription as any).current_period_start * 1000
+        ),
+        currentPeriodEnd: new Date(
+          (subscription as any).current_period_end * 1000
+        ),
         cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
       },
     });
@@ -199,7 +227,9 @@ export class BillingService {
     this.logger.log(`Subscription created for user ${userId}, tier: ${tier}`);
   }
 
-  private async handleSubscriptionUpdated(subscription: Stripe.Subscription): Promise<void> {
+  private async handleSubscriptionUpdated(
+    subscription: Stripe.Subscription
+  ): Promise<void> {
     const existingSub = await this.prisma.subscription.findUnique({
       where: { stripeSubscriptionId: subscription.id },
     });
@@ -218,16 +248,24 @@ export class BillingService {
         stripePriceId: subscription.items.data[0]?.price?.id,
         tier,
         status,
-        currentPeriodStart: new Date((subscription as any).current_period_start * 1000),
-        currentPeriodEnd: new Date((subscription as any).current_period_end * 1000),
+        currentPeriodStart: new Date(
+          (subscription as any).current_period_start * 1000
+        ),
+        currentPeriodEnd: new Date(
+          (subscription as any).current_period_end * 1000
+        ),
         cancelAtPeriodEnd: (subscription as any).cancel_at_period_end,
       },
     });
 
-    this.logger.log(`Subscription updated: ${subscription.id}, tier: ${tier}, status: ${status}`);
+    this.logger.log(
+      `Subscription updated: ${subscription.id}, tier: ${tier}, status: ${status}`
+    );
   }
 
-  private async handleSubscriptionDeleted(subscription: Stripe.Subscription): Promise<void> {
+  private async handleSubscriptionDeleted(
+    subscription: Stripe.Subscription
+  ): Promise<void> {
     const existingSub = await this.prisma.subscription.findUnique({
       where: { stripeSubscriptionId: subscription.id },
     });
@@ -248,7 +286,9 @@ export class BillingService {
     this.logger.log(`Subscription deleted: ${subscription.id}`);
   }
 
-  private async handleInvoicePaymentSucceeded(invoice: Stripe.Invoice): Promise<void> {
+  private async handleInvoicePaymentSucceeded(
+    invoice: Stripe.Invoice
+  ): Promise<void> {
     const invoiceAny = invoice as any;
     if (!invoiceAny.subscription) {
       return;
@@ -278,7 +318,9 @@ export class BillingService {
     this.logger.log(`Invoice payment succeeded: ${invoice.id}`);
   }
 
-  private async handleInvoicePaymentFailed(invoice: Stripe.Invoice): Promise<void> {
+  private async handleInvoicePaymentFailed(
+    invoice: Stripe.Invoice
+  ): Promise<void> {
     const invoiceAny = invoice as any;
     if (!invoiceAny.subscription) {
       return;
@@ -318,22 +360,28 @@ export class BillingService {
   private getPriceIdForTier(tier: SubscriptionTier): string | null {
     const priceMap: Record<SubscriptionTier, string | null> = {
       [SubscriptionTier.FREE]: null,
-      [SubscriptionTier.PRO]: this.configService.get<string>('STRIPE_PRICE_ID_PRO') || null,
-      [SubscriptionTier.PREMIUM]: this.configService.get<string>('STRIPE_PRICE_ID_PREMIUM') || null,
+      [SubscriptionTier.PRO]:
+        this.configService.get<string>('STRIPE_PRICE_ID_PRO') || null,
+      [SubscriptionTier.PREMIUM]:
+        this.configService.get<string>('STRIPE_PRICE_ID_PREMIUM') || null,
     };
     return priceMap[tier] || null;
   }
 
   private getTierFromPriceId(priceId: string): SubscriptionTier {
     const proPriceId = this.configService.get<string>('STRIPE_PRICE_ID_PRO');
-    const premiumPriceId = this.configService.get<string>('STRIPE_PRICE_ID_PREMIUM');
+    const premiumPriceId = this.configService.get<string>(
+      'STRIPE_PRICE_ID_PREMIUM'
+    );
 
     if (priceId === proPriceId) return SubscriptionTier.PRO;
     if (priceId === premiumPriceId) return SubscriptionTier.PREMIUM;
     return SubscriptionTier.FREE;
   }
 
-  private mapStripeStatus(stripeStatus: Stripe.Subscription.Status): SubscriptionStatus {
+  private mapStripeStatus(
+    stripeStatus: Stripe.Subscription.Status
+  ): SubscriptionStatus {
     const statusMap: Record<Stripe.Subscription.Status, SubscriptionStatus> = {
       active: SubscriptionStatus.ACTIVE,
       past_due: SubscriptionStatus.PAST_DUE,
@@ -369,7 +417,9 @@ export class BillingService {
       data: { cancelAtPeriodEnd: true },
     });
 
-    this.logger.log(`Subscription will be canceled at period end for user ${userId}`);
+    this.logger.log(
+      `Subscription will be canceled at period end for user ${userId}`
+    );
   }
 
   async getSubscriptionUsage(userId: string): Promise<{

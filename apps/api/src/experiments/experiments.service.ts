@@ -21,23 +21,22 @@ export class ExperimentsService {
   async assignVariant(
     experimentId: string,
     sessionId: string,
-    userId?: string,
+    userId?: string
   ) {
     const experiment = await this.getExperiment(experimentId);
 
-    const existingAssignment =
-      await this.experimentsRepository.findAssignment(
-        experimentId,
-        sessionId,
-        userId,
-      );
+    const existingAssignment = await this.experimentsRepository.findAssignment(
+      experimentId,
+      sessionId,
+      userId
+    );
 
     if (existingAssignment) {
       return existingAssignment;
     }
 
     const variant = this.selectVariant(
-      experiment.variants as Record<string, number>,
+      experiment.variants as Record<string, number>
     );
 
     return this.experimentsRepository.createAssignment({
@@ -69,7 +68,10 @@ export class ExperimentsService {
   }
 
   private selectVariant(variants: Record<string, number>): string {
-    const total = Object.values(variants).reduce((sum, weight) => sum + weight, 0);
+    const total = Object.values(variants).reduce(
+      (sum, weight) => sum + weight,
+      0
+    );
     let random = Math.random() * total;
 
     for (const [variant, weight] of Object.entries(variants)) {

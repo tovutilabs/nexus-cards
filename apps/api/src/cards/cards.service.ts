@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException, ForbiddenException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { CardsRepository } from './cards.repository';
 import { UsersService } from '../users/users.service';
 import { CreateCardDto } from './dto/create-card.dto';
@@ -9,7 +13,7 @@ import { generateSlug, generateUniqueSlug } from './utils/slug.util';
 export class CardsService {
   constructor(
     private cardsRepository: CardsRepository,
-    private usersService: UsersService,
+    private usersService: UsersService
   ) {}
 
   async create(userId: string, createCardDto: CreateCardDto) {
@@ -18,7 +22,7 @@ export class CardsService {
 
     const fullName = `${createCardDto.firstName} ${createCardDto.lastName}`;
     const baseSlug = generateSlug(fullName);
-    const existingSlugs = userCards.map(card => card.slug);
+    const existingSlugs = userCards.map((card) => card.slug);
     const slug = generateUniqueSlug(baseSlug, existingSlugs);
 
     const card = await this.cardsRepository.create({
@@ -87,16 +91,19 @@ export class CardsService {
 
     const updateData: any = { ...updateCardDto };
 
-    if ((updateCardDto.firstName || updateCardDto.lastName) && 
-        (updateCardDto.firstName !== card.firstName || updateCardDto.lastName !== card.lastName)) {
+    if (
+      (updateCardDto.firstName || updateCardDto.lastName) &&
+      (updateCardDto.firstName !== card.firstName ||
+        updateCardDto.lastName !== card.lastName)
+    ) {
       const userCards = await this.cardsRepository.findByUserId(userId);
       const firstName = updateCardDto.firstName || card.firstName;
       const lastName = updateCardDto.lastName || card.lastName;
       const fullName = `${firstName} ${lastName}`;
       const baseSlug = generateSlug(fullName);
       const existingSlugs = userCards
-        .filter(c => c.id !== id)
-        .map(c => c.slug);
+        .filter((c) => c.id !== id)
+        .map((c) => c.slug);
       updateData.slug = generateUniqueSlug(baseSlug, existingSlugs);
     }
 
@@ -114,7 +121,13 @@ export class CardsService {
   }
 
   private sanitizePublicCard(card: any) {
-    const { userId, createdAt, updatedAt, deletedAt, ...publicData } = card;
+    const {
+      userId: _userId,
+      createdAt: _createdAt,
+      updatedAt: _updatedAt,
+      deletedAt: _deletedAt,
+      ...publicData
+    } = card;
     return publicData;
   }
 }

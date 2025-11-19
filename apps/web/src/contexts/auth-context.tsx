@@ -1,14 +1,17 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useCallback,
+} from 'react';
 import { useRouter } from 'next/navigation';
 import { createApiClient } from '@/lib/api-client';
-import {
-  User,
-  LoginData,
-  RegisterData,
-  UpdateProfileData,
-} from '@/lib/auth';
+import { User, LoginData, RegisterData, UpdateProfileData } from '@/lib/auth';
+
+/* eslint-disable no-console */
 
 interface AuthContextType {
   user: User | null;

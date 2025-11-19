@@ -74,12 +74,21 @@ export default function AdminAnalyticsPage() {
       setLoading(true);
       const apiClient = createApiClient();
 
-      const [overviewData, dailyData, topCardsData, tierData] = await Promise.all([
-        apiClient.get<Overview>(`/admin/analytics/overview?days=${dateRange}`),
-        apiClient.get<{ stats: DailyStat[] }>(`/admin/analytics/daily?days=${dateRange}`),
-        apiClient.get<{ cards: TopCard[] }>('/admin/analytics/top-cards?limit=10'),
-        apiClient.get<{ stats: TierStats[] }>(`/admin/analytics/by-tier?days=${dateRange}`),
-      ]);
+      const [overviewData, dailyData, topCardsData, tierData] =
+        await Promise.all([
+          apiClient.get<Overview>(
+            `/admin/analytics/overview?days=${dateRange}`
+          ),
+          apiClient.get<{ stats: DailyStat[] }>(
+            `/admin/analytics/daily?days=${dateRange}`
+          ),
+          apiClient.get<{ cards: TopCard[] }>(
+            '/admin/analytics/top-cards?limit=10'
+          ),
+          apiClient.get<{ stats: TierStats[] }>(
+            `/admin/analytics/by-tier?days=${dateRange}`
+          ),
+        ]);
 
       setOverview(overviewData);
       setDailyStats(dailyData.stats);
@@ -132,7 +141,9 @@ export default function AdminAnalyticsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Global Analytics</h1>
-          <p className="text-gray-600 mt-1">System-wide analytics and insights</p>
+          <p className="text-gray-600 mt-1">
+            System-wide analytics and insights
+          </p>
         </div>
         <Select value={dateRange} onValueChange={setDateRange}>
           <SelectTrigger className="w-40">
@@ -156,7 +167,9 @@ export default function AdminAnalyticsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Views</p>
-                <p className="text-2xl font-bold text-gray-900">{overview.totalViews.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {overview.totalViews.toLocaleString()}
+                </p>
               </div>
             </div>
           </Card>
@@ -168,7 +181,9 @@ export default function AdminAnalyticsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Taps</p>
-                <p className="text-2xl font-bold text-gray-900">{overview.totalTaps.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {overview.totalTaps.toLocaleString()}
+                </p>
               </div>
             </div>
           </Card>
@@ -180,7 +195,9 @@ export default function AdminAnalyticsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Exchanges</p>
-                <p className="text-2xl font-bold text-gray-900">{overview.totalExchanges.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {overview.totalExchanges.toLocaleString()}
+                </p>
               </div>
             </div>
           </Card>
@@ -192,7 +209,9 @@ export default function AdminAnalyticsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Cards</p>
-                <p className="text-2xl font-bold text-gray-900">{overview.totalCards.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {overview.totalCards.toLocaleString()}
+                </p>
               </div>
             </div>
           </Card>
@@ -204,7 +223,9 @@ export default function AdminAnalyticsPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Users</p>
-                <p className="text-2xl font-bold text-gray-900">{overview.totalUsers.toLocaleString()}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {overview.totalUsers.toLocaleString()}
+                </p>
               </div>
             </div>
           </Card>
@@ -213,9 +234,13 @@ export default function AdminAnalyticsPage() {
 
       <div className="grid gap-4 md:grid-cols-2">
         <Card className="p-6">
-          <h2 className="text-lg font-semibold text-gray-900 mb-4">Daily Activity</h2>
+          <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            Daily Activity
+          </h2>
           {dailyStats.length === 0 ? (
-            <p className="text-gray-500 text-center py-8">No activity data yet</p>
+            <p className="text-gray-500 text-center py-8">
+              No activity data yet
+            </p>
           ) : (
             <div className="space-y-3">
               {dailyStats.map((stat) => (
@@ -227,20 +252,28 @@ export default function AdminAnalyticsPage() {
                         day: 'numeric',
                       })}
                     </span>
-                    <span className="text-xs text-gray-500">{stat.uniqueCards} cards</span>
+                    <span className="text-xs text-gray-500">
+                      {stat.uniqueCards} cards
+                    </span>
                   </div>
                   <div className="grid grid-cols-3 gap-4 text-sm">
                     <div>
                       <p className="text-gray-600">Views</p>
-                      <p className="font-semibold text-blue-600">{stat.totalViews.toLocaleString()}</p>
+                      <p className="font-semibold text-blue-600">
+                        {stat.totalViews.toLocaleString()}
+                      </p>
                     </div>
                     <div>
                       <p className="text-gray-600">Taps</p>
-                      <p className="font-semibold text-purple-600">{stat.totalTaps.toLocaleString()}</p>
+                      <p className="font-semibold text-purple-600">
+                        {stat.totalTaps.toLocaleString()}
+                      </p>
                     </div>
                     <div>
                       <p className="text-gray-600">Exchanges</p>
-                      <p className="font-semibold text-green-600">{stat.totalExchanges.toLocaleString()}</p>
+                      <p className="font-semibold text-green-600">
+                        {stat.totalExchanges.toLocaleString()}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -267,9 +300,12 @@ export default function AdminAnalyticsPage() {
                       </span>
                       <div>
                         <p className="font-medium text-gray-900">
-                          {card.card.user.profile?.firstName} {card.card.user.profile?.lastName}
+                          {card.card.user.profile?.firstName}{' '}
+                          {card.card.user.profile?.lastName}
                         </p>
-                        <p className="text-xs text-gray-500">/{card.card.slug}</p>
+                        <p className="text-xs text-gray-500">
+                          /{card.card.slug}
+                        </p>
                       </div>
                     </div>
                   </div>
@@ -284,7 +320,9 @@ export default function AdminAnalyticsPage() {
                     </div>
                     <div className="text-center p-2 bg-green-50 rounded">
                       <p className="text-gray-600">Exchanges</p>
-                      <p className="font-bold text-green-600">{card.exchanges}</p>
+                      <p className="font-bold text-green-600">
+                        {card.exchanges}
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -295,7 +333,9 @@ export default function AdminAnalyticsPage() {
       </div>
 
       <Card className="p-6">
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Performance by Subscription Tier</h2>
+        <h2 className="text-lg font-semibold text-gray-900 mb-4">
+          Performance by Subscription Tier
+        </h2>
         {tierStats.length === 0 ? (
           <p className="text-gray-500 text-center py-8">No tier data yet</p>
         ) : (
@@ -304,20 +344,28 @@ export default function AdminAnalyticsPage() {
               <div key={stat.tier} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-3">
                   {getTierBadge(stat.tier)}
-                  <span className="text-xs text-gray-500">{stat.uniqueCards} cards</span>
+                  <span className="text-xs text-gray-500">
+                    {stat.uniqueCards} cards
+                  </span>
                 </div>
                 <div className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Views</span>
-                    <span className="font-semibold text-blue-600">{stat.totalViews.toLocaleString()}</span>
+                    <span className="font-semibold text-blue-600">
+                      {stat.totalViews.toLocaleString()}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Taps</span>
-                    <span className="font-semibold text-purple-600">{stat.totalTaps.toLocaleString()}</span>
+                    <span className="font-semibold text-purple-600">
+                      {stat.totalTaps.toLocaleString()}
+                    </span>
                   </div>
                   <div className="flex items-center justify-between text-sm">
                     <span className="text-gray-600">Exchanges</span>
-                    <span className="font-semibold text-green-600">{stat.totalExchanges.toLocaleString()}</span>
+                    <span className="font-semibold text-green-600">
+                      {stat.totalExchanges.toLocaleString()}
+                    </span>
                   </div>
                 </div>
               </div>

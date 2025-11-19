@@ -3,32 +3,34 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
-const nexusButtonVariants = cva(
-  'transition-all duration-200 font-medium',
-  {
-    variants: {
-      variant: {
-        primary: 'bg-nexus-blue-600 hover:bg-nexus-blue-700 text-white shadow-sm hover:shadow-md',
-        secondary: 'bg-secondary hover:bg-secondary/80 text-secondary-foreground',
-        success: 'bg-nexus-green-600 hover:bg-nexus-green-700 text-white shadow-sm hover:shadow-md',
-        danger: 'bg-nexus-red-600 hover:bg-nexus-red-700 text-white shadow-sm hover:shadow-md',
-        outline: 'border-2 border-nexus-blue-600 text-nexus-blue-600 hover:bg-nexus-blue-50 dark:hover:bg-nexus-blue-950',
-        ghost: 'hover:bg-nexus-blue-50 hover:text-nexus-blue-700 dark:hover:bg-nexus-blue-950',
-        link: 'text-nexus-blue-600 underline-offset-4 hover:underline',
-      },
-      size: {
-        default: 'h-10 px-4 py-2',
-        sm: 'h-9 rounded-md px-3 text-sm',
-        lg: 'h-11 rounded-md px-8 text-base',
-        icon: 'h-10 w-10',
-      },
+const nexusButtonVariants = cva('transition-all duration-200 font-medium', {
+  variants: {
+    variant: {
+      primary:
+        'bg-nexus-blue-600 hover:bg-nexus-blue-700 text-white shadow-sm hover:shadow-md',
+      secondary: 'bg-secondary hover:bg-secondary/80 text-secondary-foreground',
+      success:
+        'bg-nexus-green-600 hover:bg-nexus-green-700 text-white shadow-sm hover:shadow-md',
+      danger:
+        'bg-nexus-red-600 hover:bg-nexus-red-700 text-white shadow-sm hover:shadow-md',
+      outline:
+        'border-2 border-nexus-blue-600 text-nexus-blue-600 hover:bg-nexus-blue-50 dark:hover:bg-nexus-blue-950',
+      ghost:
+        'hover:bg-nexus-blue-50 hover:text-nexus-blue-700 dark:hover:bg-nexus-blue-950',
+      link: 'text-nexus-blue-600 underline-offset-4 hover:underline',
     },
-    defaultVariants: {
-      variant: 'primary',
-      size: 'default',
+    size: {
+      default: 'h-10 px-4 py-2',
+      sm: 'h-9 rounded-md px-3 text-sm',
+      lg: 'h-11 rounded-md px-8 text-base',
+      icon: 'h-10 w-10',
     },
-  }
-);
+  },
+  defaultVariants: {
+    variant: 'primary',
+    size: 'default',
+  },
+});
 
 export interface NexusButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
@@ -39,7 +41,19 @@ export interface NexusButtonProps
 }
 
 const NexusButton = React.forwardRef<HTMLButtonElement, NexusButtonProps>(
-  ({ className, variant, size, loading, disabled, fullWidth, children, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      size,
+      loading,
+      disabled,
+      fullWidth,
+      children,
+      ...props
+    },
+    ref
+  ) => {
     return (
       <Button
         className={cn(

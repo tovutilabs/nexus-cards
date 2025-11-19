@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from 'react';
 
+/* eslint-disable no-console, @typescript-eslint/no-explicit-any */
+
 interface Variant {
   id: string;
   name: string;
@@ -133,7 +135,10 @@ export function ExperimentProvider({
   children,
 }: {
   experimentId: string;
-  children: (variant: string | null, trackEvent: (eventType: string, eventData?: any) => Promise<void>) => React.ReactNode;
+  children: (
+    variant: string | null,
+    trackEvent: (eventType: string, eventData?: any) => Promise<void>
+  ) => React.ReactNode;
 }) {
   const { variant, loading, trackEvent } = useExperiment(experimentId);
 

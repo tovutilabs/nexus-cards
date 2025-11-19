@@ -20,6 +20,7 @@ nexus_cards/
 ## Technology Stack
 
 ### Frontend
+
 - **Next.js 14** (App Router)
 - **TypeScript**
 - **Tailwind CSS**
@@ -27,12 +28,14 @@ nexus_cards/
 - **React Hook Form + Zod** (forms)
 
 ### Backend
+
 - **NestJS**
 - **TypeScript**
 - **Prisma ORM** (PostgreSQL)
 - **Redis** (cache, jobs, rate limiting)
 
 ### Infrastructure
+
 - **PostgreSQL 16**
 - **Redis 7**
 - **Docker** (local development)
@@ -48,22 +51,26 @@ nexus_cards/
 ### Installation
 
 1. Clone the repository:
+
 ```bash
 git clone <repository-url>
 cd nexus_cards
 ```
 
 2. Install dependencies:
+
 ```bash
 npm install
 ```
 
 3. Start all services with Docker Compose:
+
 ```bash
 docker compose up --build
 ```
 
 This will start:
+
 - PostgreSQL at localhost:5432
 - Redis at localhost:6379
 - MailHog at localhost:8025 (SMTP: 1025)
@@ -71,6 +78,7 @@ This will start:
 - Web server at http://localhost:3000
 
 4. Seed the database (creates test users):
+
 ```bash
 docker exec nexus-api sh -c "cd /app/apps/api && npx ts-node prisma/seed.ts"
 ```
@@ -79,12 +87,12 @@ docker exec nexus-api sh -c "cd /app/apps/api && npx ts-node prisma/seed.ts"
 
 After seeding, you can login with these accounts:
 
-| Email | Password | Role | Tier |
-|-------|----------|------|------|
-| `admin@nexus.cards` | `Admin123!` | ADMIN | PREMIUM |
-| `user.free@example.com` | `User123!` | USER | FREE |
-| `user.pro@example.com` | `User123!` | USER | PRO |
-| `user.premium@example.com` | `User123!` | USER | PREMIUM |
+| Email                      | Password    | Role  | Tier    |
+| -------------------------- | ----------- | ----- | ------- |
+| `admin@nexus.cards`        | `Admin123!` | ADMIN | PREMIUM |
+| `user.free@example.com`    | `User123!`  | USER  | FREE    |
+| `user.pro@example.com`     | `User123!`  | USER  | PRO     |
+| `user.premium@example.com` | `User123!`  | USER  | PREMIUM |
 
 See [docs/dev/seeding.md](docs/dev/seeding.md) for more details.
 
@@ -117,6 +125,7 @@ docker exec nexus-api sh -c "cd /app/apps/api && pnpm prisma migrate dev"
 ## Project Structure
 
 ### apps/web (Next.js)
+
 - Marketing pages
 - User dashboard
 - Admin dashboard
@@ -124,6 +133,7 @@ docker exec nexus-api sh -c "cd /app/apps/api && pnpm prisma migrate dev"
 - Authentication flows
 
 ### apps/api (NestJS)
+
 - RESTful API
 - Authentication & authorization
 - Database management (Prisma)
@@ -131,6 +141,7 @@ docker exec nexus-api sh -c "cd /app/apps/api && pnpm prisma migrate dev"
 - Webhooks
 
 ### packages/shared
+
 - TypeScript types
 - DTOs
 - Enums
@@ -142,6 +153,7 @@ docker exec nexus-api sh -c "cd /app/apps/api && pnpm prisma migrate dev"
 See `.env.example` for all available environment variables.
 
 Key variables:
+
 - `DATABASE_URL` - PostgreSQL connection string
 - `REDIS_URL` - Redis connection string
 - `JWT_SECRET` - Secret key for JWT tokens
@@ -166,22 +178,26 @@ Key variables:
 ## Critical Constraints
 
 ### NFC Tags
+
 - **1 tag → 1 card mapping** (no join tables)
 - Direct `cardId` FK on `NfcTag` table
 - Admins manage tags; users associate/disassociate only
 
 ### Analytics
+
 - **Daily granularity ONLY** (no hourly buckets)
 - Aggregate into `AnalyticsCardDaily` table
 - Tier-based retention: FREE (7d), PRO (90d), PREMIUM (unlimited)
 
 ### ORM
+
 - **Prisma is the ONLY ORM**
 - All models in `schema.prisma`
 - Migrations via `prisma migrate`
 - Repositories wrap Prisma calls
 
 ### Subscription Tiers
+
 - **FREE**: 1 card, 7-day analytics, 50 contacts
 - **PRO**: 5 cards, 90-day analytics, unlimited contacts
 - **PREMIUM**: unlimited cards, unlimited analytics, custom CSS, API access
@@ -189,11 +205,13 @@ Key variables:
 ## Testing
 
 Run tests:
+
 ```bash
 npm test
 ```
 
 Run tests in watch mode:
+
 ```bash
 npm test -- --watch
 ```

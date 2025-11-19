@@ -119,7 +119,10 @@ export default function CardsPage() {
       ) : (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {cards.map((card) => (
-            <Card key={card.id} className="overflow-hidden hover:shadow-lg transition-shadow">
+            <Card
+              key={card.id}
+              className="overflow-hidden hover:shadow-lg transition-shadow"
+            >
               <div className="p-6">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex-1">

@@ -22,12 +22,13 @@ async function bootstrap() {
       whitelist: true,
       transform: true,
       forbidNonWhitelisted: true,
-    }),
+    })
   );
 
   const port = process.env.API_PORT || 3001;
   await app.listen(port);
 
+  // eslint-disable-next-line no-console
   console.log(`API server running on http://localhost:${port}`);
 }
 

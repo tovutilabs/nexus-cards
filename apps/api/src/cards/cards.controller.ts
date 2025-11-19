@@ -1,4 +1,15 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, UseGuards, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Patch,
+  Param,
+  Delete,
+  UseGuards,
+  HttpCode,
+  HttpStatus,
+} from '@nestjs/common';
 import { CardsService } from './cards.service';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
@@ -11,7 +22,10 @@ export class CardsController {
   constructor(private readonly cardsService: CardsService) {}
 
   @Post()
-  create(@CurrentUser() user: { id: string }, @Body() createCardDto: CreateCardDto) {
+  create(
+    @CurrentUser() user: { id: string },
+    @Body() createCardDto: CreateCardDto
+  ) {
     return this.cardsService.create(user.id, createCardDto);
   }
 
@@ -29,7 +43,7 @@ export class CardsController {
   update(
     @Param('id') id: string,
     @CurrentUser() user: { id: string },
-    @Body() updateCardDto: UpdateCardDto,
+    @Body() updateCardDto: UpdateCardDto
   ) {
     return this.cardsService.update(id, user.id, updateCardDto);
   }
@@ -39,5 +53,4 @@ export class CardsController {
   remove(@Param('id') id: string, @CurrentUser() user: { id: string }) {
     return this.cardsService.remove(id, user.id);
   }
-
 }

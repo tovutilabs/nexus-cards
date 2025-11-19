@@ -21,7 +21,8 @@ export function LanguageSwitcher() {
   const pathname = usePathname();
   const locale = useLocale();
 
-  const currentLanguage = languages.find((lang) => lang.code === locale) || languages[0];
+  const currentLanguage =
+    languages.find((lang) => lang.code === locale) || languages[0];
 
   const switchLanguage = (newLocale: string) => {
     // Remove current locale prefix if it exists

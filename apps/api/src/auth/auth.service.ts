@@ -1,9 +1,19 @@
-import { Injectable, ConflictException, UnauthorizedException, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  ConflictException,
+  UnauthorizedException,
+  BadRequestException,
+} from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersRepository } from '../users/users.repository';
 import { CryptoService } from './crypto.service';
-import { RegisterDto, LoginDto, ForgotPasswordDto, ResetPasswordDto } from './dto/auth.dto';
+import {
+  RegisterDto,
+  LoginDto,
+  ForgotPasswordDto,
+  ResetPasswordDto,
+} from './dto/auth.dto';
 import { User } from '@prisma/client';
 
 @Injectable()
@@ -12,18 +22,23 @@ export class AuthService {
     private usersRepository: UsersRepository,
     private jwtService: JwtService,
     private cryptoService: CryptoService,
-    private configService: ConfigService,
+    private configService: ConfigService
   ) {}
 
   async register(registerDto: RegisterDto) {
-    const existingUser = await this.usersRepository.findByEmail(registerDto.email);
-    
+    const existingUser = await this.usersRepository.findByEmail(
+      registerDto.email
+    );
+
     if (existingUser) {
       throw new ConflictException('Email already registered');
     }
 
-    const passwordHash = await this.cryptoService.hashPassword(registerDto.password);
-    const emailVerificationToken = this.cryptoService.generateVerificationToken();
+    const passwordHash = await this.cryptoService.hashPassword(
+      registerDto.password
+    );
+    const emailVerificationToken =
+      this.cryptoService.generateVerificationToken();
 
     const user = await this.usersRepository.create({
       email: registerDto.email,
@@ -53,7 +68,7 @@ export class AuthService {
 
   async login(loginDto: LoginDto) {
     const user = await this.validateUser(loginDto.email, loginDto.password);
-    
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
@@ -68,14 +83,14 @@ export class AuthService {
 
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.usersRepository.findByEmail(email);
-    
+
     if (!user) {
       return null;
     }
 
     const isPasswordValid = await this.cryptoService.verifyPassword(
       user.passwordHash,
-      password,
+      password
     );
 
     if (!isPasswordValid) {
@@ -86,8 +101,10 @@ export class AuthService {
   }
 
   async forgotPassword(forgotPasswordDto: ForgotPasswordDto) {
-    const user = await this.usersRepository.findByEmail(forgotPasswordDto.email);
-    
+    const user = await this.usersRepository.findByEmail(
+      forgotPasswordDto.email
+    );
+
     if (!user) {
       return { message: 'If the email exists, a reset link will be sent' };
     }
@@ -118,7 +135,9 @@ export class AuthService {
       throw new BadRequestException('Invalid or expired reset token');
     }
 
-    const passwordHash = await this.cryptoService.hashPassword(resetPasswordDto.password);
+    const passwordHash = await this.cryptoService.hashPassword(
+      resetPasswordDto.password
+    );
 
     await this.usersRepository.update(user[0].id, {
       passwordHash,
@@ -144,7 +163,14 @@ export class AuthService {
   }
 
   private sanitizeUser(user: User) {
-    const { passwordHash, passwordResetToken, passwordResetExpires, emailVerificationToken, twoFactorSecret, ...sanitized } = user;
+    const {
+      passwordHash: _passwordHash,
+      passwordResetToken: _passwordResetToken,
+      passwordResetExpires: _passwordResetExpires,
+      emailVerificationToken: _emailVerificationToken,
+      twoFactorSecret: _twoFactorSecret,
+      ...sanitized
+    } = user;
     return sanitized;
   }
 }

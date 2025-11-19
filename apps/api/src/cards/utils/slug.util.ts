@@ -8,7 +8,10 @@ export function generateSlug(title: string): string {
     .substring(0, 50);
 }
 
-export function generateUniqueSlug(baseSlug: string, existingSlugs: string[]): string {
+export function generateUniqueSlug(
+  baseSlug: string,
+  existingSlugs: string[]
+): string {
   let slug = baseSlug;
   let counter = 1;
 

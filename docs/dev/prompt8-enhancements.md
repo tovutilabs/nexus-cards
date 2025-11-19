@@ -7,6 +7,7 @@ This document describes three enhancements implemented after the core Prompt 8 f
 ## 1. Public Card Language Switcher
 
 ### Purpose
+
 Enable visitors to view bilingual business card content when a card has secondary language translations configured.
 
 ### Implementation
@@ -14,6 +15,7 @@ Enable visitors to view bilingual business card content when a card has secondar
 #### Frontend Changes (`apps/web/src/app/p/[slug]/page.tsx`)
 
 **Extended CardData Interface:**
+
 ```typescript
 interface CardData {
   // ... existing fields
@@ -27,28 +29,36 @@ interface CardData {
 ```
 
 **Language State Management:**
+
 ```typescript
 const [language, setLanguage] = useState<'primary' | 'secondary'>('primary');
 
-const hasSecondaryLanguage = card.secondaryLanguage && (
-  card.firstName_es || card.lastName_es || card.jobTitle_es || 
-  card.company_es || card.bio_es
-);
+const hasSecondaryLanguage =
+  card.secondaryLanguage &&
+  (card.firstName_es ||
+    card.lastName_es ||
+    card.jobTitle_es ||
+    card.company_es ||
+    card.bio_es);
 ```
 
 **Display Logic:**
-```typescript
-const displayName = language === 'secondary' && card.firstName_es && card.lastName_es
-  ? `${card.firstName_es} ${card.lastName_es}`
-  : `${card.firstName} ${card.lastName}`;
 
-const displayJobTitle = language === 'secondary' && card.jobTitle_es
-  ? card.jobTitle_es
-  : card.jobTitle;
+```typescript
+const displayName =
+  language === 'secondary' && card.firstName_es && card.lastName_es
+    ? `${card.firstName_es} ${card.lastName_es}`
+    : `${card.firstName} ${card.lastName}`;
+
+const displayJobTitle =
+  language === 'secondary' && card.jobTitle_es
+    ? card.jobTitle_es
+    : card.jobTitle;
 // Similar pattern for company and bio
 ```
 
 **Language Toggle Button:**
+
 - Positioned in top-right corner of gradient header
 - Only visible when `hasSecondaryLanguage` is true
 - Shows "ES" when primary language active, "EN" when secondary active
@@ -69,6 +79,7 @@ const displayJobTitle = language === 'secondary' && card.jobTitle_es
 ### Database Fields Used
 
 From `Card` model (added in migration `20251119082142_add_bilingual_card_fields`):
+
 - `secondaryLanguage` - Language code (e.g., "es")
 - `firstName_es` - Spanish first name
 - `lastName_es` - Spanish last name
@@ -88,6 +99,7 @@ From `Card` model (added in migration `20251119082142_add_bilingual_card_fields`
 ## 2. A/B Testing API Endpoints
 
 ### Purpose
+
 Complete the A/B testing infrastructure by adding backend API endpoints to serve experiments, assign variants, and log events.
 
 ### Implementation
@@ -95,6 +107,7 @@ Complete the A/B testing infrastructure by adding backend API endpoints to serve
 #### New Module: `apps/api/src/experiments/`
 
 **Files Created:**
+
 1. `experiments.module.ts` - NestJS module registration
 2. `experiments.controller.ts` - HTTP endpoints
 3. `experiments.service.ts` - Business logic
@@ -105,13 +118,14 @@ Complete the A/B testing infrastructure by adding backend API endpoints to serve
 **1. GET `/api/experiments/:id`**
 
 Get experiment configuration:
+
 ```typescript
 {
   id: string;
   name: string;
   description: string;
   variants: Record<string, number>; // { "control": 50, "variant_a": 50 }
-  status: "DRAFT" | "ACTIVE" | "PAUSED" | "COMPLETED";
+  status: 'DRAFT' | 'ACTIVE' | 'PAUSED' | 'COMPLETED';
   startDate: Date;
   endDate: Date;
 }
@@ -122,6 +136,7 @@ Get experiment configuration:
 Assign user to variant:
 
 Request:
+
 ```typescript
 {
   userId?: string;      // Optional: logged-in user ID
@@ -130,15 +145,17 @@ Request:
 ```
 
 Response:
+
 ```typescript
 {
   experimentId: string;
-  variant: string;      // e.g., "control" or "variant_a"
+  variant: string; // e.g., "control" or "variant_a"
   assignedAt: Date;
 }
 ```
 
 Logic:
+
 - Checks if assignment already exists (returns existing)
 - Uses weighted random selection based on variant weights
 - Creates `ExperimentAssignment` record
@@ -148,6 +165,7 @@ Logic:
 Log experiment event:
 
 Request:
+
 ```typescript
 {
   userId?: string;
@@ -159,6 +177,7 @@ Request:
 ```
 
 Response:
+
 ```typescript
 {
   id: string;
@@ -192,6 +211,7 @@ Creates `ExperimentEvent` record for analytics.
    - Returns event ID
 
 **Weighted Variant Selection Algorithm:**
+
 ```typescript
 private selectVariant(variants: Record<string, number>): string {
   const total = Object.values(variants).reduce((sum, weight) => sum + weight, 0);
@@ -213,6 +233,7 @@ Example: `{ "control": 70, "variant_a": 30 }` → 70% control, 30% variant_a
 #### Repository Layer (`experiments.repository.ts`)
 
 Database operations:
+
 - `findById(id)` - Get experiment by ID
 - `findAssignment(experimentId, sessionId, userId?)` - Get existing assignment
 - `createAssignment(data)` - Create new assignment
@@ -234,6 +255,7 @@ const { variant, loading } = useExperiment('homepage-hero-test');
 ### Testing
 
 **Manual Testing:**
+
 ```bash
 # Get experiment
 curl http://localhost:3001/api/experiments/test-experiment-id
@@ -267,6 +289,7 @@ curl -X POST http://localhost:3001/api/experiments/test-experiment-id/event \
 ## 3. Reduced Motion Preference Support
 
 ### Purpose
+
 Respect user's `prefers-reduced-motion` system preference for accessibility, ensuring animations don't cause discomfort or vestibular issues.
 
 ### Implementation
@@ -294,6 +317,7 @@ Added media query to disable/reduce all animations:
 ```
 
 **Effect:**
+
 - All animations run for 0.01ms (effectively instant)
 - Single iteration only (no loops)
 - Smooth scrolling disabled
@@ -309,7 +333,7 @@ export function useReducedMotion(): boolean {
 
   useEffect(() => {
     const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
-    
+
     setPrefersReducedMotion(mediaQuery.matches);
 
     const handleChange = (event: MediaQueryListEvent) => {
@@ -328,6 +352,7 @@ export function useReducedMotion(): boolean {
 ```
 
 **Features:**
+
 - Detects initial preference on mount
 - Listens for preference changes at runtime
 - Returns boolean: `true` if user prefers reduced motion
@@ -336,6 +361,7 @@ export function useReducedMotion(): boolean {
 #### Chart Components (`apps/web/src/components/charts.tsx`)
 
 **LineChart:**
+
 ```typescript
 const prefersReducedMotion = useReducedMotion();
 
@@ -346,6 +372,7 @@ const prefersReducedMotion = useReducedMotion();
 ```
 
 **BarChart:**
+
 ```typescript
 const prefersReducedMotion = useReducedMotion();
 
@@ -356,10 +383,11 @@ const prefersReducedMotion = useReducedMotion();
 ```
 
 **PieChart:**
+
 ```typescript
 const prefersReducedMotion = useReducedMotion();
 
-<path 
+<path
   className={prefersReducedMotion ? '' : 'transition-all duration-300'}
   // ... other props
 />
@@ -368,12 +396,14 @@ const prefersReducedMotion = useReducedMotion();
 ### User Experience
 
 **Without Reduced Motion Preference:**
+
 - Charts animate smoothly when data updates
 - Bars grow with 500ms transition
 - Lines draw with 300ms transition
 - Pie slices animate in
 
 **With Reduced Motion Preference:**
+
 - Charts appear instantly with no animation
 - Data updates are immediate
 - No transition effects
@@ -382,6 +412,7 @@ const prefersReducedMotion = useReducedMotion();
 ### Browser Testing
 
 **Enable in Chrome DevTools:**
+
 1. Open DevTools (F12)
 2. Press Cmd+Shift+P (Mac) or Ctrl+Shift+P (Windows/Linux)
 3. Type "Rendering"
@@ -396,6 +427,7 @@ Settings → Ease of Access → Display → Show animations
 ### WCAG 2.1 Compliance
 
 This implementation satisfies:
+
 - **Success Criterion 2.3.3 (Animation from Interactions)** - Level AAA
 - Prevents motion-triggered vestibular disorders
 - Maintains full functionality without animation
@@ -447,12 +479,14 @@ A user creates a bilingual business card (Spanish/English) and wants to A/B test
 ### Testing Checklist
 
 **Language Switcher:**
+
 - [ ] Toggle button appears only for bilingual cards
 - [ ] All fields update when language switches
 - [ ] Non-bilingual fields remain unchanged
 - [ ] Button is accessible (keyboard, screen reader)
 
 **A/B Testing API:**
+
 - [ ] GET endpoint returns experiment config
 - [ ] POST assign endpoint returns consistent variant
 - [ ] POST event endpoint logs events
@@ -460,6 +494,7 @@ A user creates a bilingual business card (Spanish/English) and wants to A/B test
 - [ ] Experiment must be ACTIVE to assign variants
 
 **Reduced Motion:**
+
 - [ ] CSS media query disables animations globally
 - [ ] useReducedMotion hook returns correct preference
 - [ ] Charts respect preference
@@ -470,16 +505,19 @@ A user creates a bilingual business card (Spanish/English) and wants to A/B test
 ## Performance Considerations
 
 ### Language Switcher
+
 - **No additional API calls** - data loaded with initial card fetch
 - **Client-side only** - language switch is instant
 - **No layout shift** - button positioned absolutely
 
 ### A/B Testing API
+
 - **Minimal overhead** - 2 API calls on page load (get + assign)
 - **Caching** - assignment cached in memory/localStorage
 - **Background events** - event logging doesn't block UI
 
 ### Reduced Motion
+
 - **Zero overhead when disabled** - no JavaScript execution
 - **CSS-only** - media query handled by browser
 - **Hook optimization** - single event listener per component
@@ -489,6 +527,7 @@ A user creates a bilingual business card (Spanish/English) and wants to A/B test
 ## Migration Notes
 
 No database migrations required for these enhancements:
+
 - Language switcher uses existing bilingual fields
 - A/B testing API uses existing Experiment models
 - Reduced motion is frontend-only
@@ -508,6 +547,7 @@ No database migrations required for these enhancements:
 ## Changelog
 
 **2025-01-XX - Initial Implementation**
+
 - Added public card language switcher
 - Implemented A/B testing API endpoints (GET, POST /assign, POST /event)
 - Added reduced motion support with useReducedMotion hook
@@ -521,12 +561,14 @@ No database migrations required for these enhancements:
 These were implemented from the "Known Limitations" section of PROMPT8_VERIFICATION.md. Remaining limitations:
 
 **Still Not Implemented:**
+
 - Icon generation (requires external service)
 - `geo_country` analytics dimension (requires IP geolocation service)
 - Push notifications (requires service worker registration and backend service)
 - Real-time analytics updates (requires WebSocket implementation)
 
 **Still Partially Implemented:**
+
 - High contrast mode (needs full theme switcher)
 - Analytics export (needs CSV generation endpoint)
 - Date range picker (needs react-datepicker or similar)

@@ -1,7 +1,11 @@
-import { Injectable, NotFoundException, ForbiddenException } from '@nestjs/common';
-import { UsersRepository, UserWithRelations } from './users.repository';
+import {
+  Injectable,
+  NotFoundException,
+  ForbiddenException,
+} from '@nestjs/common';
+import { UsersRepository } from './users.repository';
 import { UpdateProfileDto } from './dto/update-profile.dto';
-import { SubscriptionTier, UserRole, SubscriptionStatus } from '@prisma/client';
+import { SubscriptionTier, UserRole } from '@prisma/client';
 import { UpdateUserSubscriptionDto } from './dto/admin-user.dto';
 
 type TierLimits = {
@@ -36,7 +40,7 @@ export class UsersService {
 
   async findById(id: string) {
     const user = await this.usersRepository.findById(id);
-    
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -46,7 +50,7 @@ export class UsersService {
 
   async updateProfile(userId: string, updateProfileDto: UpdateProfileDto) {
     const user = await this.usersRepository.findById(userId);
-    
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
@@ -60,9 +64,12 @@ export class UsersService {
     return this.sanitizeUser(updatedUser);
   }
 
-  async checkCardLimit(userId: string, currentCardCount: number): Promise<boolean> {
+  async checkCardLimit(
+    userId: string,
+    currentCardCount: number
+  ): Promise<boolean> {
     const user = await this.usersRepository.findById(userId);
-    
+
     if (!user || !user.subscription) {
       throw new NotFoundException('User or subscription not found');
     }
@@ -71,9 +78,12 @@ export class UsersService {
     return currentCardCount < limits.maxCards;
   }
 
-  async checkContactLimit(userId: string, currentContactCount: number): Promise<boolean> {
+  async checkContactLimit(
+    userId: string,
+    currentContactCount: number
+  ): Promise<boolean> {
     const user = await this.usersRepository.findById(userId);
-    
+
     if (!user || !user.subscription) {
       throw new NotFoundException('User or subscription not found');
     }
@@ -84,7 +94,7 @@ export class UsersService {
 
   async getAnalyticsRetentionDays(userId: string): Promise<number> {
     const user = await this.usersRepository.findById(userId);
-    
+
     if (!user || !user.subscription) {
       throw new NotFoundException('User or subscription not found');
     }
@@ -94,26 +104,29 @@ export class UsersService {
 
   async canCreateCard(userId: string, currentCardCount: number): Promise<void> {
     const canCreate = await this.checkCardLimit(userId, currentCardCount);
-    
+
     if (!canCreate) {
       const user = await this.usersRepository.findById(userId);
       const tier = user?.subscription?.tier || 'FREE';
       const limit = TIER_LIMITS[tier as SubscriptionTier].maxCards;
-      
+
       throw new ForbiddenException(
         `Card limit reached. Your ${tier} plan allows ${limit} card${limit > 1 ? 's' : ''}. Please upgrade to create more cards.`
       );
     }
   }
 
-  async canAddContact(userId: string, currentContactCount: number): Promise<void> {
+  async canAddContact(
+    userId: string,
+    currentContactCount: number
+  ): Promise<void> {
     const canAdd = await this.checkContactLimit(userId, currentContactCount);
-    
+
     if (!canAdd) {
       const user = await this.usersRepository.findById(userId);
       const tier = user?.subscription?.tier || 'FREE';
       const limit = TIER_LIMITS[tier as SubscriptionTier].maxContacts;
-      
+
       throw new ForbiddenException(
         `Contact limit reached. Your ${tier} plan allows ${limit} contacts. Please upgrade to add more contacts.`
       );
@@ -128,9 +141,9 @@ export class UsersService {
     tier?: string;
   }) {
     const { skip, take, search, role, tier } = params;
-    
+
     const where: any = {};
-    
+
     if (search) {
       where.OR = [
         { email: { contains: search, mode: 'insensitive' } },
@@ -138,15 +151,15 @@ export class UsersService {
         { profile: { lastName: { contains: search, mode: 'insensitive' } } },
       ];
     }
-    
+
     if (role) {
       where.role = role as UserRole;
     }
-    
+
     if (tier) {
       where.subscription = { tier: tier as SubscriptionTier };
     }
-    
+
     const [users, total] = await Promise.all([
       this.usersRepository.findMany({
         where,
@@ -156,9 +169,9 @@ export class UsersService {
       }),
       this.usersRepository.count({ where }),
     ]);
-    
+
     return {
-      users: users.map(user => this.sanitizeUser(user)),
+      users: users.map((user) => this.sanitizeUser(user)),
       total,
       skip,
       take,
@@ -167,16 +180,16 @@ export class UsersService {
 
   async getUserDetailsAdmin(userId: string) {
     const user = await this.usersRepository.findById(userId);
-    
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    
+
     const [cardsCount, contactsCount] = await Promise.all([
       this.usersRepository.countCards(userId),
       this.usersRepository.countContacts(userId),
     ]);
-    
+
     return {
       ...this.sanitizeUser(user),
       stats: {
@@ -188,72 +201,75 @@ export class UsersService {
 
   async updateUserRole(userId: string, newRole: UserRole) {
     const user = await this.usersRepository.findById(userId);
-    
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    
+
     const updatedUser = await this.usersRepository.update(userId, {
       role: newRole,
     });
-    
+
     return this.sanitizeUser(updatedUser);
   }
 
-  async updateUserSubscription(userId: string, updateDto: UpdateUserSubscriptionDto) {
+  async updateUserSubscription(
+    userId: string,
+    updateDto: UpdateUserSubscriptionDto
+  ) {
     const user = await this.usersRepository.findById(userId);
-    
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    
+
     if (!user.subscription) {
       throw new NotFoundException('User subscription not found');
     }
-    
+
     const updateData: any = {};
-    
+
     if (updateDto.tier !== undefined) {
       updateData.tier = updateDto.tier;
     }
-    
+
     if (updateDto.status !== undefined) {
       updateData.status = updateDto.status;
     }
-    
+
     if (updateDto.stripeCustomerId !== undefined) {
       updateData.stripeCustomerId = updateDto.stripeCustomerId;
     }
-    
+
     if (updateDto.stripeSubscriptionId !== undefined) {
       updateData.stripeSubscriptionId = updateDto.stripeSubscriptionId;
     }
-    
+
     const updatedUser = await this.usersRepository.update(userId, {
       subscription: {
         update: updateData,
       },
     });
-    
+
     return this.sanitizeUser(updatedUser);
   }
 
   async getUserUsageMetrics(userId: string) {
     const user = await this.usersRepository.findById(userId);
-    
+
     if (!user) {
       throw new NotFoundException('User not found');
     }
-    
+
     const [cardsCount, contactsCount, recentActivity] = await Promise.all([
       this.usersRepository.countCards(userId),
       this.usersRepository.countContacts(userId),
       this.usersRepository.getRecentActivity(userId, 7),
     ]);
-    
+
     const tier = user.subscription?.tier || 'FREE';
     const limits = TIER_LIMITS[tier as SubscriptionTier];
-    
+
     return {
       userId,
       tier,
@@ -262,16 +278,18 @@ export class UsersService {
         cards: {
           current: cardsCount,
           limit: limits.maxCards,
-          percentage: limits.maxCards === Number.MAX_SAFE_INTEGER 
-            ? 0 
-            : (cardsCount / limits.maxCards) * 100,
+          percentage:
+            limits.maxCards === Number.MAX_SAFE_INTEGER
+              ? 0
+              : (cardsCount / limits.maxCards) * 100,
         },
         contacts: {
           current: contactsCount,
           limit: limits.maxContacts,
-          percentage: limits.maxContacts === Number.MAX_SAFE_INTEGER 
-            ? 0 
-            : (contactsCount / limits.maxContacts) * 100,
+          percentage:
+            limits.maxContacts === Number.MAX_SAFE_INTEGER
+              ? 0
+              : (contactsCount / limits.maxContacts) * 100,
         },
       },
       recentActivity,
@@ -284,7 +302,14 @@ export class UsersService {
   }
 
   private sanitizeUser(user: any) {
-    const { passwordHash, passwordResetToken, passwordResetExpires, emailVerificationToken, twoFactorSecret, ...sanitized } = user;
+    const {
+      passwordHash: _passwordHash,
+      passwordResetToken: _passwordResetToken,
+      passwordResetExpires: _passwordResetExpires,
+      emailVerificationToken: _emailVerificationToken,
+      twoFactorSecret: _twoFactorSecret,
+      ...sanitized
+    } = user;
     return sanitized;
   }
 }

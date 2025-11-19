@@ -5,7 +5,10 @@ import { AnalyticsRepository } from './analytics.repository';
 export class AnalyticsService {
   constructor(private analyticsRepository: AnalyticsRepository) {}
 
-  async logCardView(cardId: string, metadata?: { nfcUid?: string; source?: string }) {
+  async logCardView(
+    cardId: string,
+    metadata?: { nfcUid?: string; source?: string }
+  ) {
     return this.analyticsRepository.logEvent({
       cardId,
       eventType: 'VIEW',
@@ -75,11 +78,7 @@ export class AnalyticsService {
     return this.analyticsRepository.getRecentEvents(params);
   }
 
-  async getUserAnalytics(
-    userId: string,
-    days: number = 7,
-    cardId?: string,
-  ) {
+  async getUserAnalytics(userId: string, days: number = 7, cardId?: string) {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
@@ -88,29 +87,30 @@ export class AnalyticsService {
       userId,
       startDate,
       endDate,
-      cardId,
+      cardId
     );
 
     const viewsOverTime = await this.analyticsRepository.getDailyViewsForUser(
       userId,
       startDate,
       endDate,
-      cardId,
+      cardId
     );
 
     const topReferrers = await this.analyticsRepository.getTopReferrersForUser(
       userId,
       startDate,
       endDate,
-      cardId,
+      cardId
     );
 
-    const deviceBreakdown = await this.analyticsRepository.getDeviceBreakdownForUser(
-      userId,
-      startDate,
-      endDate,
-      cardId,
-    );
+    const deviceBreakdown =
+      await this.analyticsRepository.getDeviceBreakdownForUser(
+        userId,
+        startDate,
+        endDate,
+        cardId
+      );
 
     return {
       views: stats.totalViews || 0,

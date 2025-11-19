@@ -9,6 +9,7 @@ The Nexus Cards project includes a database seeding system to create test users 
 The following users are automatically created when running the seed script in development mode:
 
 ### Admin User
+
 - **Email**: `admin@nexus.cards`
 - **Password**: `Admin123!`
 - **Role**: `ADMIN`
@@ -18,6 +19,7 @@ The following users are automatically created when running the seed script in de
 ### Regular Users
 
 #### FREE Tier User
+
 - **Email**: `user.free@example.com`
 - **Password**: `User123!`
 - **Role**: `USER`
@@ -26,6 +28,7 @@ The following users are automatically created when running the seed script in de
 - **Purpose**: Testing FREE tier restrictions
 
 #### PRO Tier User
+
 - **Email**: `user.pro@example.com`
 - **Password**: `User123!`
 - **Role**: `USER`
@@ -34,6 +37,7 @@ The following users are automatically created when running the seed script in de
 - **Purpose**: Testing PRO tier features
 
 #### PREMIUM Tier User
+
 - **Email**: `user.premium@example.com`
 - **Password**: `User123!`
 - **Role**: `USER`
@@ -75,7 +79,6 @@ NODE_ENV=production pnpm seed:prod
 - **Development** (`NODE_ENV=development` or not set):
   - Creates all test users (admin + 3 regular users)
   - Seeds common data
-  
 - **Production** (`NODE_ENV=production`):
   - Skips admin and test user creation
   - Only seeds essential common data (if any)
@@ -83,6 +86,7 @@ NODE_ENV=production pnpm seed:prod
 ## Automatic Seeding
 
 The seed script runs automatically after:
+
 - `prisma migrate dev` (development)
 - `prisma migrate deploy` (production, but skips admin users)
 

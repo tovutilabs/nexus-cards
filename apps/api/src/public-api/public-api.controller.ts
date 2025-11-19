@@ -1,4 +1,13 @@
-import { Controller, Get, Post, Param, Query, Body, Req, Headers } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Param,
+  Query,
+  Body,
+  Req,
+  Headers,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { CardsService } from '../cards/cards.service';
 import { AnalyticsService } from '../analytics/analytics.service';
@@ -10,13 +19,13 @@ export class PublicApiController {
   constructor(
     private readonly cardsService: CardsService,
     private readonly analyticsService: AnalyticsService,
-    private readonly contactsService: ContactsService,
+    private readonly contactsService: ContactsService
   ) {}
 
   private extractMetadata(req: Request, headers: any) {
     const userAgent = headers['user-agent'] || '';
     const referrer = headers['referer'] || headers['referrer'] || '';
-    
+
     let deviceType = 'desktop';
     if (/mobile/i.test(userAgent)) {
       deviceType = 'mobile';
@@ -37,7 +46,7 @@ export class PublicApiController {
     @Param('slug') slug: string,
     @Query('uid') uid?: string,
     @Req() req?: Request,
-    @Headers() headers?: any,
+    @Headers() headers?: any
   ) {
     const card = await this.cardsService.findPublicBySlug(slug);
 
@@ -56,14 +65,18 @@ export class PublicApiController {
   async submitContact(
     @Param('slug') slug: string,
     @Body() submitContactDto: SubmitContactDto,
-    @Query('uid') uid?: string,
+    @Query('uid') uid?: string
   ) {
     const metadata = {
       source: uid ? 'NFC' : 'WEB',
       nfcUid: uid,
     };
 
-    const contact = await this.contactsService.submitContact(slug, submitContactDto, metadata);
+    const contact = await this.contactsService.submitContact(
+      slug,
+      submitContactDto,
+      metadata
+    );
 
     await this.analyticsService.logContactSubmission(contact.cardId, metadata);
 

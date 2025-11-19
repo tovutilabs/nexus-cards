@@ -27,11 +27,9 @@ Key resolutions in this TDD:
 ### 2.1 Logical Components
 
 1. **Web App (Next.js)**
-
    - Marketing site
    - Auth flows (login, register, reset)
    - **Admin dashboard** (internal UI)
-
      - Web-based admin console (part of the same Next.js app, behind role-based access).
      - Accessible only to users with `role = ADMIN`.
      - Manages:
@@ -41,7 +39,6 @@ Key resolutions in this TDD:
        - System-wide configuration and settings
 
    - User dashboard:
-
      - Card list & editor
      - NFC tag association UI
      - Contacts wallet
@@ -51,14 +48,11 @@ Key resolutions in this TDD:
    - Uses shadcn/ui + Tailwind + a custom Nexus design system.
 
 2. **API Server (NestJS)**
-
    - Modules:
-
      - Auth, Users, Cards, NFC, Contacts, Analytics, Billing, Integrations, Notifications, Files, Public API
 
    - Public REST APIs under `/api/*`.
    - Business logic for:
-
      - Auth & subscriptions
      - Card creation/customization
      - NFC inventory + tag-to-card association
@@ -67,9 +61,7 @@ Key resolutions in this TDD:
      - Billing + integrations stubs
 
 3. **PostgreSQL**
-
    - Source of truth for:
-
      - Users
      - Cards
      - NFC tags (with direct `card_id` association)
@@ -79,33 +71,26 @@ Key resolutions in this TDD:
      - Integrations & webhooks
 
 4. **Redis**
-
    - Caching:
-
      - Public card payloads
      - Frequently used config
 
    - Rate limiting for:
-
      - Public endpoints
      - Auth endpoints
 
    - Background job queues:
-
      - Analytics aggregation
      - Email notifications
      - Housekeeping
 
 5. **Reverse Proxy (Caddy or Nginx)**
-
    - Terminates TLS.
    - Routes:
-
      - `/` and Next.js routes → `web`
      - `/api/*` → `api`
 
 6. **Storage**
-
    - Initially: local VPS disk for small uploads (avatars, card images).
    - Later: optional S3-compatible storage.
 
@@ -118,19 +103,16 @@ Key resolutions in this TDD:
 - **Next.js (App Router)** with TypeScript
 - **UI**: Tailwind CSS + shadcn/ui + custom Nexus primitives
 - **State & Data Fetching**:
-
   - React Query (or TanStack Query) for client-side fetching
   - `fetch` in server components for simple server-side data
 
 - **Forms**:
-
   - React Hook Form + Zod for validation
 
 ### 3.2 Backend
 
 - **NestJS** with TypeScript
 - **Modules** (initial set):
-
   - `AuthModule`
   - `UsersModule`
   - `CardsModule`
@@ -312,29 +294,23 @@ Responsibilities:
 #### Admin Endpoints
 
 - `POST /admin/nfc-tags/import`
-
   - Accept CSV of UIDs
   - Create `NfcTag` records with `status=AVAILABLE`, no `assignedUserId`, no `cardId`.
 
 - `POST /admin/nfc-tags/:id/assign`
-
   - Set `assignedUserId` and `status=ASSIGNED`.
 
 - `POST /admin/nfc-tags/:id/revoke`
-
   - Set `status=REVOKED`, clear `assignedUserId`, clear `cardId`.
 
 #### User Endpoints
 
 - `GET /me/nfc-tags`
-
   - List tags where `assignedUserId` is current user.
 
 - `POST /me/nfc-tags/:id/associate-card`
-
   - Body: `{ cardId }`
   - Preconditions:
-
     - Tag `status=ASSIGNED`
     - Tag `assignedUserId` = current user
 
@@ -342,7 +318,6 @@ Responsibilities:
   - If previously associated with another card, you must first disassociate.
 
 - `POST /me/nfc-tags/:id/disassociate-card`
-
   - Set `cardId=NULL`.
 
 > **Constraint**: The backend **must not allow multiple card associations** per tag. The schema and service logic enforce `cardId` as a single value.
@@ -359,7 +334,6 @@ Logic:
 2. If `status != ASSIGNED` → show “Inactive tag” response (no user info).
 3. If `cardId` is `NULL` → show “Tag not configured” page (no card to load).
 4. If `cardId` not null:
-
    - Load card
    - Log `AnalyticsEvent` of type `NFC_TAP`
    - Redirect to card’s public URL (`/p/[slug]`) or directly render payload.
@@ -376,7 +350,6 @@ ASCII Mirror:
 - `GET /contacts` — list contacts (for the owner user)
 - `PATCH /contacts/:id` — update notes/tags
 - Data exports:
-
   - `GET /contacts/export.csv`
   - `GET /contacts/export.vcf`
 
@@ -385,7 +358,6 @@ ASCII Mirror:
 Responsibilities:
 
 - Ingest events via:
-
   - `POST /public/events` — for View / LinkClick / ContactSubmit / NfcTap etc.
   - Internal logging (e.g., when NFC resolve happens)
 
@@ -394,18 +366,14 @@ Responsibilities:
   > **Daily only**: We store raw events in `AnalyticsEvent` for detail, but we aggregate exclusively into **daily** buckets (`AnalyticsCardDaily`) for dashboard reporting.
 
 - Aggregation job (cron):
-
   - Group events by `cardId` + `date(occurredAt)`
   - Increment daily counters in `AnalyticsCardDaily`
   - Optionally mark processed events or work in time windows
 
 - Query endpoints:
-
   - `GET /analytics/cards/:id?from=YYYY-MM-DD&to=YYYY-MM-DD`
-
     - Returns arrays keyed per day, using `AnalyticsCardDaily`.
     - Respect tier-based history windows:
-
       - FREE: last 7 days
       - PRO: last 90 days
       - PREMIUM: unlimited
@@ -423,7 +391,6 @@ Responsibilities:
 - `/auth/login`, `/auth/register`, `/auth/reset`
 
 - `/dashboard` — protected layout
-
   - `/dashboard/cards`
   - `/dashboard/cards/[id]` — editor view
   - `/dashboard/nfc` — list of tags, associate/disassociate to cards
@@ -433,7 +400,6 @@ Responsibilities:
   - `/dashboard/integrations`
 
 - `/p/[slug]` — public card view
-
   - Accepts `uid` query param for NFC flows.
 
 ### 6.2 Design System
@@ -449,7 +415,6 @@ Responsibilities:
 - Base API: `/api`
 - Potential versioning: `/api/v1` as needed.
 - Auth:
-
   - JWT (Bearer) or HTTP-only cookies.
 
 Error format (Nest default, optionally wrapped):
@@ -497,15 +462,12 @@ Key public endpoints:
 Use BullMQ (or NestJS-compatible queue) backed by Redis:
 
 - **AnalyticsAggregatorJob:**
-
   - Runs periodically (e.g., every 5–15 minutes or hourly), aggregates events into `AnalyticsCardDaily`.
 
 - **EmailNotificationJob:**
-
   - Sends emails on contact submissions or billing events.
 
 - **HousekeepingJob:**
-
   - Cleans old events/logs per retention policies.
 
 ---
@@ -514,13 +476,11 @@ Use BullMQ (or NestJS-compatible queue) backed by Redis:
 
 - **Envs:** `LOCAL`, `STAGING`, `PRODUCTION`
 - **Docker Compose Configuration:**
-
   - Local development: services defined in `docker-compose.yml`
   - Production: services defined in `docker-compose.prod.yml` (when created)
   - All services run in isolated Docker network (`nexus-network`)
 
 - Environment variables for:
-
   - DB URL (uses Docker service name: `postgresql://postgres:postgres@db:5432/nexus_cards`)
   - Redis URL (uses Docker service name: `redis://redis:6379`)
   - SMTP host (uses Docker service name: `mailhog`)
@@ -539,7 +499,6 @@ Use NestJS ConfigModule + Zod/Joi validation for `process.env`.
 ## 12. Deployment Strategy
 
 - **Local Development:**
-
   - `docker compose up --build` builds and runs all services (db, redis, mailhog, api, web)
   - API runs on port 3001, Web runs on port 3000
   - All services communicate via Docker network using service names (db, redis, mailhog)
@@ -547,14 +506,12 @@ Use NestJS ConfigModule + Zod/Joi validation for `process.env`.
   - Development Dockerfiles (`Dockerfile.dev`) used for api and web services
 
 - **Production VPS:**
-
   - Build optimized images via CI using production Dockerfiles
   - Push to registry
   - On VPS: `docker compose -f docker-compose.prod.yml pull && docker compose -f docker-compose.prod.yml up -d`
   - Production uses multi-stage builds with minimal image sizes
 
 - Monitor health via:
-
   - `GET /api/health` endpoint in API
   - Container health checks in `docker-compose.yml`
   - All services have healthcheck configurations

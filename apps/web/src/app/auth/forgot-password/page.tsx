@@ -49,9 +49,12 @@ export default function ForgotPasswordPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Reset your password</h1>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Reset your password
+          </h1>
           <p className="mt-2 text-gray-600">
-            Enter your email and we&apos;ll send you a link to reset your password
+            Enter your email and we&apos;ll send you a link to reset your
+            password
           </p>
         </div>
 
@@ -73,9 +76,12 @@ export default function ForgotPasswordPage() {
                   />
                 </svg>
               </div>
-              <h3 className="text-lg font-medium text-gray-900 mb-2">Check your email</h3>
+              <h3 className="text-lg font-medium text-gray-900 mb-2">
+                Check your email
+              </h3>
               <p className="text-gray-600 mb-6">
-                We&apos;ve sent you a password reset link. Please check your inbox.
+                We&apos;ve sent you a password reset link. Please check your
+                inbox.
               </p>
               <Link href="/auth/login">
                 <NexusButton>Return to sign in</NexusButton>
@@ -90,7 +96,10 @@ export default function ForgotPasswordPage() {
               )}
 
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="email"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Email address
                 </label>
                 <NexusInput
@@ -101,7 +110,9 @@ export default function ForgotPasswordPage() {
                   disabled={isLoading}
                 />
                 {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.email.message}
+                  </p>
                 )}
               </div>
 
@@ -113,7 +124,10 @@ export default function ForgotPasswordPage() {
 
           {!success && (
             <div className="mt-6 text-center">
-              <Link href="/auth/login" className="text-sm font-medium text-indigo-600 hover:text-indigo-500">
+              <Link
+                href="/auth/login"
+                className="text-sm font-medium text-indigo-600 hover:text-indigo-500"
+              >
                 Back to sign in
               </Link>
             </div>

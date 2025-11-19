@@ -11,11 +11,13 @@ app.setGlobalPrefix('api');
 ## Available Endpoints
 
 ### Root Information
+
 `GET /api/`
 
 Returns API metadata and available endpoints.
 
 **Response:**
+
 ```json
 {
   "name": "Nexus Cards API",
@@ -26,11 +28,13 @@ Returns API metadata and available endpoints.
 ```
 
 ### Health Check
+
 `GET /api/health`
 
 Returns API health status and current timestamp.
 
 **Response:**
+
 ```json
 {
   "status": "ok",
@@ -43,6 +47,7 @@ Returns API health status and current timestamp.
 ### 404 Not Found at Root URL
 
 **Problem:** Accessing `http://localhost:3001/` returns:
+
 ```json
 {
   "message": "Cannot GET /",
@@ -54,6 +59,7 @@ Returns API health status and current timestamp.
 **Explanation:** This is **expected behavior**. All API routes require the `/api` prefix.
 
 **Solution:** Use the correct endpoint:
+
 - ✅ `http://localhost:3001/api/` - API information
 - ✅ `http://localhost:3001/api/health` - Health check
 - ❌ `http://localhost:3001/` - Not Found (no route defined)
@@ -90,6 +96,7 @@ export class UsersController {
 ## Testing Endpoints
 
 ### Using curl
+
 ```bash
 # API info
 curl http://localhost:3001/api/
@@ -99,10 +106,12 @@ curl http://localhost:3001/api/health
 ```
 
 ### Using a browser
+
 - Visit: http://localhost:3001/api/
 - Visit: http://localhost:3001/api/health
 
 ### Using Postman/Insomnia
+
 - Base URL: `http://localhost:3001`
 - All requests must start with `/api`
 
@@ -124,15 +133,18 @@ Default allowed origin: `http://localhost:3000`
 As development progresses through the prompts, these routes will be added:
 
 ### Prompt 3 - Domain Model
+
 - Module skeletons created (no routes yet)
 
 ### Prompt 4 - Authentication
+
 - `POST /api/auth/register`
 - `POST /api/auth/login`
 - `POST /api/auth/logout`
 - `POST /api/auth/forgot-password`
 
 ### Prompt 5 - Cards & NFC
+
 - `GET /api/cards`
 - `POST /api/cards`
 - `GET /api/cards/:id`

@@ -31,7 +31,6 @@ A comprehensive digital business card platform that enables individuals to creat
 ### 2.2 Digital Card Creation
 
 - **Personal Information Fields**:
-
   - Full name and professional title
   - Company name and logo
   - Profile photo upload (with cropping tool)
@@ -42,7 +41,6 @@ A comprehensive digital business card platform that enables individuals to creat
   - Department and location
 
 - **Social Media Links**:
-
   - LinkedIn, Twitter, Facebook, Instagram
   - GitHub, Behance, Dribbble
   - YouTube, TikTok, Medium
@@ -65,13 +63,11 @@ A comprehensive digital business card platform that enables individuals to creat
 ### 2.4 Card Customization
 
 - **Design Templates**:
-
   - 15+ pre-designed templates
   - Industry-specific themes (tech, creative, corporate, healthcare)
   - Minimalist, modern, and classic styles
 
 - **Customization Options**:
-
   - Color scheme selector (primary, secondary, accent colors)
   - Font selection (5-7 professional fonts)
   - Layout options (horizontal, vertical, centered)
@@ -86,7 +82,6 @@ A comprehensive digital business card platform that enables individuals to creat
 ### 2.5 Card Sharing
 
 - **Digital Sharing Methods**:
-
   - Unique shareable URL
   - QR code generation (downloadable as PNG/SVG)
   - Email sharing
@@ -103,7 +98,6 @@ A comprehensive digital business card platform that enables individuals to creat
 ### 2.6 Contact Exchange System
 
 - **For Non-Users**:
-
   - Contact submission form when viewing a card
   - Required fields: Name, Email, Phone
   - Optional note field for context
@@ -120,7 +114,6 @@ A comprehensive digital business card platform that enables individuals to creat
 ### 2.7 Contact Management
 
 - **Received Contacts**:
-
   - Digital wallet for saved contacts
   - Contact details display (name, email, phone, note)
   - Search and filter functionality

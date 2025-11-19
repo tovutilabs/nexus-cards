@@ -78,7 +78,14 @@ export default function EditCardPage() {
     setSaving(true);
     try {
       const apiClient = createApiClient();
-      const { id: _id, slug: _slug, createdAt: _createdAt, updatedAt: _updatedAt, userId: _userId, ...updateData } = card as any;
+      const {
+        id: _id,
+        slug: _slug,
+        createdAt: _createdAt,
+        updatedAt: _updatedAt,
+        userId: _userId,
+        ...updateData
+      } = card as any;
       await apiClient.patch(`/cards/${cardId}`, updateData);
       alert('Card updated successfully!');
     } catch (error) {
@@ -262,7 +269,9 @@ export default function EditCardPage() {
         <TabsContent value="social">
           <Card className="p-6">
             <div className="text-center py-12">
-              <p className="text-gray-600">Social links management coming soon</p>
+              <p className="text-gray-600">
+                Social links management coming soon
+              </p>
               <p className="text-sm text-gray-500 mt-2">
                 Add LinkedIn, Twitter, GitHub, and more
               </p>
@@ -274,7 +283,9 @@ export default function EditCardPage() {
           <Card className="p-6">
             {nfcTags.length === 0 ? (
               <div className="text-center py-12">
-                <p className="text-gray-600">No NFC tags associated with this card</p>
+                <p className="text-gray-600">
+                  No NFC tags associated with this card
+                </p>
                 <p className="text-sm text-gray-500 mt-2">
                   Contact your administrator to assign NFC tags
                 </p>

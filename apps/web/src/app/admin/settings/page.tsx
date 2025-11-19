@@ -23,12 +23,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from '@/components/ui/tabs';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Settings, Plus, Edit2, Trash2, Flag, Gauge } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
@@ -67,8 +62,11 @@ export default function AdminSettingsPage() {
     try {
       setLoading(true);
       const apiClient = createApiClient();
-      const params = selectedCategory !== 'all' ? `?category=${selectedCategory}` : '';
-      const data = await apiClient.get<{ settings: Setting[] }>(`/admin/settings${params}`);
+      const params =
+        selectedCategory !== 'all' ? `?category=${selectedCategory}` : '';
+      const data = await apiClient.get<{ settings: Setting[] }>(
+        `/admin/settings${params}`
+      );
       setSettings(data.settings);
     } catch (error) {
       console.error('Failed to load settings:', error);
@@ -96,7 +94,7 @@ export default function AdminSettingsPage() {
     try {
       const apiClient = createApiClient();
       let parsedValue: any = formValue;
-      
+
       // Try to parse as JSON for complex values
       try {
         parsedValue = JSON.parse(formValue);
@@ -145,7 +143,7 @@ export default function AdminSettingsPage() {
     try {
       const apiClient = createApiClient();
       let parsedValue: any = formValue;
-      
+
       try {
         parsedValue = JSON.parse(formValue);
       } catch {
@@ -215,7 +213,11 @@ export default function AdminSettingsPage() {
   const openEditDialog = (setting: Setting) => {
     setSelectedSetting(setting);
     setFormKey(setting.key);
-    setFormValue(typeof setting.value === 'object' ? JSON.stringify(setting.value, null, 2) : String(setting.value));
+    setFormValue(
+      typeof setting.value === 'object'
+        ? JSON.stringify(setting.value, null, 2)
+        : String(setting.value)
+    );
     setFormDescription(setting.description || '');
     setFormCategory(setting.category);
     setEditDialogOpen(true);
@@ -268,7 +270,9 @@ export default function AdminSettingsPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">System Settings</h1>
-          <p className="text-gray-600 mt-1">Configure system-wide settings and preferences</p>
+          <p className="text-gray-600 mt-1">
+            Configure system-wide settings and preferences
+          </p>
         </div>
         <Button onClick={openCreateDialog}>
           <Plus className="h-4 w-4 mr-2" />
@@ -291,9 +295,13 @@ export default function AdminSettingsPage() {
               <div className="mx-auto w-24 h-24 mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                 <Settings className="h-12 w-12 text-gray-400" />
               </div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">No settings found</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                No settings found
+              </h3>
               <p className="text-gray-600 mb-4">
-                {selectedCategory === 'all' ? 'Create your first setting' : `No ${selectedCategory.replace('_', ' ')} settings yet`}
+                {selectedCategory === 'all'
+                  ? 'Create your first setting'
+                  : `No ${selectedCategory.replace('_', ' ')} settings yet`}
               </p>
               <Button onClick={openCreateDialog}>
                 <Plus className="h-4 w-4 mr-2" />
@@ -311,19 +319,24 @@ export default function AdminSettingsPage() {
                       </div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2 mb-1">
-                          <span className="font-semibold text-gray-900">{setting.key}</span>
+                          <span className="font-semibold text-gray-900">
+                            {setting.key}
+                          </span>
                           {getCategoryBadge(setting.category)}
                         </div>
                         {setting.description && (
-                          <p className="text-sm text-gray-600 mb-2">{setting.description}</p>
+                          <p className="text-sm text-gray-600 mb-2">
+                            {setting.description}
+                          </p>
                         )}
                         <div className="p-2 bg-gray-50 rounded text-xs font-mono text-gray-700 overflow-x-auto">
-                          {typeof setting.value === 'object' 
+                          {typeof setting.value === 'object'
                             ? JSON.stringify(setting.value, null, 2)
                             : String(setting.value)}
                         </div>
                         <p className="text-xs text-gray-500 mt-2">
-                          Updated {new Date(setting.updatedAt).toLocaleString()} by {setting.updatedBy}
+                          Updated {new Date(setting.updatedAt).toLocaleString()}{' '}
+                          by {setting.updatedBy}
                         </p>
                       </div>
                     </div>
@@ -359,7 +372,9 @@ export default function AdminSettingsPage() {
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Key *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Key *
+              </label>
               <Input
                 value={formKey}
                 onChange={(e) => setFormKey(e.target.value)}
@@ -367,7 +382,9 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Value * (JSON or string)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Value * (JSON or string)
+              </label>
               <Textarea
                 value={formValue}
                 onChange={(e) => setFormValue(e.target.value)}
@@ -376,7 +393,9 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description
+              </label>
               <Input
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
@@ -384,7 +403,9 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Category *</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category *
+              </label>
               <Select value={formCategory} onValueChange={setFormCategory}>
                 <SelectTrigger>
                   <SelectValue />
@@ -418,15 +439,21 @@ export default function AdminSettingsPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Edit Setting</DialogTitle>
-            <DialogDescription>Update the setting for {selectedSetting?.key}</DialogDescription>
+            <DialogDescription>
+              Update the setting for {selectedSetting?.key}
+            </DialogDescription>
           </DialogHeader>
           <div className="space-y-4 py-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Key</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Key
+              </label>
               <Input value={formKey} disabled />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Value * (JSON or string)</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Value * (JSON or string)
+              </label>
               <Textarea
                 value={formValue}
                 onChange={(e) => setFormValue(e.target.value)}
@@ -434,7 +461,9 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Description</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Description
+              </label>
               <Input
                 value={formDescription}
                 onChange={(e) => setFormDescription(e.target.value)}
@@ -442,7 +471,9 @@ export default function AdminSettingsPage() {
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Category</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category
+              </label>
               <Select value={formCategory} onValueChange={setFormCategory}>
                 <SelectTrigger>
                   <SelectValue />
@@ -477,7 +508,9 @@ export default function AdminSettingsPage() {
           <DialogHeader>
             <DialogTitle>Delete Setting</DialogTitle>
             <DialogDescription>
-              Are you sure you want to delete the setting <strong>{selectedSetting?.key}</strong>? This action cannot be undone.
+              Are you sure you want to delete the setting{' '}
+              <strong>{selectedSetting?.key}</strong>? This action cannot be
+              undone.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -488,7 +521,11 @@ export default function AdminSettingsPage() {
             >
               Cancel
             </Button>
-            <Button variant="destructive" onClick={handleDelete} disabled={saving}>
+            <Button
+              variant="destructive"
+              onClick={handleDelete}
+              disabled={saving}
+            >
               {saving ? 'Deleting...' : 'Delete'}
             </Button>
           </DialogFooter>

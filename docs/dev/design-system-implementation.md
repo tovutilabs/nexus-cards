@@ -42,6 +42,7 @@ All colors are available via Tailwind utility classes:
 ```
 
 **CSS Variables** (for runtime theming):
+
 ```css
 var(--color-brand-primary)
 var(--color-brand-secondary)
@@ -52,6 +53,7 @@ var(--color-semantic-success)
 ### 1.2 Typography
 
 **Font Families**:
+
 - **Headings**: Poppins (loaded via Google Fonts)
 - **Body**: Inter (loaded via Google Fonts)
 
@@ -69,6 +71,7 @@ var(--color-semantic-success)
 ```
 
 **Font Scale**:
+
 - `h1`: 32px / 2rem
 - `h2`: 24px / 1.5rem
 - `h3`: 20px / 1.25rem
@@ -123,6 +126,7 @@ Use CSS variables for z-index consistency:
 ```
 
 Or use Tailwind utilities:
+
 ```tsx
 <div className="z-dropdown">Dropdown</div>
 <div className="z-modal">Modal</div>
@@ -147,6 +151,7 @@ Or use Tailwind utilities:
 **24 atomic components** built with shadcn/ui and Radix UI:
 
 #### Form Components
+
 - `<Button>` - Primary action button with variants (default, destructive, outline, secondary, ghost, link)
 - `<Input>` - Text input field
 - `<Textarea>` - Multi-line text input
@@ -157,12 +162,14 @@ Or use Tailwind utilities:
 - `<Label>` - Form label with accessibility
 
 #### Feedback Components
+
 - `<Alert>` - Alert message with variants (default, destructive)
 - `<Badge>` - Inline badge with variants (default, secondary, destructive, outline)
 - `<Skeleton>` - Loading skeleton placeholder
 - `<Toast>` / `<Toaster>` - Toast notifications
 
 #### Overlay Components
+
 - `<Dialog>` - Modal dialog
 - `<Sheet>` - Slide-out panel
 - `<Tooltip>` - Tooltip on hover
@@ -170,17 +177,21 @@ Or use Tailwind utilities:
 - `<DropdownMenu>` - Dropdown menu with items
 
 #### Layout Components
+
 - `<Card>` - Content card with header/content/footer
 - `<Tabs>` - Tabbed interface
 
 #### Navigation Components
+
 - `<Breadcrumb>` - Breadcrumb navigation
 - `<Pagination>` - Pagination controls
 
 #### Display Components
+
 - `<Avatar>` - User avatar with image/fallback
 
 **Usage Example**:
+
 ```tsx
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -207,6 +218,7 @@ export function MyForm() {
 **10 application-specific components** with Nexus branding:
 
 #### Wrapped Primitives
+
 - `<NexusButton>` - Button with Nexus styling presets
 - `<NexusCard>` - Card with Nexus variants
 - `<NexusInput>` - Input with Nexus variants
@@ -214,15 +226,18 @@ export function MyForm() {
 - `<NexusDialog>` - Dialog with Nexus branding
 
 #### Layout Components
+
 - `<NexusLayoutShell>` - Application layout with header/sidebar/main
 - `<DashboardShell>` - Dashboard layout with sticky header and optional sidebar
 
 #### Domain-Specific Components
+
 - `<StatsCard>` - Statistics display with trend indicator
 - `<CardListItem>` - Digital card list item with actions
 - `<CardPreview>` - Live preview of digital business card
 
 **StatsCard Example**:
+
 ```tsx
 import { StatsCard } from '@/components/nexus';
 import { Users } from 'lucide-react';
@@ -236,10 +251,11 @@ import { Users } from 'lucide-react';
     label: 'from last week',
     isPositive: true,
   }}
-/>
+/>;
 ```
 
 **CardListItem Example**:
+
 ```tsx
 import { CardListItem } from '@/components/nexus';
 
@@ -252,10 +268,11 @@ import { CardListItem } from '@/components/nexus';
   onEdit={(id) => console.log('Edit', id)}
   onShare={(id) => console.log('Share', id)}
   onDelete={(id) => console.log('Delete', id)}
-/>
+/>;
 ```
 
 **CardPreview Example**:
+
 ```tsx
 import { CardPreview } from '@/components/nexus';
 
@@ -273,10 +290,11 @@ import { CardPreview } from '@/components/nexus';
     primaryColor: '#2D3494',
     backgroundColor: '#FFFFFF',
   }}
-/>
+/>;
 ```
 
 **DashboardShell Example**:
+
 ```tsx
 import { DashboardShell } from '@/components/nexus';
 
@@ -297,10 +315,8 @@ import { DashboardShell } from '@/components/nexus';
     </nav>
   }
 >
-  <div className="space-y-6">
-    {/* Dashboard content */}
-  </div>
-</DashboardShell>
+  <div className="space-y-6">{/* Dashboard content */}</div>
+</DashboardShell>;
 ```
 
 ---
@@ -317,7 +333,14 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 
 const formSchema = z.object({
   email: z.string().email('Invalid email address'),
@@ -414,6 +437,7 @@ xl: 1280px
 Dark mode is supported via CSS variables. The theme automatically adjusts when the user's OS preference changes.
 
 **Testing Dark Mode**:
+
 ```tsx
 // In your browser DevTools, emulate dark mode:
 // 1. Open DevTools
@@ -423,6 +447,7 @@ Dark mode is supported via CSS variables. The theme automatically adjusts when t
 ```
 
 **CSS Variables** automatically switch between light and dark themes:
+
 ```css
 /* Light mode */
 --background: 0 0% 100%;
@@ -440,6 +465,7 @@ Dark mode is supported via CSS variables. The theme automatically adjusts when t
 ### 6.1 Color Contrast
 
 All color combinations meet WCAG 2.1 AA contrast requirements:
+
 - **Text on brand-primary**: White text on #2D3494 (ratio: 8.1:1) ✅
 - **Text on brand-secondary**: White text on #0784B5 (ratio: 4.9:1) ✅
 - **Text on semantic colors**: All meet 4.5:1 minimum
@@ -447,6 +473,7 @@ All color combinations meet WCAG 2.1 AA contrast requirements:
 ### 6.2 Keyboard Navigation
 
 All interactive components support keyboard navigation:
+
 - `<Button>` - Focusable with Enter/Space
 - `<Dialog>` - Traps focus, Escape to close
 - `<DropdownMenu>` - Arrow keys to navigate, Enter to select
@@ -455,6 +482,7 @@ All interactive components support keyboard navigation:
 ### 6.3 Screen Readers
 
 All components include proper ARIA labels:
+
 ```tsx
 <Button aria-label="Delete card">
   <Trash2 className="h-4 w-4" />
@@ -470,6 +498,7 @@ All components include proper ARIA labels:
 ### 7.1 Component Composition
 
 **Prefer composition over configuration**:
+
 ```tsx
 // Good: Composable
 <Card>
@@ -486,6 +515,7 @@ All components include proper ARIA labels:
 ### 7.2 Styling
 
 **Use Tailwind utilities directly**:
+
 ```tsx
 // Good: Direct Tailwind classes
 <div className="flex items-center gap-4 p-4 rounded-md bg-white shadow-sm">
@@ -499,6 +529,7 @@ All components include proper ARIA labels:
 ```
 
 **When to use inline styles**:
+
 - Theme-dependent values from user preferences
 - Dynamic colors from API responses
 - Runtime-calculated dimensions
@@ -515,6 +546,7 @@ All components include proper ARIA labels:
 ### 7.3 Server vs Client Components
 
 **Default to Server Components**:
+
 ```tsx
 // Server Component (default)
 export default function CardsPage() {
@@ -524,6 +556,7 @@ export default function CardsPage() {
 ```
 
 **Use Client Components only when needed**:
+
 ```tsx
 'use client'; // Required for interactivity
 
@@ -536,6 +569,7 @@ export function InteractiveForm() {
 ```
 
 **When to use 'use client'**:
+
 - useState, useEffect, useContext
 - Event handlers (onClick, onChange, etc.)
 - Browser APIs (localStorage, window, etc.)
@@ -544,6 +578,7 @@ export function InteractiveForm() {
 ### 7.4 Importing Components
 
 **Always use path aliases**:
+
 ```tsx
 // Good
 import { Button } from '@/components/ui/button';
@@ -570,6 +605,7 @@ import { Button } from '../../components/ui/button';
 If you have existing components that don't use the design system:
 
 **Before**:
+
 ```tsx
 export function OldButton({ children }: { children: React.ReactNode }) {
   return (
@@ -588,6 +624,7 @@ export function OldButton({ children }: { children: React.ReactNode }) {
 ```
 
 **After**:
+
 ```tsx
 import { Button } from '@/components/ui/button';
 
@@ -599,6 +636,7 @@ export function NewButton({ children }: { children: React.ReactNode }) {
 ### 8.2 Replacing Custom Styles
 
 **Before**:
+
 ```tsx
 <div className="custom-card" style={{ boxShadow: '0 2px 4px rgba(0,0,0,0.1)' }}>
   {/* ... */}
@@ -606,12 +644,11 @@ export function NewButton({ children }: { children: React.ReactNode }) {
 ```
 
 **After**:
+
 ```tsx
 import { Card } from '@/components/ui/card';
 
-<Card className="shadow-shadow-sm">
-  {/* ... */}
-</Card>
+<Card className="shadow-shadow-sm">{/* ... */}</Card>;
 ```
 
 ---
@@ -636,10 +673,18 @@ pnpm dev:web
 ```tsx
 import { Poppins, Inter } from 'next/font/google';
 
-const poppins = Poppins({ subsets: ['latin'], weight: ['400', '600', '700'], variable: '--font-heading' });
+const poppins = Poppins({
+  subsets: ['latin'],
+  weight: ['400', '600', '700'],
+  variable: '--font-heading',
+});
 const inter = Inter({ subsets: ['latin'], variable: '--font-body' });
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function RootLayout({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return (
     <html lang="en" className={`${poppins.variable} ${inter.variable}`}>
       <body>{children}</body>

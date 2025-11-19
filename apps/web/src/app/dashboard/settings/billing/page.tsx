@@ -145,9 +145,9 @@ export default function BillingPage() {
     setProcessing(true);
     try {
       const apiClient = createApiClient();
-      const response = await apiClient.post('/billing/checkout-session', {
+      const response = (await apiClient.post('/billing/checkout-session', {
         tier: selectedTier,
-      }) as { url: string; sessionId: string };
+      })) as { url: string; sessionId: string };
 
       window.location.href = response.url;
     } catch (error: any) {
@@ -168,7 +168,8 @@ export default function BillingPage() {
 
       toast({
         title: 'Success',
-        description: 'Your subscription will be canceled at the end of the billing period',
+        description:
+          'Your subscription will be canceled at the end of the billing period',
       });
 
       setCancelDialogOpen(false);
@@ -192,13 +193,22 @@ export default function BillingPage() {
   const getStatusBadge = (status: string) => {
     const statusMap: Record<string, { label: string; className: string }> = {
       ACTIVE: { label: 'Active', className: 'bg-green-100 text-green-800' },
-      PAST_DUE: { label: 'Past Due', className: 'bg-yellow-100 text-yellow-800' },
+      PAST_DUE: {
+        label: 'Past Due',
+        className: 'bg-yellow-100 text-yellow-800',
+      },
       CANCELED: { label: 'Canceled', className: 'bg-red-100 text-red-800' },
       TRIALING: { label: 'Trial', className: 'bg-blue-100 text-blue-800' },
-      INCOMPLETE: { label: 'Incomplete', className: 'bg-gray-100 text-gray-800' },
+      INCOMPLETE: {
+        label: 'Incomplete',
+        className: 'bg-gray-100 text-gray-800',
+      },
     };
 
-    const config = statusMap[status] || { label: status, className: 'bg-gray-100 text-gray-800' };
+    const config = statusMap[status] || {
+      label: status,
+      className: 'bg-gray-100 text-gray-800',
+    };
     return <Badge className={config.className}>{config.label}</Badge>;
   };
 
@@ -217,18 +227,25 @@ export default function BillingPage() {
   return (
     <div className="max-w-6xl mx-auto space-y-6">
       <div>
-        <h1 className="text-3xl font-bold text-gray-900">Billing & Subscription</h1>
-        <p className="text-gray-600 mt-2">Manage your subscription and billing information</p>
+        <h1 className="text-3xl font-bold text-gray-900">
+          Billing & Subscription
+        </h1>
+        <p className="text-gray-600 mt-2">
+          Manage your subscription and billing information
+        </p>
       </div>
 
       <Card className="p-6">
         <div className="flex items-start justify-between">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">Current Plan</h2>
+            <h2 className="text-xl font-semibold text-gray-900">
+              Current Plan
+            </h2>
             <div className="mt-4 space-y-2">
               <div className="flex items-center gap-3">
                 <span className="text-2xl font-bold text-indigo-600">
-                  {tiers.find((t) => t.name === currentTier)?.displayName || currentTier}
+                  {tiers.find((t) => t.name === currentTier)?.displayName ||
+                    currentTier}
                 </span>
                 {getStatusBadge(subscription.status)}
               </div>
@@ -237,7 +254,9 @@ export default function BillingPage() {
                   <Calendar className="h-4 w-4" />
                   <span>
                     {subscription.cancelAtPeriodEnd ? 'Cancels' : 'Renews'} on{' '}
-                    {new Date(subscription.currentPeriodEnd).toLocaleDateString()}
+                    {new Date(
+                      subscription.currentPeriodEnd
+                    ).toLocaleDateString()}
                   </span>
                 </div>
               )}
@@ -245,7 +264,10 @@ export default function BillingPage() {
           </div>
           <div className="flex gap-2">
             {currentTier !== 'FREE' && !subscription.cancelAtPeriodEnd && (
-              <Button variant="outline" onClick={() => setCancelDialogOpen(true)}>
+              <Button
+                variant="outline"
+                onClick={() => setCancelDialogOpen(true)}
+              >
                 Cancel Subscription
               </Button>
             )}
@@ -254,7 +276,9 @@ export default function BillingPage() {
       </Card>
 
       <Card className="p-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Usage & Limits</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          Usage & Limits
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           <div>
             <div className="flex items-center gap-2 text-sm text-gray-600 mb-2">
@@ -262,13 +286,16 @@ export default function BillingPage() {
               <span>Digital Cards</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {usage.cardsUsed} / {usage.cardsLimit === -1 ? 'Unlimited' : usage.cardsLimit}
+              {usage.cardsUsed} /{' '}
+              {usage.cardsLimit === -1 ? 'Unlimited' : usage.cardsLimit}
             </div>
             {usage.cardsLimit !== -1 && (
               <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-indigo-600"
-                  style={{ width: `${(usage.cardsUsed / usage.cardsLimit) * 100}%` }}
+                  style={{
+                    width: `${(usage.cardsUsed / usage.cardsLimit) * 100}%`,
+                  }}
                 />
               </div>
             )}
@@ -287,7 +314,9 @@ export default function BillingPage() {
               <div className="mt-2 h-2 bg-gray-200 rounded-full overflow-hidden">
                 <div
                   className="h-full bg-indigo-600"
-                  style={{ width: `${(usage.contactsCount / usage.contactsLimit) * 100}%` }}
+                  style={{
+                    width: `${(usage.contactsCount / usage.contactsLimit) * 100}%`,
+                  }}
                 />
               </div>
             )}
@@ -299,14 +328,18 @@ export default function BillingPage() {
               <span>Analytics Retention</span>
             </div>
             <div className="text-2xl font-bold text-gray-900">
-              {usage.analyticsRetentionDays === -1 ? 'Unlimited' : `${usage.analyticsRetentionDays} days`}
+              {usage.analyticsRetentionDays === -1
+                ? 'Unlimited'
+                : `${usage.analyticsRetentionDays} days`}
             </div>
           </div>
         </div>
       </Card>
 
       <div>
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Available Plans</h2>
+        <h2 className="text-2xl font-bold text-gray-900 mb-6">
+          Available Plans
+        </h2>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {tiers.map((tier) => (
             <Card
@@ -318,9 +351,13 @@ export default function BillingPage() {
               }`}
             >
               <div className="text-center mb-6">
-                <h3 className="text-xl font-bold text-gray-900">{tier.displayName}</h3>
+                <h3 className="text-xl font-bold text-gray-900">
+                  {tier.displayName}
+                </h3>
                 <div className="mt-4">
-                  <span className="text-4xl font-bold text-gray-900">{tier.price}</span>
+                  <span className="text-4xl font-bold text-gray-900">
+                    {tier.price}
+                  </span>
                   <span className="text-gray-600 ml-2">/ {tier.period}</span>
                 </div>
               </div>
@@ -348,7 +385,10 @@ export default function BillingPage() {
                   Downgrade
                 </Button>
               ) : (
-                <Button className="w-full" onClick={() => openUpgradeDialog(tier.name)}>
+                <Button
+                  className="w-full"
+                  onClick={() => openUpgradeDialog(tier.name)}
+                >
                   {currentTier === 'FREE' ? 'Upgrade' : 'Switch Plan'}
                 </Button>
               )}
@@ -362,10 +402,12 @@ export default function BillingPage() {
           <div className="flex items-start gap-3">
             <AlertCircle className="h-5 w-5 text-yellow-600 flex-shrink-0 mt-0.5" />
             <div>
-              <h3 className="font-semibold text-yellow-900">Payment Past Due</h3>
+              <h3 className="font-semibold text-yellow-900">
+                Payment Past Due
+              </h3>
               <p className="text-sm text-yellow-800 mt-1">
-                There was an issue processing your payment. Please update your payment method to
-                continue using your subscription.
+                There was an issue processing your payment. Please update your
+                payment method to continue using your subscription.
               </p>
             </div>
           </div>
@@ -376,15 +418,19 @@ export default function BillingPage() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>
-              Switch to {tiers.find((t) => t.name === selectedTier)?.displayName}
+              Switch to{' '}
+              {tiers.find((t) => t.name === selectedTier)?.displayName}
             </DialogTitle>
             <DialogDescription>
-              You will be redirected to Stripe to complete the payment. Your subscription will be
-              updated immediately upon successful payment.
+              You will be redirected to Stripe to complete the payment. Your
+              subscription will be updated immediately upon successful payment.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setUpgradeDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setUpgradeDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleUpgrade} disabled={processing}>
@@ -399,15 +445,22 @@ export default function BillingPage() {
           <DialogHeader>
             <DialogTitle>Cancel Subscription</DialogTitle>
             <DialogDescription>
-              Your subscription will remain active until the end of the current billing period. You
-              will not be charged again.
+              Your subscription will remain active until the end of the current
+              billing period. You will not be charged again.
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
-            <Button variant="outline" onClick={() => setCancelDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setCancelDialogOpen(false)}
+            >
               Keep Subscription
             </Button>
-            <Button variant="destructive" onClick={handleCancelSubscription} disabled={processing}>
+            <Button
+              variant="destructive"
+              onClick={handleCancelSubscription}
+              disabled={processing}
+            >
               {processing ? 'Processing...' : 'Cancel Subscription'}
             </Button>
           </DialogFooter>

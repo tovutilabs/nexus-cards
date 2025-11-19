@@ -48,7 +48,9 @@ export default function LoginPage() {
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Welcome back</h1>
-          <p className="mt-2 text-gray-600">Sign in to your Nexus Cards account</p>
+          <p className="mt-2 text-gray-600">
+            Sign in to your Nexus Cards account
+          </p>
         </div>
 
         <NexusCard>
@@ -60,7 +62,10 @@ export default function LoginPage() {
             )}
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Email address
               </label>
               <NexusInput
@@ -71,12 +76,17 @@ export default function LoginPage() {
                 disabled={isLoading}
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Password
               </label>
               <NexusInput
@@ -87,7 +97,9 @@ export default function LoginPage() {
                 disabled={isLoading}
               />
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.password.message}
+                </p>
               )}
             </div>
 
@@ -110,7 +122,10 @@ export default function LoginPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Don&apos;t have an account?{' '}
-              <Link href="/auth/register" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <Link
+                href="/auth/register"
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
                 Sign up
               </Link>
             </p>

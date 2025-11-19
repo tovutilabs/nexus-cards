@@ -66,7 +66,9 @@ export function CardPreview({
             </div>
           )}
           {bio && (
-            <p className="text-center text-sm text-gray-600 mt-4 line-clamp-3">{bio}</p>
+            <p className="text-center text-sm text-gray-600 mt-4 line-clamp-3">
+              {bio}
+            </p>
           )}
         </div>
 

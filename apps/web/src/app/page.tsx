@@ -30,17 +30,13 @@ export default function Home() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-indigo-50 to-white">
       <div className="text-center">
-        <h1 className="text-6xl font-bold text-gray-900 mb-4">
-          Nexus Cards
-        </h1>
+        <h1 className="text-6xl font-bold text-gray-900 mb-4">Nexus Cards</h1>
         <p className="text-xl text-gray-600 mb-8">
           Digital Business Card Platform
         </p>
         <div className="flex gap-4 justify-center">
           <Link href="/auth/register">
-            <NexusButton size="lg">
-              Get Started
-            </NexusButton>
+            <NexusButton size="lg">Get Started</NexusButton>
           </Link>
           <Link href="/auth/login">
             <NexusButton variant="outline" size="lg">

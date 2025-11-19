@@ -3,7 +3,14 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/contexts/auth-context';
-import { Shield, Users, CreditCard, BarChart3, Settings, Menu } from 'lucide-react';
+import {
+  Shield,
+  Users,
+  CreditCard,
+  BarChart3,
+  Settings,
+  Menu,
+} from 'lucide-react';
 import { useState } from 'react';
 
 export default function AdminLayout({
@@ -106,9 +113,7 @@ export default function AdminLayout({
 
         {/* Main Content */}
         <main className="flex-1 p-8">
-          <div className="max-w-7xl mx-auto">
-            {children}
-          </div>
+          <div className="max-w-7xl mx-auto">{children}</div>
         </main>
       </div>
 

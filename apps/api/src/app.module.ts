@@ -1,5 +1,6 @@
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
@@ -13,6 +14,9 @@ import { BillingModule } from './billing/billing.module';
 import { IntegrationsModule } from './integrations/integrations.module';
 import { PublicApiModule } from './public-api/public-api.module';
 import { ExperimentsModule } from './experiments/experiments.module';
+import { ApiKeysModule } from './api-keys/api-keys.module';
+import { PublicApiV1Module } from './public-api-v1/public-api-v1.module';
+import { WebhooksModule } from './webhooks/webhooks.module';
 
 @Module({
   imports: [
@@ -20,6 +24,12 @@ import { ExperimentsModule } from './experiments/experiments.module';
       isGlobal: true,
       envFilePath: ['.env.local', '.env'],
     }),
+    ThrottlerModule.forRoot([
+      {
+        ttl: 60000,
+        limit: 100,
+      },
+    ]),
     PrismaModule,
     AuthModule,
     UsersModule,
@@ -31,6 +41,9 @@ import { ExperimentsModule } from './experiments/experiments.module';
     IntegrationsModule,
     PublicApiModule,
     ExperimentsModule,
+    ApiKeysModule,
+    PublicApiV1Module,
+    WebhooksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

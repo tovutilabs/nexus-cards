@@ -1,15 +1,15 @@
-import { 
-  Controller, 
-  Post, 
-  Body, 
-  UseGuards, 
-  Req, 
-  Headers, 
-  RawBodyRequest, 
-  HttpCode, 
-  HttpStatus, 
+import {
+  Controller,
+  Post,
+  Body,
+  UseGuards,
+  Req,
+  Headers,
+  RawBodyRequest,
+  HttpCode,
+  HttpStatus,
   Get,
-  Delete
+  Delete,
 } from '@nestjs/common';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { BillingService } from './billing.service';
@@ -23,18 +23,20 @@ export class BillingController {
   @Post('checkout-session')
   async createCheckoutSession(
     @Req() req: any,
-    @Body() dto: CreateCheckoutSessionDto,
+    @Body() dto: CreateCheckoutSessionDto
   ) {
     const userId = req.user.userId;
     const baseUrl = `${req.protocol}://${req.get('host')}`;
-    const successUrl = dto.successUrl || `${baseUrl}/dashboard/settings/billing?success=true`;
-    const cancelUrl = dto.cancelUrl || `${baseUrl}/dashboard/settings/billing?canceled=true`;
+    const successUrl =
+      dto.successUrl || `${baseUrl}/dashboard/settings/billing?success=true`;
+    const cancelUrl =
+      dto.cancelUrl || `${baseUrl}/dashboard/settings/billing?canceled=true`;
 
     const session = await this.billingService.createCheckoutSession(
       userId,
       dto.tier,
       successUrl,
-      cancelUrl,
+      cancelUrl
     );
 
     return session;
@@ -44,7 +46,7 @@ export class BillingController {
   @HttpCode(HttpStatus.OK)
   async handleWebhook(
     @Headers('stripe-signature') signature: string,
-    @Req() req: RawBodyRequest<Request>,
+    @Req() req: RawBodyRequest<Request>
   ) {
     if (!req.rawBody) {
       throw new Error('Raw body not available');

@@ -257,14 +257,18 @@ export default function AdminNfcPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-3xl font-bold text-gray-900">NFC Tag Management</h1>
-        <p className="text-gray-600 mt-1">Import, assign, and manage NFC tags</p>
+        <p className="text-gray-600 mt-1">
+          Import, assign, and manage NFC tags
+        </p>
       </div>
 
       {stats && (
         <div className="grid gap-4 md:grid-cols-4">
           <Card className="p-4">
             <p className="text-sm text-gray-600">Total Tags</p>
-            <p className="text-2xl font-bold text-gray-900 mt-1">{stats.total}</p>
+            <p className="text-2xl font-bold text-gray-900 mt-1">
+              {stats.total}
+            </p>
           </Card>
           <Card className="p-4">
             <p className="text-sm text-gray-600">Unassociated</p>
@@ -359,7 +363,8 @@ export default function AdminNfcPage() {
                       <div className="text-sm">
                         <span className="text-gray-600">Assigned to:</span>{' '}
                         <span className="font-medium">
-                          {tag.user.profile?.firstName} {tag.user.profile?.lastName}
+                          {tag.user.profile?.firstName}{' '}
+                          {tag.user.profile?.lastName}
                         </span>
                         <span className="text-gray-500 ml-1">
                           ({tag.user.email})
@@ -414,7 +419,8 @@ export default function AdminNfcPage() {
           <DialogHeader>
             <DialogTitle>Assign NFC Tag to User</DialogTitle>
             <DialogDescription>
-              Assign tag {selectedTag?.uid} to a user by entering their email address.
+              Assign tag {selectedTag?.uid} to a user by entering their email
+              address.
             </DialogDescription>
           </DialogHeader>
           <div className="py-4">

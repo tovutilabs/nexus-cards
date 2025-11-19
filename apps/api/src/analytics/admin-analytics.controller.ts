@@ -20,7 +20,7 @@ export class AdminAnalyticsController {
   @Get('overview')
   async getOverview(
     @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query('endDate') endDate?: string
   ) {
     return this.analyticsService.getGlobalOverview({
       startDate: startDate ? new Date(startDate) : undefined,
@@ -33,7 +33,7 @@ export class AdminAnalyticsController {
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
-    @Query('take', new DefaultValuePipe(30), ParseIntPipe) take?: number,
+    @Query('take', new DefaultValuePipe(30), ParseIntPipe) take?: number
   ) {
     return this.analyticsService.getDailyStatsAdmin({
       startDate: startDate ? new Date(startDate) : undefined,
@@ -47,7 +47,7 @@ export class AdminAnalyticsController {
   async getTopCards(
     @Query('startDate') startDate?: string,
     @Query('endDate') endDate?: string,
-    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number,
+    @Query('limit', new DefaultValuePipe(10), ParseIntPipe) limit?: number
   ) {
     return this.analyticsService.getTopCardsAdmin({
       startDate: startDate ? new Date(startDate) : undefined,
@@ -59,7 +59,7 @@ export class AdminAnalyticsController {
   @Get('by-tier')
   async getStatsByTier(
     @Query('startDate') startDate?: string,
-    @Query('endDate') endDate?: string,
+    @Query('endDate') endDate?: string
   ) {
     return this.analyticsService.getStatsByTier({
       startDate: startDate ? new Date(startDate) : undefined,
@@ -71,7 +71,7 @@ export class AdminAnalyticsController {
   async getRecentEvents(
     @Query('skip', new DefaultValuePipe(0), ParseIntPipe) skip?: number,
     @Query('take', new DefaultValuePipe(50), ParseIntPipe) take?: number,
-    @Query('eventType') eventType?: string,
+    @Query('eventType') eventType?: string
   ) {
     return this.analyticsService.getRecentEventsAdmin({
       skip,

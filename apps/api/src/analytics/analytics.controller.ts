@@ -12,15 +12,16 @@ export class AnalyticsController {
   async getAnalytics(
     @CurrentUser() user: { id: string },
     @Query('timeRange') timeRange?: string,
-    @Query('cardId') cardId?: string,
+    @Query('cardId') cardId?: string
   ) {
     const range = timeRange || '7d';
-    const days = range === '7d' ? 7 : range === '30d' ? 30 : range === '90d' ? 90 : 365;
+    const days =
+      range === '7d' ? 7 : range === '30d' ? 30 : range === '90d' ? 90 : 365;
 
     const analyticsData = await this.analyticsService.getUserAnalytics(
       user.id,
       days,
-      cardId === 'all' ? undefined : cardId,
+      cardId === 'all' ? undefined : cardId
     );
 
     return analyticsData;
@@ -29,10 +30,11 @@ export class AnalyticsController {
   @Get('card/:cardId')
   async getCardAnalytics(
     @CurrentUser() user: { id: string },
-    @Query('timeRange') timeRange?: string,
+    @Query('timeRange') timeRange?: string
   ) {
     const range = timeRange || '7d';
-    const days = range === '7d' ? 7 : range === '30d' ? 30 : range === '90d' ? 90 : 365;
+    const days =
+      range === '7d' ? 7 : range === '30d' ? 30 : range === '90d' ? 90 : 365;
 
     return this.analyticsService.getUserAnalytics(user.id, days);
   }

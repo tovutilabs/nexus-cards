@@ -83,6 +83,7 @@
 ### 4. Advanced Analytics ✅
 
 **Events Tracked:**
+
 - [x] `CARD_VIEW` (in schema as `AnalyticsEventType`)
 - [x] `LINK_CLICK` (in schema)
 - [x] `CONTACT_EXCHANGE` (in schema, logged as `CONTACT_EXCHANGE`)
@@ -91,6 +92,7 @@
 - [x] `SHARE` (in schema)
 
 **Metadata Dimensions:**
+
 - [x] `referral_source` / `referrer` (captured in metadata)
 - [x] `device_type` (captured: mobile/tablet/desktop)
 - [x] `user_agent` (captured in metadata)
@@ -98,6 +100,7 @@
 - [ ] `geo_country` (NOT IMPLEMENTED - requires IP geolocation service)
 
 **Dashboard:**
+
 - [x] `/dashboard/analytics` page created
 - [x] Charts implemented:
   - [x] LineChart - views over time
@@ -108,6 +111,7 @@
 - [x] Overview metrics cards (Views, Unique Visitors, Contact Exchanges, Link Clicks)
 
 **Backend Implementation:**
+
 - [x] Analytics controller with endpoints
 - [x] Analytics service with aggregation logic
 - [x] Analytics repository with query methods
@@ -135,8 +139,9 @@
 - [x] `ExperimentProvider` component for easy integration
 
 **Backend API (Scaffolding - Not Implemented):**
+
 - [ ] GET `/api/experiments/:id` endpoint
-- [ ] POST `/api/experiments/:id/assign` endpoint  
+- [ ] POST `/api/experiments/:id/assign` endpoint
 - [ ] POST `/api/experiments/:id/event` endpoint
 
 ### 6. Documentation ✅
@@ -160,34 +165,40 @@
 ## Known Limitations
 
 ### PWA
+
 - Icon image files not generated (only manifest references exist)
 - Screenshot images not captured
 - Push notifications not implemented
 - Background sync not implemented
 
 ### i18n
+
 - Only English and Spanish supported
 - No RTL language support
 - Date/time formatting not localized
 - Currency formatting hardcoded to USD
 
 ### Bilingual Cards
+
 - No UI for editing bilingual fields in card editor form
 - Language switcher on public card page not implemented
 - No automatic translation suggestions
 
 ### Accessibility
+
 - No high contrast mode
 - No reduced motion preference detection
 - Text resizing limited to browser defaults
 
 ### Analytics
+
 - `geo_country` dimension not implemented (requires IP geolocation service integration)
 - No real-time analytics dashboard updates
 - No export functionality
 - No date picker for custom date ranges
 
 ### A/B Testing
+
 - Backend API endpoints not implemented (scaffolding only)
 - No admin UI for creating/managing experiments
 - No statistical significance calculations
@@ -198,26 +209,31 @@
 ### Required Criteria
 
 ✅ **App is installable as a PWA**
+
 - Manifest and service worker implemented
 - Requires manual testing with Lighthouse
 
 ✅ **Public cards work offline**
+
 - Service worker caches `/p/[slug]` pages
 - Network-first strategy with offline fallback
 - Requires manual testing
 
 ✅ **Two languages supported**
+
 - English and Spanish fully configured
 - Translation files complete with 7 namespaces
 - Language switcher component exists
 
 ✅ **Accessible**
+
 - WCAG 2.1 AA improvements implemented
 - Keyboard navigation support
 - ARIA roles and focus states
 - Screen reader utilities
 
 ✅ **Analytics-enabled**
+
 - Analytics dashboard UI complete
 - Backend endpoints functional
 - Event logging with metadata dimensions
@@ -236,6 +252,7 @@ All core requirements from Prompt 8 have been implemented. The gaps identified d
 5. ✅ Device type and referrer tracking added
 
 **Remaining Work (Future Enhancements):**
+
 - Icon and screenshot image generation
 - IP geolocation for country tracking
 - A/B testing backend API implementation
@@ -243,6 +260,7 @@ All core requirements from Prompt 8 have been implemented. The gaps identified d
 - Public card language switcher UI
 
 **Testing Required:**
+
 - Manual Lighthouse PWA audit
 - Manual Lighthouse accessibility audit
 - Offline mode verification
@@ -250,6 +268,7 @@ All core requirements from Prompt 8 have been implemented. The gaps identified d
 - Analytics event logging verification
 
 **Files Modified in Fix:**
+
 - `/apps/web/public/manifest.json` - CREATED
 - `/apps/web/public/sw.js` - CREATED
 - `/apps/api/src/analytics/analytics.controller.ts` - UPDATED
@@ -258,6 +277,7 @@ All core requirements from Prompt 8 have been implemented. The gaps identified d
 - `/apps/api/src/public-api/public-api.controller.ts` - UPDATED
 
 All code follows House Rules:
+
 - ✅ Full file contents (no snippets)
 - ✅ ASCII characters only
 - ✅ Repo-relative paths

@@ -62,10 +62,14 @@ export default function AccountSettingsPage() {
 
   return (
     <div className="max-w-3xl">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8">Account Settings</h1>
+      <h1 className="text-3xl font-bold text-gray-900 mb-8">
+        Account Settings
+      </h1>
 
       <NexusCard>
-        <h2 className="text-xl font-semibold text-gray-900 mb-6">Profile Information</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-6">
+          Profile Information
+        </h2>
 
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {error && (
@@ -82,7 +86,10 @@ export default function AccountSettingsPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="firstName"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 First name
               </label>
               <NexusInput
@@ -92,12 +99,17 @@ export default function AccountSettingsPage() {
                 disabled={isLoading}
               />
               {errors.firstName && (
-                <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.firstName.message}
+                </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="lastName"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Last name
               </label>
               <NexusInput
@@ -107,13 +119,18 @@ export default function AccountSettingsPage() {
                 disabled={isLoading}
               />
               {errors.lastName && (
-                <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.lastName.message}
+                </p>
               )}
             </div>
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="phone"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Phone number
             </label>
             <NexusInput
@@ -125,7 +142,10 @@ export default function AccountSettingsPage() {
           </div>
 
           <div>
-            <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="company"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Company
             </label>
             <NexusInput
@@ -137,7 +157,10 @@ export default function AccountSettingsPage() {
           </div>
 
           <div>
-            <label htmlFor="jobTitle" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="jobTitle"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               Job title
             </label>
             <NexusInput
@@ -150,7 +173,10 @@ export default function AccountSettingsPage() {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label htmlFor="timezone" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="timezone"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Timezone
               </label>
               <NexusInput
@@ -162,7 +188,10 @@ export default function AccountSettingsPage() {
             </div>
 
             <div>
-              <label htmlFor="language" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="language"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Language
               </label>
               <NexusInput
@@ -183,7 +212,9 @@ export default function AccountSettingsPage() {
       </NexusCard>
 
       <NexusCard className="mt-6">
-        <h2 className="text-xl font-semibold text-gray-900 mb-4">Account Details</h2>
+        <h2 className="text-xl font-semibold text-gray-900 mb-4">
+          Account Details
+        </h2>
         <div className="space-y-3">
           <div>
             <p className="text-sm text-gray-600">Email</p>
@@ -192,7 +223,9 @@ export default function AccountSettingsPage() {
           <div>
             <p className="text-sm text-gray-600">Account created</p>
             <p className="font-medium">
-              {user?.createdAt ? new Date(user.createdAt).toLocaleDateString() : 'N/A'}
+              {user?.createdAt
+                ? new Date(user.createdAt).toLocaleDateString()
+                : 'N/A'}
             </p>
           </div>
         </div>

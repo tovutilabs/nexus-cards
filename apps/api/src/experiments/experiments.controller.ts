@@ -37,7 +37,7 @@ export class ExperimentsController {
   @HttpCode(HttpStatus.OK)
   async assignVariant(
     @Param('id') experimentId: string,
-    @Body() body: { userId?: string; sessionId: string },
+    @Body() body: { userId?: string; sessionId: string }
   ) {
     const { userId, sessionId } = body;
 
@@ -48,7 +48,7 @@ export class ExperimentsController {
     const assignment = await this.experimentsService.assignVariant(
       experimentId,
       sessionId,
-      userId,
+      userId
     );
 
     return {
@@ -69,13 +69,13 @@ export class ExperimentsController {
       variant: string;
       eventType: string;
       metadata?: Record<string, any>;
-    },
+    }
   ) {
     const { userId, sessionId, variant, eventType, metadata } = body;
 
     if (!sessionId || !variant || !eventType) {
       throw new BadRequestException(
-        'sessionId, variant, and eventType are required',
+        'sessionId, variant, and eventType are required'
       );
     }
 

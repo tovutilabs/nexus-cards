@@ -78,10 +78,13 @@ export default function ContactsPage() {
 
   const handleExport = async (format: 'vcf' | 'csv') => {
     try {
-      const response = await fetch(`http://localhost:3001/api/contacts/export/${format}`, {
-        credentials: 'include',
-      });
-      
+      const response = await fetch(
+        `http://localhost:3001/api/contacts/export/${format}`,
+        {
+          credentials: 'include',
+        }
+      );
+
       if (!response.ok) throw new Error('Export failed');
 
       const blob = await response.blob();
@@ -122,7 +125,8 @@ export default function ContactsPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Contacts</h1>
           <p className="text-gray-600 mt-1">
-            {contacts.length} contact{contacts.length !== 1 ? 's' : ''} collected
+            {contacts.length} contact{contacts.length !== 1 ? 's' : ''}{' '}
+            collected
           </p>
         </div>
         <div className="flex gap-2">
@@ -164,7 +168,10 @@ export default function ContactsPage() {
       ) : (
         <div className="space-y-4">
           {filteredContacts.map((contact) => (
-            <Card key={contact.id} className="p-6 hover:shadow-md transition-shadow">
+            <Card
+              key={contact.id}
+              className="p-6 hover:shadow-md transition-shadow"
+            >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
@@ -172,9 +179,7 @@ export default function ContactsPage() {
                       {contact.firstName} {contact.lastName}
                     </h3>
                     {contact.metadata?.source && (
-                      <Badge variant="outline">
-                        {contact.metadata.source}
-                      </Badge>
+                      <Badge variant="outline">{contact.metadata.source}</Badge>
                     )}
                     {contact.tags.map((tag) => (
                       <Badge key={tag} variant="secondary">
@@ -212,7 +217,8 @@ export default function ContactsPage() {
                   )}
 
                   <p className="mt-3 text-xs text-gray-500">
-                    Exchanged: {new Date(contact.exchangedAt).toLocaleDateString()}
+                    Exchanged:{' '}
+                    {new Date(contact.exchangedAt).toLocaleDateString()}
                   </p>
                 </div>
 

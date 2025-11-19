@@ -15,7 +15,7 @@ export interface JwtPayload {
 export class JwtStrategy extends PassportStrategy(Strategy) {
   constructor(
     private configService: ConfigService,
-    private usersRepository: UsersRepository,
+    private usersRepository: UsersRepository
   ) {
     super({
       jwtFromRequest: ExtractJwt.fromExtractors([
@@ -25,13 +25,15 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
         ExtractJwt.fromAuthHeaderAsBearerToken(),
       ]),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET') || 'default-secret-change-in-production',
+      secretOrKey:
+        configService.get<string>('JWT_SECRET') ||
+        'default-secret-change-in-production',
     });
   }
 
   async validate(payload: JwtPayload) {
     const user = await this.usersRepository.findById(payload.sub);
-    
+
     if (!user) {
       throw new UnauthorizedException('User not found');
     }

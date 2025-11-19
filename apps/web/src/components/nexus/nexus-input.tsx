@@ -3,28 +3,25 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { Input } from '@/components/ui/input';
 import { cn } from '@/lib/utils';
 
-const nexusInputVariants = cva(
-  'transition-all duration-200',
-  {
-    variants: {
-      variant: {
-        default: 'border-input focus-visible:ring-nexus-blue-500',
-        success: 'border-nexus-green-500 focus-visible:ring-nexus-green-500',
-        error: 'border-nexus-red-500 focus-visible:ring-nexus-red-500',
-        warning: 'border-yellow-500 focus-visible:ring-yellow-500',
-      },
-      inputSize: {
-        default: 'h-10 px-3 py-2',
-        sm: 'h-9 px-3 py-2 text-sm',
-        lg: 'h-11 px-4 py-2 text-base',
-      },
+const nexusInputVariants = cva('transition-all duration-200', {
+  variants: {
+    variant: {
+      default: 'border-input focus-visible:ring-nexus-blue-500',
+      success: 'border-nexus-green-500 focus-visible:ring-nexus-green-500',
+      error: 'border-nexus-red-500 focus-visible:ring-nexus-red-500',
+      warning: 'border-yellow-500 focus-visible:ring-yellow-500',
     },
-    defaultVariants: {
-      variant: 'default',
-      inputSize: 'default',
+    inputSize: {
+      default: 'h-10 px-3 py-2',
+      sm: 'h-9 px-3 py-2 text-sm',
+      lg: 'h-11 px-4 py-2 text-base',
     },
-  }
-);
+  },
+  defaultVariants: {
+    variant: 'default',
+    inputSize: 'default',
+  },
+});
 
 export interface NexusInputProps
   extends Omit<React.InputHTMLAttributes<HTMLInputElement>, 'size'>,
@@ -37,7 +34,20 @@ export interface NexusInputProps
 }
 
 const NexusInput = React.forwardRef<HTMLInputElement, NexusInputProps>(
-  ({ className, variant, inputSize, label, helperText, errorText, leftIcon, rightIcon, ...props }, ref) => {
+  (
+    {
+      className,
+      variant,
+      inputSize,
+      label,
+      helperText,
+      errorText,
+      leftIcon,
+      rightIcon,
+      ...props
+    },
+    ref
+  ) => {
     const hasError = !!errorText;
     const finalVariant = hasError ? 'error' : variant;
 
@@ -56,7 +66,11 @@ const NexusInput = React.forwardRef<HTMLInputElement, NexusInputProps>(
           )}
           <Input
             className={cn(
-              nexusInputVariants({ variant: finalVariant, inputSize, className }),
+              nexusInputVariants({
+                variant: finalVariant,
+                inputSize,
+                className,
+              }),
               leftIcon && 'pl-10',
               rightIcon && 'pr-10'
             )}
@@ -70,7 +84,9 @@ const NexusInput = React.forwardRef<HTMLInputElement, NexusInputProps>(
           )}
         </div>
         {errorText && (
-          <p className="text-sm text-nexus-red-600 dark:text-nexus-red-400">{errorText}</p>
+          <p className="text-sm text-nexus-red-600 dark:text-nexus-red-400">
+            {errorText}
+          </p>
         )}
         {!errorText && helperText && (
           <p className="text-sm text-muted-foreground">{helperText}</p>

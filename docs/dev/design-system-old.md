@@ -7,17 +7,20 @@ The Nexus Design System is a comprehensive set of design tokens, components, and
 ## Architecture
 
 ### Layer 1: Base (shadcn/ui)
+
 - 14 primitive components from shadcn/ui library
 - Located in `/apps/web/src/components/ui/`
 - Provides headless, accessible base components
 - Styled with Tailwind CSS and CSS variables
 
 ### Layer 2: Design Tokens
+
 - Defined in `/apps/web/tailwind.config.ts`
 - Extended CSS variables in `/apps/web/src/app/globals.css`
 - Includes Nexus-specific color palettes, typography, spacing
 
 ### Layer 3: Nexus Components
+
 - Located in `/apps/web/src/components/nexus/`
 - Branded wrapper components that consume shadcn/ui primitives
 - Consistent API with opinionated defaults
@@ -28,6 +31,7 @@ The Nexus Design System is a comprehensive set of design tokens, components, and
 ### Colors
 
 #### Primary Palette (Nexus Blue)
+
 ```css
 nexus-blue-50  -> #eff6ff
 nexus-blue-100 -> #dbeafe
@@ -43,6 +47,7 @@ nexus-blue-950 -> #172554
 ```
 
 #### Success Palette (Nexus Green)
+
 ```css
 nexus-green-500 -> #22c55e (Success)
 nexus-green-600 -> #16a34a
@@ -50,6 +55,7 @@ nexus-green-700 -> #15803d
 ```
 
 #### Danger Palette (Nexus Red)
+
 ```css
 nexus-red-500 -> #ef4444 (Danger)
 nexus-red-600 -> #dc2626
@@ -57,19 +63,20 @@ nexus-red-700 -> #b91c1c
 ```
 
 #### Semantic Colors
+
 ```css
---success: 142 76% 36%
---warning: 38 92% 50%
---danger: 0 84% 60%
+--success: 142 76% 36% --warning: 38 92% 50% --danger: 0 84% 60%;
 ```
 
 ### Typography
 
 #### Font Families
+
 - **Sans**: `var(--font-inter)` - Primary body font (system fallback)
 - **Display**: `var(--font-display)` - Headings and hero text (system fallback)
 
 #### Font Sizes
+
 ```css
 text-2xs -> 0.625rem (10px)
 text-xs  -> 0.75rem (12px)
@@ -85,6 +92,7 @@ text-4xl -> 2.25rem (36px)
 ### Spacing
 
 Extended spacing scale:
+
 ```css
 18  -> 4.5rem (72px)
 88  -> 22rem (352px)
@@ -94,10 +102,8 @@ Extended spacing scale:
 ### Border Radius
 
 ```css
---radius: 0.5rem (8px)
-lg: var(--radius)
-md: calc(var(--radius) - 2px)
-sm: calc(var(--radius) - 4px)
+--radius: 0.5rem (8px) lg: var(--radius) md: calc(var(--radius) - 2px)
+  sm: calc(var(--radius) - 4px);
 ```
 
 ## Components
@@ -107,6 +113,7 @@ sm: calc(var(--radius) - 4px)
 Branded button component with variants, sizes, and loading states.
 
 **Variants:**
+
 - `primary` - Nexus blue background (default)
 - `secondary` - Muted background
 - `success` - Green background
@@ -116,15 +123,24 @@ Branded button component with variants, sizes, and loading states.
 - `link` - Text link style
 
 **Sizes:**
+
 - `sm` - 36px height
 - `default` - 40px height
 - `lg` - 44px height
 - `icon` - 40x40px square
 
 **Props:**
+
 ```tsx
 interface NexusButtonProps {
-  variant?: 'primary' | 'secondary' | 'success' | 'danger' | 'outline' | 'ghost' | 'link';
+  variant?:
+    | 'primary'
+    | 'secondary'
+    | 'success'
+    | 'danger'
+    | 'outline'
+    | 'ghost'
+    | 'link';
   size?: 'sm' | 'default' | 'lg' | 'icon';
   loading?: boolean;
   disabled?: boolean;
@@ -133,6 +149,7 @@ interface NexusButtonProps {
 ```
 
 **Example:**
+
 ```tsx
 <NexusButton variant="primary" size="lg" loading={false}>
   Click Me
@@ -144,6 +161,7 @@ interface NexusButtonProps {
 Branded card component with variants and hover effects.
 
 **Variants:**
+
 - `default` - Standard card with shadow
 - `elevated` - Stronger shadow
 - `outlined` - Colored border
@@ -151,12 +169,14 @@ Branded card component with variants and hover effects.
 - `glass` - Glassmorphism effect
 
 **Hover Effects:**
+
 - `none` - No hover effect (default)
 - `lift` - Translates up on hover
 - `glow` - Ring glow on hover
 - `scale` - Scales up on hover
 
 **Props:**
+
 ```tsx
 interface NexusCardProps {
   variant?: 'default' | 'elevated' | 'outlined' | 'gradient' | 'glass';
@@ -169,6 +189,7 @@ interface NexusCardProps {
 ```
 
 **Example:**
+
 ```tsx
 <NexusCard
   variant="elevated"
@@ -185,17 +206,20 @@ interface NexusCardProps {
 Branded input component with validation states and icons.
 
 **Variants:**
+
 - `default` - Standard input
 - `success` - Green border (valid state)
 - `error` - Red border (invalid state)
 - `warning` - Yellow border (warning state)
 
 **Sizes:**
+
 - `sm` - 36px height
 - `default` - 40px height
 - `lg` - 44px height
 
 **Props:**
+
 ```tsx
 interface NexusInputProps {
   variant?: 'default' | 'success' | 'error' | 'warning';
@@ -209,6 +233,7 @@ interface NexusInputProps {
 ```
 
 **Example:**
+
 ```tsx
 <NexusInput
   label="Email"
@@ -223,6 +248,7 @@ interface NexusInputProps {
 Branded badge component for status indicators and labels.
 
 **Variants:**
+
 - `primary` - Blue background
 - `success` - Green background
 - `danger` - Red background
@@ -231,20 +257,29 @@ Branded badge component for status indicators and labels.
 - `outline` - Transparent with border
 
 **Sizes:**
+
 - `sm` - Extra small
 - `default` - Standard
 - `lg` - Large
 
 **Props:**
+
 ```tsx
 interface NexusBadgeProps {
-  variant?: 'primary' | 'success' | 'danger' | 'warning' | 'secondary' | 'outline';
+  variant?:
+    | 'primary'
+    | 'success'
+    | 'danger'
+    | 'warning'
+    | 'secondary'
+    | 'outline';
   size?: 'sm' | 'default' | 'lg';
   dot?: boolean;
 }
 ```
 
 **Example:**
+
 ```tsx
 <NexusBadge variant="success" dot>
   Active
@@ -256,6 +291,7 @@ interface NexusBadgeProps {
 Branded dialog modal component.
 
 **Sizes:**
+
 - `sm` - 384px max width
 - `default` - 512px max width
 - `lg` - 672px max width
@@ -263,6 +299,7 @@ Branded dialog modal component.
 - `full` - 95vw max width
 
 **Props:**
+
 ```tsx
 interface NexusDialogProps {
   open: boolean;
@@ -275,6 +312,7 @@ interface NexusDialogProps {
 ```
 
 **Example:**
+
 ```tsx
 <NexusDialog
   open={dialogOpen}
@@ -292,6 +330,7 @@ interface NexusDialogProps {
 Application shell with header, sidebar, and responsive layout.
 
 **Props:**
+
 ```tsx
 interface NexusLayoutShellProps {
   header?: React.ReactNode;
@@ -301,12 +340,9 @@ interface NexusLayoutShellProps {
 ```
 
 **Example:**
+
 ```tsx
-<NexusLayoutShell
-  maxWidth="xl"
-  header={<AppHeader />}
-  sidebar={<AppSidebar />}
->
+<NexusLayoutShell maxWidth="xl" header={<AppHeader />} sidebar={<AppSidebar />}>
   Page content
 </NexusLayoutShell>
 ```
@@ -316,15 +352,16 @@ interface NexusLayoutShellProps {
 All Nexus components support dark mode via CSS variables defined in `globals.css`. The design system uses the `prefers-color-scheme` media query and can be manually toggled via a theme switcher.
 
 **CSS Variable Structure:**
+
 ```css
 :root {
-  --primary: 217 91% 60%;        /* Light mode primary */
-  --background: 0 0% 100%;       /* Light mode background */
+  --primary: 217 91% 60%; /* Light mode primary */
+  --background: 0 0% 100%; /* Light mode background */
 }
 
 .dark {
-  --primary: 217 91% 60%;        /* Dark mode primary (same) */
-  --background: 0 0% 3.9%;       /* Dark mode background */
+  --primary: 217 91% 60%; /* Dark mode primary (same) */
+  --background: 0 0% 3.9%; /* Dark mode background */
 }
 ```
 

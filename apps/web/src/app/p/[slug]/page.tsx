@@ -7,17 +7,17 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-  Mail, 
-  Phone, 
-  MapPin, 
-  Globe, 
-  Linkedin, 
-  Twitter, 
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Globe,
+  Linkedin,
+  Twitter,
   Github,
   Share2,
   Download,
-  MessageSquare
+  MessageSquare,
 } from 'lucide-react';
 
 interface CardData {
@@ -76,10 +76,10 @@ export default function PublicCardPage() {
   const loadCard = async () => {
     try {
       const apiClient = createApiClient();
-      const url = nfcUid ? `/public/cards/${slug}?uid=${nfcUid}` : `/public/cards/${slug}`;
-      console.log('Loading card from:', url);
+      const url = nfcUid
+        ? `/public/cards/${slug}?uid=${nfcUid}`
+        : `/public/cards/${slug}`;
       const data = await apiClient.get<CardData>(url);
-      console.log('Card loaded:', data);
       setCard(data);
     } catch (error) {
       console.error('Failed to load card:', error);
@@ -95,10 +95,10 @@ export default function PublicCardPage() {
 
     try {
       const apiClient = createApiClient();
-      const url = nfcUid 
+      const url = nfcUid
         ? `/public/cards/${slug}/contacts?uid=${nfcUid}`
         : `/public/cards/${slug}/contacts`;
-      
+
       await apiClient.post(url, contactForm);
       setSubmitted(true);
       setContactForm({
@@ -123,7 +123,8 @@ export default function PublicCardPage() {
       try {
         await navigator.share({
           title: `${card?.firstName} ${card?.lastName}`,
-          text: card?.bio || `Connect with ${card?.firstName} ${card?.lastName}`,
+          text:
+            card?.bio || `Connect with ${card?.firstName} ${card?.lastName}`,
           url,
         });
       } catch (error) {
@@ -170,37 +171,47 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
         <Card className="p-12 text-center max-w-md">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Card Not Found</h1>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">
+            Card Not Found
+          </h1>
           <p className="text-gray-600">
-            The card you're looking for doesn't exist or has been removed.
+            The card you&apos;re looking for doesn&apos;t exist or has been
+            removed.
           </p>
         </Card>
       </div>
     );
   }
 
-  const cardUrl = typeof window !== 'undefined' ? window.location.origin + `/p/${slug}` : '';
+  const cardUrl =
+    typeof window !== 'undefined' ? window.location.origin + `/p/${slug}` : '';
   const primaryColor = card.theme?.primaryColor || '#4F46E5';
 
-  const hasSecondaryLanguage = card.secondaryLanguage && (
-    card.firstName_es || card.lastName_es || card.jobTitle_es || card.company_es || card.bio_es
-  );
+  const hasSecondaryLanguage =
+    card.secondaryLanguage &&
+    (card.firstName_es ||
+      card.lastName_es ||
+      card.jobTitle_es ||
+      card.company_es ||
+      card.bio_es);
 
-  const displayName = language === 'secondary' && card.firstName_es && card.lastName_es
-    ? `${card.firstName_es} ${card.lastName_es}`
-    : `${card.firstName} ${card.lastName}`;
+  const displayName =
+    language === 'secondary' && card.firstName_es && card.lastName_es
+      ? `${card.firstName_es} ${card.lastName_es}`
+      : `${card.firstName} ${card.lastName}`;
 
-  const displayJobTitle = language === 'secondary' && card.jobTitle_es
-    ? card.jobTitle_es
-    : card.jobTitle;
+  const displayJobTitle =
+    language === 'secondary' && card.jobTitle_es
+      ? card.jobTitle_es
+      : card.jobTitle;
 
-  const displayCompany = language === 'secondary' && card.company_es
-    ? card.company_es
-    : card.company;
+  const displayCompany =
+    language === 'secondary' && card.company_es
+      ? card.company_es
+      : card.company;
 
-  const displayBio = language === 'secondary' && card.bio_es
-    ? card.bio_es
-    : card.bio;
+  const displayBio =
+    language === 'secondary' && card.bio_es ? card.bio_es : card.bio;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -208,16 +219,20 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
         {/* Main Card */}
         <Card className="overflow-hidden shadow-xl">
           {/* Header with gradient and language switcher */}
-          <div 
+          <div
             className="relative h-32 bg-gradient-to-r from-indigo-600 to-purple-600"
             style={{
-              background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}dd 100%)`
+              background: `linear-gradient(135deg, ${primaryColor} 0%, ${primaryColor}dd 100%)`,
             }}
           >
             {hasSecondaryLanguage && (
               <div className="absolute top-4 right-4">
                 <button
-                  onClick={() => setLanguage(language === 'primary' ? 'secondary' : 'primary')}
+                  onClick={() =>
+                    setLanguage(
+                      language === 'primary' ? 'secondary' : 'primary'
+                    )
+                  }
                   className="px-3 py-1.5 bg-white/20 backdrop-blur-sm text-white text-sm font-medium rounded-full hover:bg-white/30 transition-colors flex items-center gap-2"
                   aria-label="Switch language"
                 >
@@ -233,7 +248,8 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
             <div className="flex flex-col items-center -mt-16">
               {/* Avatar placeholder */}
               <div className="w-32 h-32 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center text-4xl font-bold text-indigo-600">
-                {card.firstName[0]}{card.lastName[0]}
+                {card.firstName[0]}
+                {card.lastName[0]}
               </div>
 
               <h1 className="mt-4 text-3xl font-bold text-gray-900">
@@ -306,7 +322,9 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
             {/* Social Links */}
             {card.socialLinks && Object.keys(card.socialLinks).length > 0 && (
               <div className="mt-6 pt-6 border-t border-gray-200">
-                <p className="text-sm font-semibold text-gray-700 mb-3">Connect</p>
+                <p className="text-sm font-semibold text-gray-700 mb-3">
+                  Connect
+                </p>
                 <div className="flex gap-3">
                   {card.socialLinks.linkedin && (
                     <a
@@ -378,15 +396,26 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
             {submitted ? (
               <div className="text-center py-8">
                 <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <svg className="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg
+                    className="w-8 h-8 text-green-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M5 13l4 4L19 7"
+                    />
                   </svg>
                 </div>
                 <h3 className="text-xl font-semibold text-gray-900 mb-2">
                   Contact Exchanged!
                 </h3>
                 <p className="text-gray-600">
-                  Thank you for connecting. {card.firstName} will be in touch soon.
+                  Thank you for connecting. {card.firstName} will be in touch
+                  soon.
                 </p>
                 <Button
                   onClick={() => {
@@ -412,7 +441,12 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
                     <Input
                       id="firstName"
                       value={contactForm.firstName}
-                      onChange={(e) => setContactForm({ ...contactForm, firstName: e.target.value })}
+                      onChange={(e) =>
+                        setContactForm({
+                          ...contactForm,
+                          firstName: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -421,7 +455,12 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
                     <Input
                       id="lastName"
                       value={contactForm.lastName}
-                      onChange={(e) => setContactForm({ ...contactForm, lastName: e.target.value })}
+                      onChange={(e) =>
+                        setContactForm({
+                          ...contactForm,
+                          lastName: e.target.value,
+                        })
+                      }
                       required
                     />
                   </div>
@@ -433,7 +472,9 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
                     id="email"
                     type="email"
                     value={contactForm.email}
-                    onChange={(e) => setContactForm({ ...contactForm, email: e.target.value })}
+                    onChange={(e) =>
+                      setContactForm({ ...contactForm, email: e.target.value })
+                    }
                     required
                   />
                 </div>
@@ -444,7 +485,9 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
                     id="phone"
                     type="tel"
                     value={contactForm.phone}
-                    onChange={(e) => setContactForm({ ...contactForm, phone: e.target.value })}
+                    onChange={(e) =>
+                      setContactForm({ ...contactForm, phone: e.target.value })
+                    }
                   />
                 </div>
 
@@ -453,7 +496,12 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
                   <Input
                     id="company"
                     value={contactForm.company}
-                    onChange={(e) => setContactForm({ ...contactForm, company: e.target.value })}
+                    onChange={(e) =>
+                      setContactForm({
+                        ...contactForm,
+                        company: e.target.value,
+                      })
+                    }
                   />
                 </div>
 
@@ -463,12 +511,18 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
                     id="notes"
                     className="w-full min-h-[80px] px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
                     value={contactForm.notes}
-                    onChange={(e) => setContactForm({ ...contactForm, notes: e.target.value })}
+                    onChange={(e) =>
+                      setContactForm({ ...contactForm, notes: e.target.value })
+                    }
                   />
                 </div>
 
                 <div className="flex gap-3">
-                  <Button type="submit" disabled={submitting} className="flex-1">
+                  <Button
+                    type="submit"
+                    disabled={submitting}
+                    className="flex-1"
+                  >
                     {submitting ? 'Submitting...' : 'Submit'}
                   </Button>
                   <Button
@@ -498,7 +552,9 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
                 <div className="w-[200px] h-[200px] bg-gray-100 flex items-center justify-center text-sm text-gray-500">
                   QR Code
                 </div>
-                <p className="text-xs text-gray-500 mt-2">Scan to save contact</p>
+                <p className="text-xs text-gray-500 mt-2">
+                  Scan to save contact
+                </p>
               </div>
             )}
           </Card>
@@ -506,7 +562,9 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
 
         {/* Footer */}
         <div className="mt-8 text-center text-sm text-gray-500">
-          <p>Powered by <span className="font-semibold">Nexus Cards</span></p>
+          <p>
+            Powered by <span className="font-semibold">Nexus Cards</span>
+          </p>
           <p className="mt-1">
             <a href="https://nexus.cards" className="hover:text-indigo-600">
               Create your digital business card

@@ -51,6 +51,7 @@ cp .env.local.example .env.local
 ```
 
 Local development assumes Docker services are running:
+
 - PostgreSQL on port 5432 (nexus-db)
 - Redis on port 6379 (nexus-redis)
 - MailHog on ports 1025 (SMTP) and 8025 (UI) (nexus-mailhog)
@@ -66,26 +67,28 @@ All Docker services include health checks and will show as "healthy" when ready.
 
 ### Key Environment Variables
 
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `NODE_ENV` | Environment mode | `development` |
+| Variable       | Description           | Default                                                     |
+| -------------- | --------------------- | ----------------------------------------------------------- |
+| `NODE_ENV`     | Environment mode      | `development`                                               |
 | `DATABASE_URL` | PostgreSQL connection | `postgresql://postgres:postgres@localhost:5432/nexus_cards` |
-| `REDIS_URL` | Redis connection | `redis://localhost:6379` |
-| `JWT_SECRET` | JWT signing key | Must be set |
-| `API_PORT` | API server port | `3001` |
-| `WEB_PORT` | Web server port | `3000` |
+| `REDIS_URL`    | Redis connection      | `redis://localhost:6379`                                    |
+| `JWT_SECRET`   | JWT signing key       | Must be set                                                 |
+| `API_PORT`     | API server port       | `3001`                                                      |
+| `WEB_PORT`     | Web server port       | `3000`                                                      |
 
 ## Tooling
 
 ### ESLint
 
 ESLint is configured at the root level with TypeScript support:
+
 - Extends recommended TypeScript rules
 - Integrates with Prettier
 - Warns on console.log statements
 - Ignores common build directories
 
 Run linting:
+
 ```bash
 pnpm lint
 ```
@@ -93,12 +96,14 @@ pnpm lint
 ### Prettier
 
 Prettier enforces consistent code formatting:
+
 - Single quotes
 - Semicolons
 - 2-space indentation
 - 80-character line width
 
 Format all files:
+
 ```bash
 pnpm format
 ```
@@ -106,6 +111,7 @@ pnpm format
 ### TypeScript
 
 All apps and packages use TypeScript with strict mode enabled:
+
 - Strict null checks
 - No implicit any
 - Strict bind/call/apply
@@ -115,16 +121,19 @@ All apps and packages use TypeScript with strict mode enabled:
 ### Starting Development
 
 1. Start Docker services:
+
 ```bash
 docker-compose up -d
 ```
 
 2. Install dependencies:
+
 ```bash
 pnpm install
 ```
 
 3. Start development servers:
+
 ```bash
 pnpm dev
 ```
@@ -134,11 +143,13 @@ This starts both web (port 3000) and api (port 3001) concurrently using concurre
 ### Individual App Development
 
 Start only the web app:
+
 ```bash
 pnpm dev:web
 ```
 
 Start only the API:
+
 ```bash
 pnpm dev:api
 ```
@@ -146,11 +157,13 @@ pnpm dev:api
 ### Building
 
 Build all workspaces:
+
 ```bash
 pnpm build
 ```
 
 Build individual apps:
+
 ```bash
 pnpm build:web
 pnpm build:api
@@ -159,6 +172,7 @@ pnpm build:api
 ### Testing
 
 Run all tests:
+
 ```bash
 pnpm test
 ```
@@ -223,6 +237,7 @@ TypeScript path aliases are configured to resolve shared code:
 `GET /api/health`
 
 Returns API health status:
+
 ```json
 {
   "status": "ok",
@@ -250,12 +265,14 @@ Additional routes will be added in subsequent prompts.
 ## Next Steps
 
 **Prompt 2** - Design System: Brand Tokens, Typography, Spacing & shadcn Theme
+
 - Tailwind theme tokens
-- shadcn/ui integration  
+- shadcn/ui integration
 - Nexus UI primitives
 - `/design-system` showcase route
 
 Then:
+
 1. Prompt 3 - Prisma schema and migrations
 2. Prompt 4 - Authentication module
 3. Prompt 5 - Core card functionality
@@ -265,6 +282,7 @@ Then:
 ### Docker services not starting
 
 Check if ports are already in use:
+
 ```bash
 lsof -i :5432
 lsof -i :6379
@@ -275,6 +293,7 @@ Stop existing services or change ports in `docker-compose.yml`.
 ### TypeScript errors
 
 Ensure all dependencies are installed:
+
 ```bash
 pnpm install
 ```
@@ -284,6 +303,7 @@ Restart your IDE/editor to pick up TypeScript configuration changes.
 ### Build failures
 
 Clear build artifacts and rebuild:
+
 ```bash
 rm -rf apps/*/dist apps/*/.next
 pnpm build
@@ -292,6 +312,7 @@ pnpm build
 ### Port conflicts
 
 If ports 3000 or 3001 are already in use:
+
 ```bash
 # Check what's using the ports
 lsof -i :3000

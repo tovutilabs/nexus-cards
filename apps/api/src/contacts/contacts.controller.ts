@@ -1,12 +1,10 @@
-import { 
-  Controller, 
-  Get, 
-  Post, 
-  Patch, 
-  Delete, 
-  Body, 
-  Param, 
-  Query, 
+import {
+  Controller,
+  Get,
+  Patch,
+  Delete,
+  Body,
+  Param,
   UseGuards,
   Req,
   Res,
@@ -14,7 +12,6 @@ import {
 } from '@nestjs/common';
 import { Response } from 'express';
 import { ContactsService } from './contacts.service';
-import { SubmitContactDto } from './dto/submit-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
@@ -39,9 +36,13 @@ export class ContactsController {
   async updateContact(
     @Param('id') id: string,
     @Body() updateContactDto: UpdateContactDto,
-    @Req() req: any,
+    @Req() req: any
   ) {
-    return this.contactsService.updateContact(id, req.user.id, updateContactDto);
+    return this.contactsService.updateContact(
+      id,
+      req.user.id,
+      updateContactDto
+    );
   }
 
   @Delete(':id')
@@ -55,22 +56,33 @@ export class ContactsController {
   async exportContacts(
     @Param('format') format: string,
     @Req() req: any,
-    @Res() res: Response,
+    @Res() res: Response
   ) {
     const upperFormat = format.toUpperCase();
-    
+
     if (upperFormat !== 'VCF' && upperFormat !== 'CSV') {
-      return res.status(HttpStatus.BAD_REQUEST).json({ message: 'Invalid export format. Use VCF or CSV.' });
+      return res
+        .status(HttpStatus.BAD_REQUEST)
+        .json({ message: 'Invalid export format. Use VCF or CSV.' });
     }
 
-    const data = await this.contactsService.exportContacts(req.user.id, upperFormat as 'VCF' | 'CSV');
+    const data = await this.contactsService.exportContacts(
+      req.user.id,
+      upperFormat as 'VCF' | 'CSV'
+    );
 
     if (upperFormat === 'VCF') {
       res.setHeader('Content-Type', 'text/vcard');
-      res.setHeader('Content-Disposition', 'attachment; filename="contacts.vcf"');
+      res.setHeader(
+        'Content-Disposition',
+        'attachment; filename="contacts.vcf"'
+      );
     } else {
       res.setHeader('Content-Type', 'text/csv');
-      res.setHeader('Content-Disposition', 'attachment; filename="contacts.csv"');
+      res.setHeader(
+        'Content-Disposition',
+        'attachment; filename="contacts.csv"'
+      );
     }
 
     res.send(data);

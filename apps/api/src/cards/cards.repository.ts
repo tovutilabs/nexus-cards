@@ -38,7 +38,7 @@ export class CardsRepository {
 
   async findByUserId(userId: string): Promise<Card[]> {
     return this.prisma.card.findMany({
-      where: { 
+      where: {
         userId,
         status: {
           not: 'ARCHIVED',

@@ -10,6 +10,7 @@
 ### ✅ Task 1: Card Management (Backend)
 
 **Required Features:**
+
 - [x] CRUD for cards with title, user profile fields, contact info, social links
 - [x] Design settings and template/theme references support
 - [x] "Default card" setting
@@ -19,6 +20,7 @@
 **Implementation Verification:**
 
 **Files:**
+
 - `/apps/api/src/cards/cards.controller.ts` - Full CRUD endpoints
 - `/apps/api/src/cards/cards.service.ts` - Business logic
 - `/apps/api/src/cards/cards.repository.ts` - Database operations
@@ -27,6 +29,7 @@
 - `/apps/api/src/cards/utils/slug.util.ts` - Slug generation
 
 **Evidence:**
+
 ```typescript
 // Slug generation (cards.service.ts line 6, 20, 96)
 import { generateSlug, generateUniqueSlug } from './utils/slug.util';
@@ -46,6 +49,7 @@ return this.cardsRepository.update(id, { status: 'ARCHIVED' });
 ### ✅ Task 2: Public Card API
 
 **Required Features:**
+
 - [x] `GET /public/cards/:slug` endpoint
 - [x] Safe payload (only public-safe fields)
 - [x] Public/private visibility support (PUBLISHED status check)
@@ -55,10 +59,12 @@ return this.cardsRepository.update(id, { status: 'ARCHIVED' });
 **Implementation Verification:**
 
 **Files:**
+
 - `/apps/api/src/public-api/public-api.controller.ts` - Public endpoints
 - `/apps/api/src/cards/cards.service.ts` - `findPublicBySlug()` method (line 75)
 
 **Evidence:**
+
 ```typescript
 // Public card endpoint (public-api.controller.ts)
 @Get('cards/:slug')
@@ -67,12 +73,12 @@ async getPublicCard(
   @Query('uid') uid?: string,
 ) {
   const card = await this.cardsService.findPublicBySlug(slug);
-  
+
   await this.analyticsService.logCardView(card.id, {
     nfcUid: uid,
     source: uid ? 'nfc' : 'web',
   });
-  
+
   return card;
 }
 ```
@@ -87,6 +93,7 @@ async getPublicCard(
 ### ✅ Task 3: NFC Tag Core Logic
 
 **Required Features:**
+
 - [x] Admin imports list of UIDs into NFC inventory
 - [x] Admin assigns UIDs to user accounts
 - [x] Users cannot add physical tags (only view assigned)
@@ -100,6 +107,7 @@ async getPublicCard(
 **Implementation Verification:**
 
 **Schema Validation:**
+
 ```prisma
 // schema.prisma line 188-203
 model NfcTag {
@@ -112,7 +120,7 @@ model NfcTag {
   updatedAt   DateTime      @updatedAt
 
   card        Card?         @relation(fields: [cardId], references: [id], onDelete: SetNull)
-  
+
   @@index([uid])
   @@index([cardId])
   @@index([status])
@@ -122,6 +130,7 @@ model NfcTag {
 **✅ NO join table exists** - Correct 1:1 implementation
 
 **Controller Endpoints:**
+
 ```typescript
 // nfc.controller.ts lines 52-98
 @Post('admin/import')         // ✅ Admin imports UIDs
@@ -137,18 +146,23 @@ model NfcTag {
 ```
 
 **All endpoints protected with:**
+
 - `@UseGuards(JwtAuthGuard, RolesGuard)`
 - `@Roles('ADMIN')` for admin operations
 
 **1:1 Enforcement Code:**
+
 ```typescript
 // nfc.service.ts line 97
 if (tag.cardId) {
-  throw new ConflictException('This tag is already associated with another card');
+  throw new ConflictException(
+    'This tag is already associated with another card'
+  );
 }
 ```
 
 **Tag Resolution States:**
+
 1. UID not found → "Unknown tag"
 2. UID unassigned → "Unassigned tag"
 3. UID assigned but no card → "Card association needed"
@@ -161,6 +175,7 @@ if (tag.cardId) {
 ### ✅ Task 4: Contact Exchange System
 
 **Required Features:**
+
 - [x] Public contact submission endpoint
 - [x] Contact storage linked to card owner
 - [x] User contact wallet - list contacts
@@ -173,11 +188,13 @@ if (tag.cardId) {
 **Implementation Verification:**
 
 **Files:**
+
 - `/apps/api/src/contacts/contacts.controller.ts` - Contact endpoints
 - `/apps/api/src/contacts/contacts.service.ts` - Business logic with tier checks
 - `/apps/api/src/public-api/public-api.controller.ts` - Public submission
 
 **Public Submission:**
+
 ```typescript
 // public-api.controller.ts
 @Post('cards/:slug/contacts')
@@ -190,16 +207,17 @@ async submitContact(
     source: uid ? 'NFC' : 'WEB',
     nfcUid: uid,
   };
-  
+
   const contact = await this.contactsService.submitContact(slug, submitContactDto, metadata);
-  
+
   await this.analyticsService.logContactSubmission(contact.cardId, metadata);
-  
+
   return { message: 'Contact submitted successfully', contactId: contact.id };
 }
 ```
 
 **Contact Wallet Operations:**
+
 ```typescript
 // contacts.controller.ts
 @Get()                    // ✅ List contacts
@@ -211,6 +229,7 @@ async submitContact(
 ```
 
 **Export Implementation:**
+
 ```typescript
 // contacts.service.ts line 81
 async exportContacts(userId: string, format: 'VCF' | 'CSV') {
@@ -219,6 +238,7 @@ async exportContacts(userId: string, format: 'VCF' | 'CSV') {
 ```
 
 **Tier Limits:**
+
 - FREE: 50 contacts maximum
 - PRO/PREMIUM: Unlimited
 - Enforced in `submitContact()` method
@@ -230,6 +250,7 @@ async exportContacts(userId: string, format: 'VCF' | 'CSV') {
 ### ✅ Task 5: Dashboard UIs
 
 **Required Features:**
+
 - [x] `/dashboard/cards` - List all user cards
 - [x] `/dashboard/cards/[id]` - Multi-tab card editor
 - [x] `/dashboard/nfc` - Tag assignment overview
@@ -239,6 +260,7 @@ async exportContacts(userId: string, format: 'VCF' | 'CSV') {
 **Implementation Verification:**
 
 **Dashboard Structure:**
+
 ```
 /apps/web/src/app/dashboard/
 ├── cards/
@@ -255,6 +277,7 @@ async exportContacts(userId: string, format: 'VCF' | 'CSV') {
 ```
 
 **Admin Dashboard Shell:**
+
 ```
 /apps/web/src/app/admin/
 ├── layout.tsx                ✅ Role-protected layout (ADMIN only)
@@ -266,6 +289,7 @@ async exportContacts(userId: string, format: 'VCF' | 'CSV') {
 ```
 
 **Role Protection Evidence:**
+
 ```typescript
 // admin/layout.tsx line 19, 35
 if (!loading && (!user || user.role !== 'ADMIN')) {
@@ -279,6 +303,7 @@ if (!user || user.role !== 'ADMIN') {
 ```
 
 **Admin Navigation:**
+
 - ✅ Dashboard
 - ✅ NFC Tags
 - ✅ Users
@@ -286,6 +311,7 @@ if (!user || user.role !== 'ADMIN') {
 - ✅ Settings
 
 **Special Note:** `/admin/nfc` is **fully functional** (not just placeholder):
+
 - Bulk UID import
 - Tag search and filtering
 - Tag list with status badges
@@ -299,6 +325,7 @@ if (!user || user.role !== 'ADMIN') {
 ### ✅ Task 6: Public Card Frontend
 
 **Required Features:**
+
 - [x] `/p/[slug]` public card route
 - [x] Mobile-first responsive layout
 - [x] Contact exchange form
@@ -310,6 +337,7 @@ if (!user || user.role !== 'ADMIN') {
 **File:** `/apps/web/src/app/p/[slug]/page.tsx`
 
 **Features Implemented:**
+
 ```typescript
 // Client-side component with full interactivity
 'use client';
@@ -343,9 +371,12 @@ const nfcUid = searchParams.get('uid');
 ```
 
 **Analytics Integration:**
+
 ```typescript
 // Loads card and logs analytics
-const url = nfcUid ? `/public/cards/${slug}?uid=${nfcUid}` : `/public/cards/${slug}`;
+const url = nfcUid
+  ? `/public/cards/${slug}?uid=${nfcUid}`
+  : `/public/cards/${slug}`;
 const data = await apiClient.get<CardData>(url);
 // Backend automatically logs CARD_VIEW with NFC source if uid present
 ```
@@ -361,6 +392,7 @@ const data = await apiClient.get<CardData>(url);
 **Requirement:** "Each NFC tag may be associated with at most one card at a time (1 tag → 0/1 card); a card may have multiple tags, and a tag must never link to multiple cards. No NfcTagCardLink join table is allowed."
 
 **Verification:**
+
 - ✅ Schema uses direct `cardId` FK (nullable) on `NfcTag` model
 - ✅ NO join table exists in schema
 - ✅ 1:1 enforcement in service layer (line 97: checks `tag.cardId`)
@@ -376,6 +408,7 @@ const data = await apiClient.get<CardData>(url);
 **Requirement:** "Admin imports list of UIDs into NFC inventory. Admin assigns UIDs to user accounts. User cannot add physical tags; only view assigned ones."
 
 **Verification:**
+
 - ✅ Import endpoint: `POST /nfc/admin/import` with `@Roles('ADMIN')`
 - ✅ Assign endpoint: `PATCH /nfc/admin/tags/:tagId/assign` with `@Roles('ADMIN')`
 - ✅ No user endpoints for adding/importing tags
@@ -390,6 +423,7 @@ const data = await apiClient.get<CardData>(url);
 **Requirement:** "Implement 'delete card' with soft-delete (if PRD requires)."
 
 **Verification:**
+
 ```typescript
 // cards.service.ts line 108
 return this.cardsRepository.update(id, { status: 'ARCHIVED' });
@@ -404,6 +438,7 @@ return this.cardsRepository.update(id, { status: 'ARCHIVED' });
 **Requirement:** "Additionally, scaffold the Admin dashboard shell (no deep feature wiring yet): /admin layout with navigation visible only for users with role = ADMIN, /admin/nfc, /admin/users, /admin/analytics, /admin/settings placeholder pages."
 
 **Verification:**
+
 - ✅ `/admin` layout with ADMIN role check
 - ✅ `/admin/nfc` - FULLY FUNCTIONAL (exceeds requirement)
 - ✅ `/admin/users` - Placeholder with "Coming Soon"
@@ -421,6 +456,7 @@ return this.cardsRepository.update(id, { status: 'ARCHIVED' });
 ### Backend API Tests
 
 ✅ **Card CRUD:**
+
 ```bash
 GET    /api/cards                # List user cards
 POST   /api/cards                # Create card with tier enforcement
@@ -430,12 +466,14 @@ DELETE /api/cards/:id            # Soft delete (ARCHIVED)
 ```
 
 ✅ **Public Card API:**
+
 ```bash
 GET /api/public/cards/:slug      # Returns card data
 GET /api/public/cards/:slug?uid=<UID>  # NFC tap tracking
 ```
 
 ✅ **NFC Operations:**
+
 ```bash
 # Admin operations
 POST   /api/nfc/admin/import     # Bulk import UIDs
@@ -452,6 +490,7 @@ POST   /api/nfc/tags/:id/disassociate  # Unlink from card
 ```
 
 ✅ **Contact Exchange:**
+
 ```bash
 POST   /api/public/cards/:slug/contacts  # Public submission
 GET    /api/contacts                     # List user contacts
@@ -465,6 +504,7 @@ GET    /api/contacts/export/csv          # Export CSV
 ### Frontend UI Tests
 
 ✅ **Dashboard Pages:**
+
 - Cards list renders with grid layout
 - Card editor loads with 4 tabs
 - Contacts page shows list with export buttons
@@ -472,6 +512,7 @@ GET    /api/contacts/export/csv          # Export CSV
 - All pages compile without errors
 
 ✅ **Admin Pages:**
+
 - Admin layout redirects non-ADMIN users
 - NFC management page fully functional
 - Bulk import accepts newline-separated UIDs
@@ -479,6 +520,7 @@ GET    /api/contacts/export/csv          # Export CSV
 - Placeholder pages render correctly
 
 ✅ **Public Card:**
+
 - Page compiles successfully
 - Client-side rendering works
 - Form validation functional
@@ -487,6 +529,7 @@ GET    /api/contacts/export/csv          # Export CSV
 ### System Health
 
 ✅ **Containers:**
+
 ```
 nexus-api     - Up and healthy
 nexus-web     - Up and running
@@ -496,6 +539,7 @@ nexus-mailhog - Up and running
 ```
 
 ✅ **Compilation:**
+
 - API: 0 TypeScript errors
 - Web: 0 TypeScript errors
 
@@ -528,6 +572,7 @@ nexus-mailhog - Up and running
 **Requirement:** "Complete card editing + NFC flows + contact exchange functioning end-to-end. Admin dashboard shell routes exist and are gated to role = ADMIN users only."
 
 ### ✅ Card Editing
+
 - Create card: ✅ Working
 - Update card: ✅ Working
 - Delete card: ✅ Working (soft delete)
@@ -535,6 +580,7 @@ nexus-mailhog - Up and running
 - Tier enforcement: ✅ Working
 
 ### ✅ NFC Flows
+
 - Admin import: ✅ Working
 - Admin assign: ✅ Working
 - User associate: ✅ Working
@@ -543,6 +589,7 @@ nexus-mailhog - Up and running
 - 1:1 mapping: ✅ Enforced
 
 ### ✅ Contact Exchange
+
 - Public submission: ✅ Working
 - List contacts: ✅ Working
 - Edit contacts: ✅ Working
@@ -551,6 +598,7 @@ nexus-mailhog - Up and running
 - Export CSV: ✅ Working
 
 ### ✅ Admin Dashboard
+
 - Layout created: ✅ Yes
 - Role protection: ✅ Implemented
 - Navigation menu: ✅ Working
@@ -564,6 +612,7 @@ nexus-mailhog - Up and running
 ## Critical Constraints Compliance
 
 ### ✅ NFC Rules
+
 - [x] Admins manage tags (import/assign/revoke)
 - [x] Users only link/unlink to their cards
 - [x] 1:1 tag-to-card mapping enforced
@@ -571,11 +620,13 @@ nexus-mailhog - Up and running
 - [x] ASCII Mirror support
 
 ### ✅ UI Requirements
+
 - [x] Must use Nexus UI primitives
 - [x] Mobile-first responsive design
 - [x] Role-based access control
 
 ### ✅ Code Quality
+
 - [x] Full file contents (no snippets)
 - [x] ASCII-only characters
 - [x] Repo-relative paths
@@ -586,6 +637,7 @@ nexus-mailhog - Up and running
 ## Issues Found
 
 ### ⚠️ Minor Issue: QR Code Implementation
+
 **Status:** Placeholder implementation (gray box instead of actual QR code)  
 **Reason:** `qrcode.react` package type definition conflicts  
 **Impact:** Low - Does not affect core functionality  
@@ -600,15 +652,15 @@ nexus-mailhog - Up and running
 
 ### Requirements Coverage: 100%
 
-| Category | Required | Implemented | Status |
-|----------|----------|-------------|--------|
-| Card Management Backend | 5 features | 5 ✅ | Complete |
-| Public Card API | 5 features | 5 ✅ | Complete |
-| NFC Tag Core Logic | 10 features | 10 ✅ | Complete |
-| Contact Exchange System | 7 features | 7 ✅ | Complete |
-| Dashboard UIs | 5 pages | 5 ✅ | Complete |
-| Admin Dashboard Shell | 5 pages | 5 ✅ | Complete |
-| Public Card Frontend | 5 features | 5 ✅ | Complete |
+| Category                | Required    | Implemented | Status   |
+| ----------------------- | ----------- | ----------- | -------- |
+| Card Management Backend | 5 features  | 5 ✅        | Complete |
+| Public Card API         | 5 features  | 5 ✅        | Complete |
+| NFC Tag Core Logic      | 10 features | 10 ✅       | Complete |
+| Contact Exchange System | 7 features  | 7 ✅        | Complete |
+| Dashboard UIs           | 5 pages     | 5 ✅        | Complete |
+| Admin Dashboard Shell   | 5 pages     | 5 ✅        | Complete |
+| Public Card Frontend    | 5 features  | 5 ✅        | Complete |
 
 ### Test Coverage: 100%
 
@@ -634,6 +686,7 @@ nexus-mailhog - Up and running
 **✅ PROMPT 5 IS 100% COMPLETE**
 
 All 6 tasks have been successfully implemented according to specifications:
+
 1. ✅ Card Management Backend - Full CRUD with tier enforcement
 2. ✅ Public Card API - Safe payload with analytics
 3. ✅ NFC Tag Core Logic - Proper 1:1 mapping with admin controls
@@ -642,6 +695,7 @@ All 6 tasks have been successfully implemented according to specifications:
 6. ✅ Public Card Frontend - Mobile-first with contact form
 
 **System Status:**
+
 - 0 API errors
 - 0 Web errors
 - All containers healthy

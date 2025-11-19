@@ -49,15 +49,18 @@ export class ContactsRepository {
     });
   }
 
-  async updateContact(id: string, data: {
-    firstName?: string;
-    lastName?: string;
-    email?: string;
-    phone?: string;
-    company?: string;
-    notes?: string;
-    tags?: string[];
-  }): Promise<Contact> {
+  async updateContact(
+    id: string,
+    data: {
+      firstName?: string;
+      lastName?: string;
+      email?: string;
+      phone?: string;
+      company?: string;
+      notes?: string;
+      tags?: string[];
+    }
+  ): Promise<Contact> {
     return this.prisma.contact.update({
       where: { id },
       data,

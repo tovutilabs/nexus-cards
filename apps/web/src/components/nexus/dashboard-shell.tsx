@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-export interface DashboardShellProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface DashboardShellProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   sidebar?: React.ReactNode;
   header?: React.ReactNode;

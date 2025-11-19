@@ -78,6 +78,7 @@ The system handles the following Stripe webhook events:
 #### Idempotency
 
 Webhook processing is idempotent through the `activity_logs` table:
+
 - Each webhook event ID is recorded after processing
 - Duplicate events are detected and skipped
 - Ensures no double-processing of payments
@@ -103,10 +104,10 @@ if (existingLog) {
 
 #### Subscription Tiers
 
-| Tier | Cards | Contacts | Analytics | Price |
-|------|-------|----------|-----------|-------|
-| FREE | 1 | 50 | 7 days | $0 |
-| PRO | 5 | Unlimited | 90 days | $9/mo |
+| Tier    | Cards     | Contacts  | Analytics | Price  |
+| ------- | --------- | --------- | --------- | ------ |
+| FREE    | 1         | 50        | 7 days    | $0     |
+| PRO     | 5         | Unlimited | 90 days   | $9/mo  |
 | PREMIUM | Unlimited | Unlimited | Unlimited | $29/mo |
 
 #### Subscription Lifecycle
@@ -138,6 +139,7 @@ if (existingLog) {
 Create Stripe checkout session.
 
 **Request Body:**
+
 ```json
 {
   "tier": "PRO",
@@ -147,6 +149,7 @@ Create Stripe checkout session.
 ```
 
 **Response:**
+
 ```json
 {
   "sessionId": "cs_test_...",
@@ -161,11 +164,13 @@ Create Stripe checkout session.
 Receive and process Stripe webhooks.
 
 **Headers:**
+
 - `stripe-signature`: Webhook signature for verification
 
 **Request Body:** Raw Stripe event JSON
 
 **Response:**
+
 ```json
 {
   "received": true
@@ -179,6 +184,7 @@ Receive and process Stripe webhooks.
 Get user's subscription usage and limits.
 
 **Response:**
+
 ```json
 {
   "cardsUsed": 2,
@@ -196,6 +202,7 @@ Get user's subscription usage and limits.
 Cancel user's subscription at period end.
 
 **Response:**
+
 ```json
 {
   "success": true
@@ -211,7 +218,11 @@ The system includes a `PaymentProvider` interface for future payment methods:
 ```typescript
 export interface PaymentProvider {
   name: string;
-  createCheckoutSession(userId: string, amount: number, currency: string): Promise<{ url: string }>;
+  createCheckoutSession(
+    userId: string,
+    amount: number,
+    currency: string
+  ): Promise<{ url: string }>;
   processWebhook(signature: string, rawBody: Buffer): Promise<void>;
   cancelSubscription(subscriptionId: string): Promise<void>;
 }
@@ -224,6 +235,7 @@ Location: `apps/api/src/billing/providers/paypal.provider.ts`
 Currently throws `Error('PayPal integration not yet implemented')` for all methods.
 
 To implement:
+
 1. Add PayPal SDK dependency
 2. Implement checkout session creation
 3. Handle IPN/webhook verification
@@ -236,6 +248,7 @@ Location: `apps/api/src/billing/providers/mpesa.provider.ts`
 Currently throws `Error('M-Pesa integration not yet implemented')` for all methods.
 
 To implement:
+
 1. Add Safaricom M-Pesa SDK
 2. Implement STK Push for payments
 3. Handle callback verification
@@ -259,10 +272,13 @@ To implement:
 All integration credentials are encrypted before storage using the `CryptoService`:
 
 ```typescript
-const encryptedCredentials = this.crypto.encrypt(JSON.stringify(dto.credentials));
+const encryptedCredentials = this.crypto.encrypt(
+  JSON.stringify(dto.credentials)
+);
 ```
 
 Encryption uses AES-256-CBC with:
+
 - Key derived from `ENCRYPTION_KEY` environment variable
 - Initialization vector (IV) generated per credential
 - IV prepended to encrypted data for decryption
@@ -274,6 +290,7 @@ Encryption uses AES-256-CBC with:
 List user's connected integrations.
 
 **Response:**
+
 ```json
 [
   {
@@ -294,6 +311,7 @@ List user's connected integrations.
 Connect a new integration or update credentials.
 
 **Request Body:**
+
 ```json
 {
   "provider": "HUBSPOT",
@@ -315,9 +333,11 @@ Connect a new integration or update credentials.
 Disconnect an integration.
 
 **URL Parameters:**
+
 - `provider`: IntegrationProvider enum value
 
 **Response:**
+
 ```json
 {
   "success": true
@@ -331,9 +351,11 @@ Disconnect an integration.
 Manually trigger sync for an integration.
 
 **URL Parameters:**
+
 - `provider`: IntegrationProvider enum value
 
 **Response:**
+
 ```json
 {
   "provider": "HUBSPOT",
@@ -347,6 +369,7 @@ Manually trigger sync for an integration.
 ### Integration Implementation Status
 
 All integrations currently return stub responses. Each provider method:
+
 1. Updates `lastSyncAt` timestamp
 2. Returns success message indicating stub status
 3. Returns zero counts for synced items
@@ -356,19 +379,21 @@ All integrations currently return stub responses. Each provider method:
 To implement a real integration (e.g., HubSpot):
 
 1. **Add SDK Dependency**
+
    ```bash
    pnpm add @hubspot/api-client
    ```
 
 2. **Update Service Method**
+
    ```typescript
    private async syncHubspot(userId: string, credentials: any, integrationId: string) {
      const hubspot = new Client({ accessToken: credentials.apiKey });
-     
+
      const contacts = await this.prisma.contact.findMany({
        where: { userId },
      });
-     
+
      let syncedCount = 0;
      for (const contact of contacts) {
        await hubspot.crm.contacts.basicApi.create({
@@ -381,12 +406,12 @@ To implement a real integration (e.g., HubSpot):
        });
        syncedCount++;
      }
-     
+
      await this.prisma.integration.update({
        where: { id: integrationId },
        data: { lastSyncAt: new Date() },
      });
-     
+
      return {
        provider: 'HUBSPOT',
        message: 'Contacts synced successfully',
@@ -396,6 +421,7 @@ To implement a real integration (e.g., HubSpot):
    ```
 
 3. **Error Handling**
+
    ```typescript
    try {
      // sync logic
@@ -420,6 +446,7 @@ To implement a real integration (e.g., HubSpot):
 Location: `apps/web/src/app/dashboard/settings/billing/page.tsx`
 
 Features:
+
 - Display current plan and status badge
 - Show renewal/cancellation date
 - Usage metrics with progress bars (cards, contacts, analytics retention)
@@ -430,6 +457,7 @@ Features:
 - Stripe redirect handling (success/canceled query params)
 
 Key Functions:
+
 - `loadData()`: Fetches user subscription and usage
 - `handleUpgrade()`: Creates checkout session and redirects
 - `handleCancelSubscription()`: Marks subscription for cancellation
@@ -440,6 +468,7 @@ Key Functions:
 Location: `apps/web/src/app/dashboard/integrations/page.tsx`
 
 Features:
+
 - Grid of all available integrations
 - Connection status badges (Active/Inactive/Error)
 - Last sync timestamp display
@@ -449,6 +478,7 @@ Features:
 - Disconnect button with confirmation
 
 Key Functions:
+
 - `loadIntegrations()`: Fetches connected integrations
 - `handleConnect()`: Connects new integration with credentials
 - `handleDisconnect()`: Removes integration
@@ -457,6 +487,7 @@ Key Functions:
 
 Integration Providers Array:
 Each provider defines:
+
 - `id`: Provider enum value
 - `name`: Display name
 - `description`: Short explanation
@@ -522,16 +553,19 @@ model Integration {
 ### Webhook Testing with Stripe CLI
 
 1. Install Stripe CLI:
+
    ```bash
    stripe login
    ```
 
 2. Forward webhooks to local API:
+
    ```bash
    stripe listen --forward-to http://localhost:3001/billing/webhook
    ```
 
 3. Trigger test events:
+
    ```bash
    stripe trigger customer.subscription.created
    stripe trigger invoice.payment_succeeded
@@ -556,6 +590,7 @@ model Integration {
 ### Manual E2E Test Flow
 
 #### Billing Flow
+
 1. Log in as FREE tier user
 2. Navigate to `/dashboard/settings/billing`
 3. Click "Upgrade" on PRO tier
@@ -567,6 +602,7 @@ model Integration {
 9. Verify shows "Cancels on [date]"
 
 #### Integration Flow
+
 1. Navigate to `/dashboard/integrations`
 2. Click "Connect" on HubSpot
 3. Enter fake API key
@@ -580,23 +616,27 @@ model Integration {
 ## Security Considerations
 
 ### Webhook Security
+
 - Signature verification using `stripe.webhooks.constructEvent`
 - Rejects webhooks with invalid signatures
 - Logs all webhook attempts
 
 ### Credential Storage
+
 - All credentials encrypted with AES-256
 - Encryption key from environment variable
 - Never logged or exposed in API responses
 - Decrypted only when needed for API calls
 
 ### Payment Security
+
 - No credit card data stored
 - Stripe handles all payment processing
 - PCI compliance through Stripe
 - Customer IDs stored, not payment methods
 
 ### API Security
+
 - All endpoints protected with JwtAuthGuard
 - Webhook endpoint public but signature-verified
 - User can only access their own subscriptions/integrations
@@ -611,12 +651,15 @@ All billing and integration operations are logged:
 ```typescript
 this.logger.log(`Subscription created for user ${userId}, tier: ${tier}`);
 this.logger.error(`Failed to process webhook ${event.id}: ${error.message}`);
-this.logger.warn('STRIPE_SECRET_KEY not configured - payment features disabled');
+this.logger.warn(
+  'STRIPE_SECRET_KEY not configured - payment features disabled'
+);
 ```
 
 ### Activity Logs
 
 Critical events recorded in `activity_logs`:
+
 - Webhook processing
 - Integration connections/disconnections
 - Subscription changes
@@ -634,6 +677,7 @@ Critical events recorded in `activity_logs`:
 ## Future Enhancements
 
 ### Billing
+
 - [ ] Implement PayPal payment flow
 - [ ] Implement M-Pesa payment flow
 - [ ] Add annual billing option with discount
@@ -643,6 +687,7 @@ Critical events recorded in `activity_logs`:
 - [ ] Add dunning emails for past due subscriptions
 
 ### Integrations
+
 - [ ] Implement actual HubSpot API integration
 - [ ] Implement actual Salesforce API integration
 - [ ] Add OAuth flows for integrations
@@ -676,11 +721,13 @@ DATABASE_URL=postgresql://...
 ### Webhook Not Receiving Events
 
 1. Check Stripe CLI is forwarding:
+
    ```bash
    stripe listen --forward-to http://localhost:3001/billing/webhook
    ```
 
 2. Verify webhook secret matches:
+
    ```bash
    echo $STRIPE_WEBHOOK_SECRET
    ```
@@ -690,6 +737,7 @@ DATABASE_URL=postgresql://...
 ### Integration Credentials Not Working
 
 1. Verify encryption key is set:
+
    ```bash
    echo $ENCRYPTION_KEY
    ```
@@ -712,11 +760,13 @@ DATABASE_URL=postgresql://...
 ## Compliance
 
 ### PCI DSS
+
 - No cardholder data stored
 - All payment processing via Stripe
 - Compliant through Stripe's PCI certification
 
 ### Data Privacy
+
 - Credentials encrypted at rest
 - User can delete all data (GDPR right to erasure)
 - Integration data can be exported
@@ -725,6 +775,7 @@ DATABASE_URL=postgresql://...
 ## Conclusion
 
 The billing and integrations system provides a complete foundation for:
+
 - Stripe subscription management with webhook handling
 - Extension points for additional payment providers
 - Eight CRM/productivity integration stubs ready for implementation

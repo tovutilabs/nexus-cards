@@ -24,6 +24,7 @@ All Prompt 8 requirements have been fully implemented, including the three prior
 ### 1. Progressive Web App (PWA) ✅ COMPLETE
 
 #### Manifest Configuration
+
 - **File:** `/apps/web/public/manifest.json` (2,212 bytes)
 - **Status:** ✅ Created and verified
 - **Contents:**
@@ -35,6 +36,7 @@ All Prompt 8 requirements have been fully implemented, including the three prior
   - Background color: #ffffff
 
 #### Service Worker
+
 - **File:** `/apps/web/public/sw.js` (3,672 bytes)
 - **Status:** ✅ Created and verified
 - **Cache Strategies:**
@@ -45,6 +47,7 @@ All Prompt 8 requirements have been fully implemented, including the three prior
 - **Offline Support:** Fallback to `/offline` page when network unavailable
 
 #### PWA Features
+
 - ✅ Installable as standalone app
 - ✅ Service worker registration with update detection
 - ✅ Offline fallback page (`/apps/web/src/app/offline/page.tsx`)
@@ -57,11 +60,13 @@ All Prompt 8 requirements have been fully implemented, including the three prior
 ### 2. Internationalization (i18n) ✅ COMPLETE
 
 #### Framework Integration
+
 - **Package:** `next-intl` v4.5.3
 - **Status:** ✅ Fully configured
 - **Locales:** English (en), Spanish (es)
 
 #### Translation Namespaces (7 Total)
+
 1. ✅ `common` - Shared UI strings
 2. ✅ `dashboard` - Dashboard pages
 3. ✅ `publicCard` - Public card page
@@ -71,15 +76,18 @@ All Prompt 8 requirements have been fully implemented, including the three prior
 7. ✅ `errors` - Error messages
 
 #### Translation Files
+
 - ✅ `/apps/web/messages/en.json` - Complete English translations
 - ✅ `/apps/web/messages/es.json` - Complete Spanish translations
 
 #### Language Switching
+
 - ✅ Dashboard language switcher component (`/apps/web/src/components/language-switcher.tsx`)
 - ✅ LocaleSwitcher in navigation
 - ✅ URL-based locale routing
 
 #### Bilingual Card Support ✅ ENHANCED
+
 - **Database Fields:**
   - ✅ `secondaryLanguage` (String, optional)
   - ✅ `firstName_es` (String, optional)
@@ -92,6 +100,7 @@ All Prompt 8 requirements have been fully implemented, including the three prior
 - **Shared Types:** ✅ Updated in `/packages/shared/src/types/card.types.ts`
 
 #### **NEW: Public Card Language Switcher** ✅
+
 - **File:** `/apps/web/src/app/p/[slug]/page.tsx` (Enhanced)
 - **Features:**
   - Language toggle button in card header (Globe icon + EN/ES label)
@@ -101,17 +110,22 @@ All Prompt 8 requirements have been fully implemented, including the three prior
   - Smooth transitions with backdrop blur effect
   - Fully accessible with ARIA labels
 - **Implementation:**
+
   ```tsx
   const [language, setLanguage] = useState<'primary' | 'secondary'>('primary');
-  
-  const hasSecondaryLanguage = card.secondaryLanguage && (
-    card.firstName_es || card.lastName_es || card.jobTitle_es || 
-    card.company_es || card.bio_es
-  );
-  
-  const displayName = language === 'secondary' && card.firstName_es && card.lastName_es
-    ? `${card.firstName_es} ${card.lastName_es}`
-    : `${card.firstName} ${card.lastName}`;
+
+  const hasSecondaryLanguage =
+    card.secondaryLanguage &&
+    (card.firstName_es ||
+      card.lastName_es ||
+      card.jobTitle_es ||
+      card.company_es ||
+      card.bio_es);
+
+  const displayName =
+    language === 'secondary' && card.firstName_es && card.lastName_es
+      ? `${card.firstName_es} ${card.lastName_es}`
+      : `${card.firstName} ${card.lastName}`;
   ```
 
 ---
@@ -119,30 +133,36 @@ All Prompt 8 requirements have been fully implemented, including the three prior
 ### 3. Accessibility Requirements ✅ COMPLETE + ENHANCED
 
 #### WCAG 2.1 AA Compliance
+
 - ✅ Keyboard navigation support
 - ✅ ARIA roles on interactive elements
 - ✅ Visible focus states (focus rings, outlines)
 - ✅ Color contrast compliance (semantic color tokens)
 
 #### Accessibility Components
+
 1. ✅ **Skip-to-content link** (`/apps/web/src/components/skip-to-content.tsx`)
    - Allows keyboard users to bypass navigation
    - Visible on focus
 
 #### Accessibility Hooks
+
 1. ✅ **useFocusTrap** - Modal and dialog focus management
 2. ✅ **useAnnouncement** - Screen reader announcements
 3. ✅ **useKeyboardNavigation** - Global keyboard event handling
 
 #### CSS Utilities
+
 - ✅ `.sr-only` - Screen reader only content
 - ✅ `.not-sr-only` - Restore visibility
 - ✅ `.focus-visible-ring` - Focus outline utility
 - ✅ `.focus-within-ring` - Focus within utility
 
 #### **NEW: Reduced Motion Support** ✅ WCAG AAA
+
 - **File:** `/apps/web/src/app/globals.css` (Enhanced)
 - **Media Query:**
+
   ```css
   @media (prefers-reduced-motion: reduce) {
     *,
@@ -157,6 +177,7 @@ All Prompt 8 requirements have been fully implemented, including the three prior
   ```
 
 - **Hook:** `/apps/web/src/hooks/useReducedMotion.ts`
+
   ```tsx
   export function useReducedMotion(): boolean {
     // Detects prefers-reduced-motion preference
@@ -178,6 +199,7 @@ All Prompt 8 requirements have been fully implemented, including the three prior
 ### 4. Advanced Analytics ✅ COMPLETE
 
 #### Event Types (6 Total)
+
 1. ✅ `CARD_VIEW` - Public card page view
 2. ✅ `CONTACT_EXCHANGE` - Contact form submission
 3. ✅ `LINK_CLICK` - Social/contact link click
@@ -186,6 +208,7 @@ All Prompt 8 requirements have been fully implemented, including the three prior
 6. ✅ `SHARE` - Card share action
 
 #### Metadata Dimensions (5/6)
+
 1. ✅ `device_type` - mobile, tablet, desktop (extracted from User-Agent)
 2. ✅ `referrer` - HTTP Referer header
 3. ✅ `user_agent` - Full User-Agent string
@@ -193,27 +216,30 @@ All Prompt 8 requirements have been fully implemented, including the three prior
 5. ❌ `geo_country` - **NOT IMPLEMENTED** (requires IP geolocation service)
 
 #### Metadata Extraction
+
 - **File:** `/apps/api/src/public-api/public-api.controller.ts`
 - **Method:** `extractMetadata(req, headers)`
 - **Implementation:**
+
   ```typescript
   private extractMetadata(req: Request, headers: any) {
     const userAgent = headers['user-agent'] || '';
     const referrer = headers['referer'] || headers['referrer'] || '';
     const ip = req.ip || req.socket.remoteAddress || '';
-    
+
     // Device type detection
-    const device_type = /mobile/i.test(userAgent) 
-      ? 'mobile' 
-      : /tablet/i.test(userAgent) 
-        ? 'tablet' 
+    const device_type = /mobile/i.test(userAgent)
+      ? 'mobile'
+      : /tablet/i.test(userAgent)
+        ? 'tablet'
         : 'desktop';
-    
+
     return { device_type, referrer, user_agent: userAgent, ip };
   }
   ```
 
 #### Dashboard UI
+
 - **Page:** `/apps/web/src/app/dashboard/analytics/page.tsx`
 - **Status:** ✅ Fully implemented
 - **Features:**
@@ -223,6 +249,7 @@ All Prompt 8 requirements have been fully implemented, including the three prior
   - Three chart types with data visualization
 
 #### Chart Components
+
 - **File:** `/apps/web/src/components/charts.tsx`
 - **Charts:**
   1. ✅ **LineChart** - Views over time
@@ -240,6 +267,7 @@ All Prompt 8 requirements have been fully implemented, including the three prior
      - Color-coded segments
 
 #### Backend Implementation
+
 - **Controller:** `/apps/api/src/analytics/analytics.controller.ts`
   - ✅ `GET /api/analytics` - User analytics with time range and card filter
   - ✅ `GET /api/analytics/card/:cardId` - Specific card analytics
@@ -256,6 +284,7 @@ All Prompt 8 requirements have been fully implemented, including the three prior
   - ✅ `getDeviceBreakdownForUser(userId, startDate, cardId?)` - Device distribution
 
 #### Database Models
+
 - ✅ `AnalyticsEvent` - Raw event storage
 - ✅ `AnalyticsCardDaily` - Daily aggregation (unique index on cardId + date)
 
@@ -264,6 +293,7 @@ All Prompt 8 requirements have been fully implemented, including the three prior
 ### 5. A/B Testing ✅ COMPLETE + BACKEND API
 
 #### Database Models
+
 1. ✅ **Experiment** Model
    - Fields: id, name, description, targetPath, variants (JSON), status, startDate, endDate, conversionGoal
    - Status enum: DRAFT, ACTIVE, PAUSED, COMPLETED
@@ -279,9 +309,11 @@ All Prompt 8 requirements have been fully implemented, including the three prior
    - Logs events per variant for analysis
 
 #### Migration
+
 - ✅ `20251119082756_add_ab_testing` - Applied successfully
 
 #### Frontend Hook
+
 - **File:** `/apps/web/src/hooks/useExperiment.tsx`
 - **Features:**
   - Session ID generation and persistence (localStorage)
@@ -290,17 +322,19 @@ All Prompt 8 requirements have been fully implemented, including the three prior
   - Event tracking: `trackEvent(eventType, data?)`
   - Loading and error states
 - **Usage:**
+
   ```tsx
   const { variant, isLoading, trackEvent } = useExperiment('experiment_id');
-  
+
   if (variant === 'variant_a') {
     // Show variant A
   }
-  
+
   trackEvent('button_click', { buttonId: 'cta' });
   ```
 
 #### **NEW: Backend API Endpoints** ✅
+
 - **Module:** `/apps/api/src/experiments/experiments.module.ts`
 - **Controller:** `/apps/api/src/experiments/experiments.controller.ts`
 - **Service:** `/apps/api/src/experiments/experiments.service.ts`
@@ -327,18 +361,21 @@ All Prompt 8 requirements have been fully implemented, including the three prior
    - Stores metadata in eventData JSON field
 
 **Service Layer:**
+
 - ✅ `getExperiment(id)` - Fetches and validates experiment
 - ✅ `assignVariant(experimentId, sessionId, userId?)` - Handles assignment logic
 - ✅ `logEvent(params)` - Logs event with validation
 - ✅ `selectVariant(variants)` - Weighted random selection algorithm
 
 **Repository Layer:**
+
 - ✅ `findById(id)` - Query experiment by ID
 - ✅ `findAssignment(experimentId, sessionId, userId?)` - Find existing assignment
 - ✅ `createAssignment(data)` - Create new assignment
 - ✅ `createEvent(data)` - Create event record
 
 **Verification:**
+
 ```bash
 # API routes successfully mapped:
 [RouterExplorer] Mapped {/api/experiments/:id, GET} route
@@ -347,6 +384,7 @@ All Prompt 8 requirements have been fully implemented, including the three prior
 ```
 
 **Integration:**
+
 - ✅ ExperimentsModule imported in AppModule
 - ✅ Prisma client regenerated with Experiment models
 - ✅ TypeScript compilation successful
@@ -357,6 +395,7 @@ All Prompt 8 requirements have been fully implemented, including the three prior
 ### 6. Documentation ✅ COMPLETE
 
 #### Primary Documentation
+
 - ✅ `/docs/dev/pwa-i18n-accessibility.md` (Comprehensive guide)
   - PWA implementation details
   - Service worker strategies
@@ -370,10 +409,12 @@ All Prompt 8 requirements have been fully implemented, including the three prior
   - Deployment checklist
 
 #### Verification Documentation
+
 - ✅ `/docs/dev/PROMPT8_VERIFICATION.md` (Initial gap analysis)
 - ✅ `/docs/dev/PROMPT8_FINAL_VERIFICATION.md` (This document)
 
 #### Enhancement Documentation
+
 - Summary of three priority enhancements implemented
 - Implementation details for each feature
 - Verification steps and results
@@ -448,30 +489,30 @@ All Prompt 8 requirements have been fully implemented, including the three prior
 
 ### ✅ All Core Requirements COMPLETE
 
-| Requirement | Status | Evidence |
-|------------|--------|----------|
-| PWA Manifest | ✅ Complete | `/apps/web/public/manifest.json` (2,212 bytes) |
-| Service Worker | ✅ Complete | `/apps/web/public/sw.js` (3,672 bytes) |
-| Offline Support | ✅ Complete | Cache strategies + offline page |
-| i18n Framework | ✅ Complete | next-intl v4.5.3 configured |
-| Translation Files | ✅ Complete | 7 namespaces, 2 languages |
-| Bilingual Cards | ✅ Complete | Schema + migration + UI toggle |
-| Accessibility | ✅ Complete | WCAG 2.1 AA + AAA (reduced motion) |
-| Analytics Events | ✅ Complete | 6 event types tracked |
-| Analytics Metadata | ✅ 83% | 5/6 dimensions (missing geo_country) |
-| Analytics Dashboard | ✅ Complete | 3 charts + overview metrics |
-| A/B Testing Models | ✅ Complete | 3 models + migration |
-| A/B Testing Frontend | ✅ Complete | useExperiment hook |
-| A/B Testing Backend | ✅ Complete | 3 API endpoints implemented |
-| Documentation | ✅ Complete | 3 comprehensive docs |
+| Requirement          | Status      | Evidence                                       |
+| -------------------- | ----------- | ---------------------------------------------- |
+| PWA Manifest         | ✅ Complete | `/apps/web/public/manifest.json` (2,212 bytes) |
+| Service Worker       | ✅ Complete | `/apps/web/public/sw.js` (3,672 bytes)         |
+| Offline Support      | ✅ Complete | Cache strategies + offline page                |
+| i18n Framework       | ✅ Complete | next-intl v4.5.3 configured                    |
+| Translation Files    | ✅ Complete | 7 namespaces, 2 languages                      |
+| Bilingual Cards      | ✅ Complete | Schema + migration + UI toggle                 |
+| Accessibility        | ✅ Complete | WCAG 2.1 AA + AAA (reduced motion)             |
+| Analytics Events     | ✅ Complete | 6 event types tracked                          |
+| Analytics Metadata   | ✅ 83%      | 5/6 dimensions (missing geo_country)           |
+| Analytics Dashboard  | ✅ Complete | 3 charts + overview metrics                    |
+| A/B Testing Models   | ✅ Complete | 3 models + migration                           |
+| A/B Testing Frontend | ✅ Complete | useExperiment hook                             |
+| A/B Testing Backend  | ✅ Complete | 3 API endpoints implemented                    |
+| Documentation        | ✅ Complete | 3 comprehensive docs                           |
 
 ### ✅ All Priority Enhancements COMPLETE
 
-| Enhancement | Status | Files Modified/Created | Verification |
-|------------|--------|----------------------|--------------|
-| Language Switcher | ✅ Complete | `/apps/web/src/app/p/[slug]/page.tsx` | Globe icon, EN/ES toggle functional |
-| A/B Testing API | ✅ Complete | 4 new files + AppModule update | 3 routes mapped to /api/experiments/* |
-| Reduced Motion | ✅ Complete | globals.css + useReducedMotion hook + charts | All 3 charts respect preference |
+| Enhancement       | Status      | Files Modified/Created                       | Verification                           |
+| ----------------- | ----------- | -------------------------------------------- | -------------------------------------- |
+| Language Switcher | ✅ Complete | `/apps/web/src/app/p/[slug]/page.tsx`        | Globe icon, EN/ES toggle functional    |
+| A/B Testing API   | ✅ Complete | 4 new files + AppModule update               | 3 routes mapped to /api/experiments/\* |
+| Reduced Motion    | ✅ Complete | globals.css + useReducedMotion hook + charts | All 3 charts respect preference        |
 
 ### API Health Status
 
@@ -508,6 +549,7 @@ Routes Mapped:
 ### Required Criteria (All Met)
 
 ✅ **App is installable as a PWA**
+
 - Manifest.json complete with 8 icon sizes, shortcuts, theme
 - Service worker with 4 caching strategies
 - Offline fallback page
@@ -515,12 +557,14 @@ Routes Mapped:
 - **Status:** Implementation complete, manual testing required
 
 ✅ **Public cards work offline**
+
 - Service worker caches /p/[slug] pages
 - Network-first strategy with offline fallback
 - Cached version available when offline
 - **Status:** Implementation complete, manual testing required
 
 ✅ **Two languages supported**
+
 - English and Spanish fully configured
 - 7 translation namespaces complete
 - Language switcher in dashboard
@@ -528,6 +572,7 @@ Routes Mapped:
 - **Status:** Fully implemented and verified
 
 ✅ **Accessible and analytics-enabled**
+
 - WCAG 2.1 AA compliance (keyboard, ARIA, focus, contrast)
 - **NEW:** WCAG AAA reduced motion support
 - Analytics dashboard with 3 chart types
@@ -536,6 +581,7 @@ Routes Mapped:
 - **Status:** Fully implemented and verified
 
 ✅ **A/B Testing Scaffolding**
+
 - 3 database models (Experiment, ExperimentAssignment, ExperimentEvent)
 - Frontend useExperiment hook with weighted selection
 - **NEW:** Complete backend API (3 endpoints)

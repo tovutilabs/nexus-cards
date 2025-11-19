@@ -42,9 +42,7 @@ export default function AdminDashboardPage() {
               <Users className="h-6 w-6 text-indigo-600" />
             </div>
           </div>
-          <p className="text-sm text-gray-500 mt-4">
-            Registered accounts
-          </p>
+          <p className="text-sm text-gray-500 mt-4">Registered accounts</p>
         </Card>
 
         <Card className="p-6">
@@ -59,9 +57,7 @@ export default function AdminDashboardPage() {
               <CreditCard className="h-6 w-6 text-green-600" />
             </div>
           </div>
-          <p className="text-sm text-gray-500 mt-4">
-            Active digital cards
-          </p>
+          <p className="text-sm text-gray-500 mt-4">Active digital cards</p>
         </Card>
 
         <Card className="p-6">
@@ -76,9 +72,7 @@ export default function AdminDashboardPage() {
               <Mail className="h-6 w-6 text-blue-600" />
             </div>
           </div>
-          <p className="text-sm text-gray-500 mt-4">
-            Total exchanges
-          </p>
+          <p className="text-sm text-gray-500 mt-4">Total exchanges</p>
         </Card>
 
         <Card className="p-6">
@@ -93,9 +87,7 @@ export default function AdminDashboardPage() {
               <TrendingUp className="h-6 w-6 text-purple-600" />
             </div>
           </div>
-          <p className="text-sm text-gray-500 mt-4">
-            Registered tags
-          </p>
+          <p className="text-sm text-gray-500 mt-4">Registered tags</p>
         </Card>
       </div>
 

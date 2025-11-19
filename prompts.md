@@ -18,30 +18,24 @@ We are building _Nexus Cards_, a digital business card platform using:
 ### **Tasks**
 
 1. **Monorepo Setup**
-
    - Create a monorepo structure with:
-
      - `apps/web` -> Next.js App Router (TypeScript)
      - `apps/api` -> NestJS (TypeScript)
      - `packages/shared` -> shared types & utilities (DTOs, enums, helpers)
 
 2. **Environment Configuration**
-
    - Configure environment files for `local`, `staging`, and `production`.
    - Ensure dev environment assumes **local Docker**.
    - Ensure production assumes **containerized VPS deployment**.
    - No secrets may be committed.
 
 3. **Repository Tooling**
-
    - Configure ESLint + Prettier (consistent formatting).
    - Add root-level `README.md` explaining setup.
    - Set up workspace management using PNPM or NPM workspaces.
 
 4. **Root-Level Scripts**
-
    - Create scripts:
-
      - `dev:web`, `dev:api`, `dev`
      - `build:web`, `build:api`
      - `build`
@@ -81,9 +75,7 @@ We need to define the _Nexus UI Design System_ including tokens, typography, spa
 ### **Tasks**
 
 1. **Tailwind Theme Tokens**
-
    - Add semantic token categories:
-
      - primary, secondary, accent
      - muted, border
      - background, foreground
@@ -93,15 +85,12 @@ We need to define the _Nexus UI Design System_ including tokens, typography, spa
    - Add a typographic scale (Headings, Body, Display).
 
 2. **shadcn/ui Integration**
-
    - Install shadcn/ui in `apps/web`.
    - Generate base components: Button, Card, Input, Dialog, DropdownMenu, Tabs, Badge, Alert, Sheet, Skeleton, Toast, Form, etc.
    - Map shadcn theme tokens to Nexus tokens.
 
 3. **Nexus UI Primitives**
-
    - Create wrappers:
-
      - NexusButton
      - NexusCard
      - NexusInput
@@ -110,7 +99,6 @@ We need to define the _Nexus UI Design System_ including tokens, typography, spa
      - NexusLayoutShell (primary dashboard layout wrapper)
 
 4. **Design System Showcase**
-
    - Add `/design-system` route showing every primitive and state.
 
 ### **Tests**
@@ -147,10 +135,8 @@ Users, Cards, NFC Tags, Contacts, Analytics, Subscriptions, Integrations, etc.
 ### **Tasks**
 
 1. **ORM**
-
    - Use **Prisma** as the single ORM for all database access (no additional ORMs).
    - Model (in `schema.prisma`):
-
      - User
      - Card
      - NfcTag (with direct `cardId` FK; no join table)
@@ -162,13 +148,10 @@ Users, Cards, NFC Tags, Contacts, Analytics, Subscriptions, Integrations, etc.
      - IntegrationTokens
 
 2. **Migrations**
-
    - Implement migration pipeline runnable inside Docker.
 
 3. **NestJS Modules**
-
    - Create modules:
-
      - Auth
      - Users
      - Cards
@@ -213,33 +196,26 @@ Implement secure authentication (email/password), subscription awareness, and us
 ### **Tasks**
 
 1. **Email + Password Auth**
-
    - Register, login, logout
    - Password hashing, session or JWT tokens
    - Forgot password flow
 
 2. **User Profiles**
-
    - Update name/title/avatar/etc.
 
 3. **Subscription Awareness**
-
    - Apply tier limits:
-
      - Free: 1 card
      - Professional: 5 cards
      - Premium: unlimited
 
    - Analytics retention:
-
      - Free: 7 days
      - Pro: 90 days
      - Premium: unlimited
 
 4. **Frontend Integration**
-
    - Pages:
-
      - `/auth/login`
      - `/auth/register`
      - `/auth/forgot-password`
@@ -278,7 +254,6 @@ This step implements the core business logic of Nexus Cards: card creation, cust
 #### **1. Card Management (Backend)**
 
 - Implement CRUD for cards:
-
   - title
   - user profile fields
   - contact info
@@ -296,7 +271,6 @@ This step implements the core business logic of Nexus Cards: card creation, cust
   `GET /public/cards/:slug`
 - Returns safe-to-display card payload only.
 - Supports:
-
   - public/private visibility
   - passwords (if enabled in a later prompt)
   - analytics logging
@@ -312,7 +286,6 @@ Implement **ALL NFC rules** from PRD/TDD:
 - Each NFC tag may be associated with **at most one card at a time** (1 tag -> 0/1 card); a **card may have multiple tags**, and a tag **must never link to multiple cards**.
 - No `NfcTagCardLink` join table is allowed; the 1-tag-to-1-card relation is enforced via a single `cardId` on `NfcTag`.
 - When scanning an NFC tag:
-
   1. If UID exists but unassigned -> "unassigned tag" screen
   2. If UID assigned to user but not linked to a card -> card association screen
   3. If UID assigned & linked -> redirect to associated card
@@ -324,7 +297,6 @@ Implement **ALL NFC rules** from PRD/TDD:
 - Non-users can submit their contact information on a public card.
 - Store in `Contact` table linked to card owner.
 - User contact wallet features:
-
   - list
   - view
   - edit
@@ -393,22 +365,17 @@ Prompt 5 created the basic Admin dashboard shell (`/admin/*`) and NFC/user/analy
 ### **Tasks**
 
 1. **Admin Auth & RBAC Enforcement**
-
    - Implement server-side checks so that all `/admin/*` routes are only accessible to authenticated users with `role = ADMIN`.
    - Add shared guards/middleware/hooks on both frontend and backend:
-
      - Backend: NestJS guards (e.g., `RolesGuard`) on all admin controllers (`/admin/nfc`, `/admin/users`, `/admin/analytics`, `/admin/settings`).
      - Frontend: Next.js route protection for `/admin/*` (redirect non-admin users to a safe page such as `/dashboard`).
 
    - Ensure non-admin users cannot see Admin nav items or hit Admin APIs (even by typing URLs directly).
 
 2. **Admin NFC Inventory Management UI**
-
    - Wire `/admin/nfc` to the real NFC inventory endpoints defined in the `NfcModule`:
-
      - List all NFC tags in inventory with columns: UID, status (`AVAILABLE`, `ASSIGNED`, `REVOKED`), assigned user, createdAt/updatedAt.
      - Actions:
-
        - Import UIDs (CSV upload) -> calls admin NFC import endpoint.
        - Assign tag to user -> calls admin assign endpoint with `userId`.
        - Revoke tag -> calls revoke endpoint (sets status to `REVOKED`, clears `assignedUserId` and `cardId`).
@@ -417,12 +384,9 @@ Prompt 5 created the basic Admin dashboard shell (`/admin/*`) and NFC/user/analy
    - Log admin actions to an audit trail (optional stub for now).
 
 3. **Admin User & Subscription Management UI**
-
    - Wire `/admin/users` to Users and Subscription APIs:
-
      - List users with: email, name, `role`, subscription tier, status, createdAt.
      - Actions:
-
        - Change user `role` between `USER` and `ADMIN` (with confirmation).
        - View and adjust subscription tier (`FREE`, `PRO`, `PREMIUM`) and subscription status (`ACTIVE`, `CANCELED`, `PAST_DUE`).
        - View high-level usage metrics per user (cards count, contacts count, recent activity).
@@ -430,11 +394,8 @@ Prompt 5 created the basic Admin dashboard shell (`/admin/*`) and NFC/user/analy
    - Enforce that only admins can modify roles/tiers; regular users must never see this UI or hit these endpoints.
 
 4. **Admin Global Analytics & Reporting**
-
    - Wire `/admin/analytics` to the daily analytics aggregates (`AnalyticsCardDaily`) and any existing analytics APIs:
-
      - Provide global, cross-tenant views with **daily granularity only**:
-
        - Total cards, total views, total NFC taps per day.
        - Top cards by views/taps.
        - Per-plan usage summaries (FREE vs PRO vs PREMIUM).
@@ -444,9 +405,7 @@ Prompt 5 created the basic Admin dashboard shell (`/admin/*`) and NFC/user/analy
    - Ensure that all analytics queries continue to use daily-level buckets and do not introduce hourly/sub-daily aggregations.
 
 5. **Admin System Settings**
-
    - Wire `/admin/settings` to system configuration endpoints (or stubs if full implementation is deferred):
-
      - Feature flags (e.g., enabling/disabling experimental features).
      - Global limits (e.g., default card limits, default analytics retention windows aligned with tiers).
      - Contact/analytics export options (e.g., enabling exports, configuring destinations).
@@ -456,20 +415,16 @@ Prompt 5 created the basic Admin dashboard shell (`/admin/*`) and NFC/user/analy
 ### **Tests**
 
 - RBAC:
-
   - Non-authenticated and non-admin users cannot access any `/admin/*` routes (UI or API); they receive correct HTTP status codes (e.g., 401/403) and are redirected away from Admin pages.
   - Admin users can fully access `/admin/*` routes.
 
 - NFC Inventory:
-
   - Import, assign, and revoke flows work end-to-end from the `/admin/nfc` UI through to the database (NfcTag records updated correctly).
 
 - User Management:
-
   - Changing `role` and subscription tier from `/admin/users` updates the underlying user/subscription records.
 
 - Analytics:
-
   - `/admin/analytics` charts reflect `AnalyticsCardDaily` data and respect date ranges.
   - No non-daily aggregation is introduced.
 
@@ -507,22 +462,18 @@ Real payment integrations must at least support Stripe; others may use integrati
 #### **1. Payment Processing**
 
 - Integrate Stripe subscription flow:
-
   - Create checkout session
   - Handle webhook for:
-
     - subscription.created
     - subscription.updated
     - invoice.payment_succeeded
 
 - On successful payment:
-
   - Update user’s subscription tier
   - Update renewal dates
   - Apply tier limits
 
 - Add extension scaffolding for:
-
   - PayPal
   - M-Pesa
 
@@ -596,7 +547,6 @@ The PRD requires that Nexus Cards operate as a PWA for public card viewing, supp
 
 - Add `manifest.json` with icons in required sizes.
 - Add service worker:
-
   - Cache-first for static assets.
   - Network-first for dynamic content.
   - Offline fallback for public card pages.
@@ -607,7 +557,6 @@ The PRD requires that Nexus Cards operate as a PWA for public card viewing, supp
 
 - Integrate `next-intl` or `next-i18next`.
 - Set up translation namespaces:
-
   - common
   - dashboard
   - public-card
@@ -615,14 +564,12 @@ The PRD requires that Nexus Cards operate as a PWA for public card viewing, supp
 
 - Add language switcher to dashboard.
 - Implement bilingual card support:
-
   - Secondary language fields in card model.
   - Switcher toggle on the public card.
 
 #### **3. Accessibility Requirements**
 
 - Audit pages for WCAG 2.1 AA compliance:
-
   - Keyboard navigation
   - ARIA roles
   - Visible focus states
@@ -645,7 +592,6 @@ Create:
 
 - `/dashboard/analytics`
 - Basic charts:
-
   - views over time
   - top referrals
   - device breakdown
@@ -703,7 +649,6 @@ Premium tier offers public API access. PRD also requires webhook systems for eve
 - Premium users can generate API keys.
 - Endpoint for rotating/regenerating keys.
 - Implement API key–protected endpoints:
-
   - List user cards
   - Retrieve card metadata
   - List contacts
@@ -731,7 +676,6 @@ Users can:
 #### **3. Testing (Backend + Frontend)**
 
 - Unit tests for:
-
   - Auth
   - Cards
   - NFC
@@ -739,12 +683,10 @@ Users can:
   - Billing
 
 - Integration tests for:
-
   - Analytics logging
   - API key validation
 
 - Frontend tests:
-
   - Component tests (Nexus UI primitives)
   - E2E flows (Playwright/Cypress)
 
@@ -887,7 +829,6 @@ PRD Section 2.4 requires advanced card customization, templates, design packs, i
 
 - Implement template registry with ~15 starter templates.
 - Industry theme collections:
-
   - Tech
   - Corporate
   - Creative
@@ -895,7 +836,6 @@ PRD Section 2.4 requires advanced card customization, templates, design packs, i
   - Healthcare
 
 - Include template metadata fields:
-
   - allowed tiers
   - recommended industries
   - color scheme lock/unlock
@@ -906,7 +846,6 @@ PRD Section 2.4 requires advanced card customization, templates, design packs, i
 - Font family switching.
 - Logo upload support.
 - Background:
-
   - Solid colors
   - Gradients
   - Patterns
@@ -982,7 +921,6 @@ Parameters:
 - Link expiration date
 - Password protection (optional)
 - Permission profile:
-
   - view only
   - allow contact submission
 
@@ -1089,7 +1027,6 @@ Implement fields:
 #### **6. Contact Wallet UI Enhancements**
 
 - `/dashboard/contacts` filters:
-
   - tags
   - categories
   - favorites
@@ -1133,7 +1070,6 @@ Implement logic:
 - When user A views user B’s card while logged in, record a “connection event.”
 - If user B later views user A’s card, mark as **mutual connection**.
 - Store:
-
   - first_interaction_date
   - last_interaction_date
   - view_count
@@ -1155,16 +1091,13 @@ Create:
 
 - `/dashboard/network`
 - Graph rendered using a lightweight library:
-
   - force-directed graph or radial graph
 
 - Nodes:
-
   - users
   - contacts
 
 - Edges:
-
   - views
   - mutual connections
   - relationships via imported contacts
@@ -1180,7 +1113,6 @@ Implement:
 
 - Profile completeness scoring
 - Suggestions:
-
   - missing fields
   - recommended links
   - recommended templates
@@ -1260,7 +1192,6 @@ Actions:
 
 - Webhook-based integration
 - Allow any event to be emitted:
-
   - contact_created
   - card_view
   - link_click
@@ -1350,20 +1281,17 @@ UI:
 #### **2. Offline Mode Enhancements**
 
 - Cache fallback for:
-
   - dashboard shell (partial)
   - public card images
   - translations
 
 - Handle:
-
   - offline contact submission (queued)
 
 #### **3. Accessibility Completion**
 
 - Full WCAG 2.1 AA audit
 - Fix:
-
   - headings
   - ARIA roles
   - focus traps

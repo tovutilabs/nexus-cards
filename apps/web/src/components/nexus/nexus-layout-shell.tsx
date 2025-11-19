@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 
-export interface NexusLayoutShellProps extends React.HTMLAttributes<HTMLDivElement> {
+export interface NexusLayoutShellProps
+  extends React.HTMLAttributes<HTMLDivElement> {
   children: React.ReactNode;
   header?: React.ReactNode;
   sidebar?: React.ReactNode;
@@ -17,13 +18,24 @@ const maxWidthClasses = {
   full: 'max-w-full',
 };
 
-const NexusLayoutShell = React.forwardRef<HTMLDivElement, NexusLayoutShellProps>(
-  ({ children, header, sidebar, maxWidth = 'xl', className, ...props }, ref) => {
+const NexusLayoutShell = React.forwardRef<
+  HTMLDivElement,
+  NexusLayoutShellProps
+>(
+  (
+    { children, header, sidebar, maxWidth = 'xl', className, ...props },
+    ref
+  ) => {
     return (
       <div className="min-h-screen bg-background" ref={ref} {...props}>
         {header && (
           <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-            <div className={cn('container flex h-16 items-center', maxWidthClasses[maxWidth])}>
+            <div
+              className={cn(
+                'container flex h-16 items-center',
+                maxWidthClasses[maxWidth]
+              )}
+            >
               {header}
             </div>
           </header>
@@ -35,7 +47,9 @@ const NexusLayoutShell = React.forwardRef<HTMLDivElement, NexusLayoutShellProps>
             </aside>
           )}
           <main className={cn('flex-1 py-6', className)}>
-            <div className={cn('container', maxWidthClasses[maxWidth])}>{children}</div>
+            <div className={cn('container', maxWidthClasses[maxWidth])}>
+              {children}
+            </div>
           </main>
         </div>
       </div>

@@ -51,9 +51,7 @@ const integrationProviders = [
     name: 'HubSpot',
     description: 'Manage contacts in HubSpot',
     icon: '🟠',
-    fields: [
-      { key: 'apiKey', label: 'API Key', type: 'password' },
-    ],
+    fields: [{ key: 'apiKey', label: 'API Key', type: 'password' }],
   },
   {
     id: 'ZOHO',
@@ -81,18 +79,14 @@ const integrationProviders = [
     name: 'SendGrid',
     description: 'Send emails via SendGrid',
     icon: '✉️',
-    fields: [
-      { key: 'apiKey', label: 'API Key', type: 'password' },
-    ],
+    fields: [{ key: 'apiKey', label: 'API Key', type: 'password' }],
   },
   {
     id: 'ZAPIER',
     name: 'Zapier',
     description: 'Trigger Zapier workflows',
     icon: '⚡',
-    fields: [
-      { key: 'webhookUrl', label: 'Webhook URL', type: 'text' },
-    ],
+    fields: [{ key: 'webhookUrl', label: 'Webhook URL', type: 'text' }],
   },
   {
     id: 'GOOGLE_DRIVE',
@@ -110,9 +104,7 @@ const integrationProviders = [
     name: 'Dropbox',
     description: 'Store contact files in Dropbox',
     icon: '📦',
-    fields: [
-      { key: 'accessToken', label: 'Access Token', type: 'password' },
-    ],
+    fields: [{ key: 'accessToken', label: 'Access Token', type: 'password' }],
   },
 ];
 
@@ -174,7 +166,8 @@ export default function IntegrationsPage() {
     } catch (error: any) {
       toast({
         title: 'Connection Failed',
-        description: error.message || `Failed to connect to ${selectedProvider.name}`,
+        description:
+          error.message || `Failed to connect to ${selectedProvider.name}`,
         variant: 'destructive',
       });
     } finally {
@@ -200,7 +193,8 @@ export default function IntegrationsPage() {
     } catch (error: any) {
       toast({
         title: 'Error',
-        description: error.message || `Failed to disconnect from ${providerName}`,
+        description:
+          error.message || `Failed to disconnect from ${providerName}`,
         variant: 'destructive',
       });
     }
@@ -210,7 +204,10 @@ export default function IntegrationsPage() {
     setSyncing(provider);
     try {
       const apiClient = createApiClient();
-      const result = await apiClient.post(`/integrations/${provider}/sync`, {}) as { message?: string };
+      const result = (await apiClient.post(
+        `/integrations/${provider}/sync`,
+        {}
+      )) as { message?: string };
 
       toast({
         title: 'Sync Complete',
@@ -291,8 +288,12 @@ export default function IntegrationsPage() {
                 <div className="flex items-start gap-3">
                   <div className="text-3xl">{provider.icon}</div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{provider.name}</h3>
-                    <p className="text-sm text-gray-600 mt-1">{provider.description}</p>
+                    <h3 className="font-semibold text-gray-900">
+                      {provider.name}
+                    </h3>
+                    <p className="text-sm text-gray-600 mt-1">
+                      {provider.description}
+                    </p>
                   </div>
                 </div>
                 {connected && integration && getStatusBadge(integration.status)}
@@ -300,7 +301,8 @@ export default function IntegrationsPage() {
 
               {integration?.lastSyncAt && (
                 <p className="text-xs text-gray-500 mb-4">
-                  Last synced: {new Date(integration.lastSyncAt).toLocaleString()}
+                  Last synced:{' '}
+                  {new Date(integration.lastSyncAt).toLocaleString()}
                 </p>
               )}
 
@@ -336,7 +338,9 @@ export default function IntegrationsPage() {
                     <Button
                       size="sm"
                       variant="destructive"
-                      onClick={() => handleDisconnect(provider.id, provider.name)}
+                      onClick={() =>
+                        handleDisconnect(provider.id, provider.name)
+                      }
                     >
                       <Unlink className="h-4 w-4 mr-2" />
                       Disconnect
@@ -357,11 +361,10 @@ export default function IntegrationsPage() {
       <Dialog open={connectDialogOpen} onOpenChange={setConnectDialogOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle>
-              Connect to {selectedProvider?.name}
-            </DialogTitle>
+            <DialogTitle>Connect to {selectedProvider?.name}</DialogTitle>
             <DialogDescription>
-              Enter your {selectedProvider?.name} credentials to establish the connection.
+              Enter your {selectedProvider?.name} credentials to establish the
+              connection.
             </DialogDescription>
           </DialogHeader>
 
@@ -374,7 +377,10 @@ export default function IntegrationsPage() {
                   type={field.type}
                   value={credentials[field.key] || ''}
                   onChange={(e) =>
-                    setCredentials({ ...credentials, [field.key]: e.target.value })
+                    setCredentials({
+                      ...credentials,
+                      [field.key]: e.target.value,
+                    })
                   }
                   placeholder={`Enter ${field.label.toLowerCase()}`}
                 />
@@ -383,7 +389,10 @@ export default function IntegrationsPage() {
           </div>
 
           <DialogFooter>
-            <Button variant="outline" onClick={() => setConnectDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setConnectDialogOpen(false)}
+            >
               Cancel
             </Button>
             <Button onClick={handleConnect} disabled={processing}>

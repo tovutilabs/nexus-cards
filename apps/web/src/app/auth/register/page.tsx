@@ -49,8 +49,12 @@ export default function RegisterPage() {
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-12">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Create your account</h1>
-          <p className="mt-2 text-gray-600">Get started with Nexus Cards for free</p>
+          <h1 className="text-3xl font-bold text-gray-900">
+            Create your account
+          </h1>
+          <p className="mt-2 text-gray-600">
+            Get started with Nexus Cards for free
+          </p>
         </div>
 
         <NexusCard>
@@ -63,7 +67,10 @@ export default function RegisterPage() {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="firstName"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   First name
                 </label>
                 <NexusInput
@@ -74,12 +81,17 @@ export default function RegisterPage() {
                   disabled={isLoading}
                 />
                 {errors.firstName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.firstName.message}
+                  </p>
                 )}
               </div>
 
               <div>
-                <label htmlFor="lastName" className="block text-sm font-medium text-gray-700 mb-2">
+                <label
+                  htmlFor="lastName"
+                  className="block text-sm font-medium text-gray-700 mb-2"
+                >
                   Last name
                 </label>
                 <NexusInput
@@ -90,13 +102,18 @@ export default function RegisterPage() {
                   disabled={isLoading}
                 />
                 {errors.lastName && (
-                  <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>
+                  <p className="mt-1 text-sm text-red-600">
+                    {errors.lastName.message}
+                  </p>
                 )}
               </div>
             </div>
 
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Email address
               </label>
               <NexusInput
@@ -107,12 +124,17 @@ export default function RegisterPage() {
                 disabled={isLoading}
               />
               {errors.email && (
-                <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.email.message}
+                </p>
               )}
             </div>
 
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-gray-700 mb-2"
+              >
                 Password
               </label>
               <NexusInput
@@ -123,9 +145,13 @@ export default function RegisterPage() {
                 disabled={isLoading}
               />
               {errors.password && (
-                <p className="mt-1 text-sm text-red-600">{errors.password.message}</p>
+                <p className="mt-1 text-sm text-red-600">
+                  {errors.password.message}
+                </p>
               )}
-              <p className="mt-1 text-xs text-gray-500">Must be at least 8 characters</p>
+              <p className="mt-1 text-xs text-gray-500">
+                Must be at least 8 characters
+              </p>
             </div>
 
             <NexusButton type="submit" fullWidth disabled={isLoading}>
@@ -136,7 +162,10 @@ export default function RegisterPage() {
           <div className="mt-6 text-center">
             <p className="text-sm text-gray-600">
               Already have an account?{' '}
-              <Link href="/auth/login" className="font-medium text-indigo-600 hover:text-indigo-500">
+              <Link
+                href="/auth/login"
+                className="font-medium text-indigo-600 hover:text-indigo-500"
+              >
                 Sign in
               </Link>
             </p>

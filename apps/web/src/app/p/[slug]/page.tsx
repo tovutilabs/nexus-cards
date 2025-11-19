@@ -10,7 +10,6 @@ import { Label } from '@/components/ui/label';
 import { 
   Mail, 
   Phone, 
-  Building2, 
   MapPin, 
   Globe, 
   Linkedin, 

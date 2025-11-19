@@ -72,6 +72,11 @@ export default function AdminUsersPage() {
   const [userUsage, setUserUsage] = useState<any>(null);
   const { toast } = useToast();
 
+  useEffect(() => {
+    loadUsers();
+    loadStats();
+  }, [roleFilter, tierFilter]);
+
   const loadUsers = async () => {
     try {
       setLoading(true);
@@ -106,11 +111,6 @@ export default function AdminUsersPage() {
     }
   };
 
-  useEffect(() => {
-    loadUsers();
-    loadStats();
-  }, [roleFilter, tierFilter, loadUsers, loadStats]);
-
   const handleRoleChange = async () => {
     if (!selectedUser) return;
 
@@ -142,7 +142,7 @@ export default function AdminUsersPage() {
     }
   };
 
-  const handleTierChange = async () => {
+  const handleTierChange = async () {
     if (!selectedUser) return;
 
     setSaving(true);

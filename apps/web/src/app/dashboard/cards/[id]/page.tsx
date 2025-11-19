@@ -78,7 +78,7 @@ export default function EditCardPage() {
     setSaving(true);
     try {
       const apiClient = createApiClient();
-      const { id, slug, createdAt, updatedAt, userId, ...updateData } = card as any;
+      const { id: _id, slug: _slug, createdAt: _createdAt, updatedAt: _updatedAt, userId: _userId, ...updateData } = card as any;
       await apiClient.patch(`/cards/${cardId}`, updateData);
       alert('Card updated successfully!');
     } catch (error) {

@@ -23,7 +23,6 @@ import {
   getCardClasses,
   getCardStyles,
   getLayoutContainerClass,
-  getTextSizeClass,
 } from '@/lib/card-styles';
 
 interface CardData {

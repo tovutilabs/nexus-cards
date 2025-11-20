@@ -168,7 +168,7 @@ describe('ContactsService', () => {
 
       mockContactsRepository.findByUserId.mockResolvedValue(mockContacts);
 
-      const vcfData = await service.exportContacts(userId, 'VCF');
+      const vcfData = await service.exportContacts(userId, { format: 'VCF' as any });
 
       expect(vcfData).toContain('BEGIN:VCARD');
       expect(vcfData).toContain('VERSION:3.0');
@@ -196,7 +196,7 @@ describe('ContactsService', () => {
 
       mockContactsRepository.findByUserId.mockResolvedValue(mockContacts);
 
-      const csvData = await service.exportContacts(userId, 'CSV');
+      const csvData = await service.exportContacts(userId, { format: 'CSV' as any });
 
       expect(csvData).toContain('firstName');
       expect(csvData).toContain('John');

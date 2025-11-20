@@ -79,6 +79,13 @@ enum AnalyticsEventType {
   SHARE
 }
 
+enum ContactSource {
+  FORM
+  QR
+  IMPORTED
+  MANUAL
+}
+
 model User {
   id                String   @id @default(cuid())
   email             String   @unique
@@ -295,7 +302,7 @@ model NfcTag {
 }
 
 model Contact {
-  id              String   @id @default(cuid())
+  id              String        @id @default(cuid())
   userId          String
   cardId          String
   firstName       String
@@ -306,10 +313,13 @@ model Contact {
   jobTitle        String?
   notes           String?
   tags            String[]
+  category        String?
+  favorite        Boolean       @default(false)
+  source          ContactSource @default(FORM)
   metadata        Json?
-  exchangedAt     DateTime @default(now())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  exchangedAt     DateTime      @default(now())
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   card            Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
@@ -317,6 +327,8 @@ model Contact {
   @@index([userId])
   @@index([cardId])
   @@index([email])
+  @@index([favorite])
+  @@index([category])
   @@map("contacts")
 }
 

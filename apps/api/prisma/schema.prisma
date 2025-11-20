@@ -113,6 +113,10 @@ model User {
   oauthProviders    OAuthProvider[]
   connectionsAsUserA Connection[]   @relation("ConnectionsAsUserA")
   connectionsAsUserB Connection[]   @relation("ConnectionsAsUserB")
+  notifications     Notification[]
+  notificationPreferences NotificationPreferences?
+  dataExports       UserDataExport[]
+  cookieConsents    CookieConsent[]
 
   @@index([email])
   @@map("users")
@@ -636,4 +640,101 @@ model Connection {
   @@index([isMutual])
   @@index([strengthScore])
   @@map("connections")
+}
+
+enum NotificationType {
+  NEW_CONTACT
+  ANALYTICS_MILESTONE
+  PAYMENT_SUCCESS
+  NFC_TAG_SCAN
+  CARD_VIEW_MILESTONE
+  SUBSCRIPTION_EXPIRING
+  EXPERIMENT_RESULT
+}
+
+enum NotificationChannel {
+  IN_APP
+  EMAIL
+  PUSH
+}
+
+model Notification {
+  id          String            @id @default(cuid())
+  userId      String
+  type        NotificationType
+  title       String
+  message     String
+  link        String?
+  metadata    Json?
+  isRead      Boolean           @default(false)
+  readAt      DateTime?
+  createdAt   DateTime          @default(now())
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+  @@index([createdAt])
+  @@map("notifications")
+}
+
+model NotificationPreferences {
+  id                    String              @id @default(cuid())
+  userId                String              @unique
+  newContactEmail       Boolean             @default(true)
+  newContactInApp       Boolean             @default(true)
+  analyticsMilestoneEmail Boolean           @default(true)
+  analyticsMilestoneInApp Boolean           @default(true)
+  paymentSuccessEmail   Boolean             @default(true)
+  paymentSuccessInApp   Boolean             @default(true)
+  nfcTagScanEmail       Boolean             @default(false)
+  nfcTagScanInApp       Boolean             @default(true)
+  cardViewMilestoneEmail Boolean            @default(true)
+  cardViewMilestoneInApp Boolean            @default(true)
+  subscriptionExpiringEmail Boolean         @default(true)
+  subscriptionExpiringInApp Boolean         @default(true)
+  marketingEmails       Boolean             @default(false)
+  createdAt             DateTime            @default(now())
+  updatedAt             DateTime            @updatedAt
+
+  user                  User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("notification_preferences")
+}
+
+model UserDataExport {
+  id          String   @id @default(cuid())
+  userId      String
+  format      String
+  status      String
+  fileUrl     String?
+  expiresAt   DateTime
+  createdAt   DateTime @default(now())
+
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([status])
+  @@index([expiresAt])
+  @@map("user_data_exports")
+}
+
+model CookieConsent {
+  id                String   @id @default(cuid())
+  userId            String?
+  sessionId         String
+  necessary         Boolean  @default(true)
+  analytics         Boolean  @default(false)
+  marketing         Boolean  @default(false)
+  preferences       Boolean  @default(false)
+  ipAddress         String?
+  userAgent         String?
+  consentedAt       DateTime @default(now())
+
+  user              User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([sessionId])
+  @@index([userId])
+  @@index([consentedAt])
+  @@map("cookie_consents")
 }

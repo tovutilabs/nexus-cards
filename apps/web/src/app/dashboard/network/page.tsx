@@ -5,7 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { createApiClient } from '@/lib/api-client';
-import { Users, Network, ZoomIn, ZoomOut, Maximize2, Star } from 'lucide-react';
+import { Users, Network, ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 
 interface NetworkNode {
   id: string;
@@ -122,7 +122,7 @@ export default function NetworkPage() {
         const dx = node2.x! - node1.x!;
         const dy = node2.y! - node1.y!;
         const distSq = dx * dx + dy * dy + 0.1;
-        const dist = Math.sqrt(distSq);
+        const _dist = Math.sqrt(distSq);
 
         fx -= (repulsionStrength * dx) / distSq;
         fy -= (repulsionStrength * dy) / distSq;

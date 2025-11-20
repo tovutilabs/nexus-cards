@@ -21,6 +21,8 @@ import { TemplatesModule } from './templates/templates.module';
 import { ShareLinksModule } from './share-links/share-links.module';
 import { ConnectionsModule } from './connections/connections.module';
 import { SuggestionsModule } from './suggestions/suggestions.module';
+import { NotificationsModule } from './notifications/notifications.module';
+import { ComplianceModule } from './compliance/compliance.module';
 
 @Module({
   imports: [
@@ -52,6 +54,8 @@ import { SuggestionsModule } from './suggestions/suggestions.module';
     ShareLinksModule,
     ConnectionsModule,
     SuggestionsModule,
+    NotificationsModule,
+    ComplianceModule,
   ],
   controllers: [AppController],
   providers: [AppService],

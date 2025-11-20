@@ -1,0 +1,53 @@
+{
+  "ci": {
+    "collect": {
+      "numberOfRuns": 3,
+      "startServerCommand": "npm run dev",
+      "startServerReadyPattern": "Local:",
+      "url": [
+        "http://localhost:3000/",
+        "http://localhost:3000/auth/login",
+        "http://localhost:3000/auth/register",
+        "http://localhost:3000/accessibility",
+        "http://localhost:3000/privacy-policy",
+        "http://localhost:3000/terms-of-service",
+        "http://localhost:3000/faq"
+      ],
+      "settings": {
+        "preset": "desktop",
+        "onlyCategories": ["accessibility", "best-practices", "seo"]
+      }
+    },
+    "assert": {
+      "preset": "lighthouse:recommended",
+      "assertions": {
+        "categories:accessibility": ["error", { "minScore": 0.9 }],
+        "categories:best-practices": ["warn", { "minScore": 0.85 }],
+        "categories:seo": ["warn", { "minScore": 0.8 }],
+        "color-contrast": "error",
+        "document-title": "error",
+        "html-has-lang": "error",
+        "html-lang-valid": "error",
+        "meta-description": "warn",
+        "heading-order": "error",
+        "link-name": "error",
+        "button-name": "error",
+        "image-alt": "error",
+        "label": "error",
+        "valid-lang": "error",
+        "aria-allowed-attr": "error",
+        "aria-required-attr": "error",
+        "aria-required-children": "error",
+        "aria-required-parent": "error",
+        "aria-roles": "error",
+        "aria-valid-attr": "error",
+        "aria-valid-attr-value": "error",
+        "duplicate-id-aria": "error",
+        "duplicate-id-active": "error"
+      }
+    },
+    "upload": {
+      "target": "temporary-public-storage"
+    }
+  }
+}

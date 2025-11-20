@@ -1,0 +1,461 @@
+import { Injectable, BadRequestException } from '@nestjs/common';
+import { PrismaService } from '../prisma/prisma.service';
+import { WebhookEventType, Prisma } from '@prisma/client';
+import axios from 'axios';
+import * as crypto from 'crypto';
+
+export interface WebhookPayload {
+  event: string;
+  timestamp: string;
+  data: any;
+}
+
+@Injectable()
+export class WebhooksRepository {
+  constructor(private readonly prisma: PrismaService) {}
+
+  async createSubscription(data: {
+    userId: string;
+    url: string;
+    events: WebhookEventType[];
+    secret?: string;
+  }) {
+    const secret = data.secret || crypto.randomBytes(32).toString('hex');
+    
+    return this.prisma.webhookSubscription.create({
+      data: {
+        userId: data.userId,
+        url: data.url,
+        events: data.events,
+        secret,
+        isActive: true,
+      },
+    });
+  }
+
+  async listSubscriptions(userId: string) {
+    return this.prisma.webhookSubscription.findMany({
+      where: { userId },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  async getUserWebhooks(userId: string) {
+    return this.listSubscriptions(userId);
+  }
+
+  async getWebhookSubscription(userId: string, id: string) {
+    const webhook = await this.prisma.webhookSubscription.findFirst({
+      where: { id, userId },
+    });
+
+    if (!webhook) {
+      throw new BadRequestException('Webhook subscription not found');
+    }
+
+    return webhook;
+  }
+
+  async getWebhookDeliveries(userId: string, webhookId: string, limit: number = 50) {
+    const webhook = await this.prisma.webhookSubscription.findFirst({
+      where: { id: webhookId, userId },
+    });
+
+    if (!webhook) {
+      throw new BadRequestException('Webhook subscription not found');
+    }
+
+    return this.prisma.webhookDelivery.findMany({
+      where: { webhookSubscriptionId: webhookId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+  }
+
+  async retryDelivery(userId: string, webhookId: string, deliveryId: string) {
+    const webhook = await this.prisma.webhookSubscription.findFirst({
+      where: { id: webhookId, userId },
+    });
+
+    if (!webhook) {
+      throw new BadRequestException('Webhook subscription not found');
+    }
+
+    const targetDelivery = await this.prisma.webhookDelivery.findFirst({
+      where: { id: deliveryId, webhookSubscriptionId: webhookId },
+    });
+
+    if (!targetDelivery) {
+      throw new BadRequestException('Delivery not found');
+    }
+
+    if (targetDelivery.deliveredAt) {
+      throw new BadRequestException('Delivery already succeeded');
+    }
+
+    try {
+      const signature = crypto
+        .createHmac('sha256', webhook.secret)
+        .update(JSON.stringify(targetDelivery.payload))
+        .digest('hex');
+
+      const response = await axios.post(webhook.url, targetDelivery.payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Webhook-Signature': signature,
+          'X-Webhook-Id': webhook.id,
+        },
+        timeout: 10000,
+      });
+
+      await this.prisma.webhookDelivery.update({
+        where: { id: deliveryId },
+        data: {
+          deliveredAt: new Date(),
+          responseStatus: response.status,
+          attemptCount: { increment: 1 },
+        },
+      });
+
+      return { success: true, status: response.status };
+    } catch (error: any) {
+      const nextAttempt = targetDelivery.attemptCount + 1;
+      const nextRetryAt: Date | undefined =
+        nextAttempt < 5
+          ? new Date(Date.now() + Math.pow(2, nextAttempt) * 1000)
+          : undefined;
+
+      await this.prisma.webhookDelivery.update({
+        where: { id: deliveryId },
+        data: {
+          failedAt: new Date(),
+          responseStatus: error.response?.status || 0,
+          attemptCount: { increment: 1 },
+          nextRetryAt,
+        },
+      });
+
+      throw new BadRequestException(
+        `Webhook delivery failed: ${error.message}`
+      );
+    }
+  }
+
+  async findSubscriptionById(id: string) {
+    return this.prisma.webhookSubscription.findUnique({
+      where: { id },
+    });
+  }
+
+  async updateSubscription(id: string, data: {
+    url?: string;
+    events?: WebhookEventType[];
+    isActive?: boolean;
+  }) {
+    return this.prisma.webhookSubscription.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async deleteSubscription(id: string) {
+    return this.prisma.webhookSubscription.delete({
+      where: { id },
+    });
+  }
+
+  async findActiveSubscriptionsByEvent(userId: string, event: WebhookEventType) {
+    return this.prisma.webhookSubscription.findMany({
+      where: {
+        userId,
+        isActive: true,
+        events: {
+          has: event,
+        },
+      },
+    });
+  }
+
+  async createDelivery(data: {
+    webhookSubscriptionId: string;
+    eventType: WebhookEventType;
+    payload: any;
+  }) {
+    return this.prisma.webhookDelivery.create({
+      data: {
+        webhookSubscriptionId: data.webhookSubscriptionId,
+        eventType: data.eventType,
+        payload: data.payload as Prisma.InputJsonValue,
+        attemptCount: 0,
+      },
+    });
+  }
+
+  async updateDelivery(id: string, data: {
+    responseStatus?: number;
+    responseBody?: string;
+    attemptCount?: number;
+    deliveredAt?: Date | null;
+    failedAt?: Date | null;
+    nextRetryAt?: Date | null;
+  }) {
+    return this.prisma.webhookDelivery.update({
+      where: { id },
+      data,
+    });
+  }
+
+  async findPendingDeliveries(limit: number = 100) {
+    return this.prisma.webhookDelivery.findMany({
+      where: {
+        OR: [
+          { status: WebhookDeliveryStatus.PENDING },
+          {
+            status: WebhookDeliveryStatus.RETRYING,
+            nextRetryAt: {
+              lte: new Date(),
+            },
+          },
+        ],
+      },
+      include: {
+        webhookSubscription: true,
+      },
+      take: limit,
+      orderBy: { createdAt: 'asc' },
+    });
+  }
+
+  async findDeliveriesBySubscription(subscriptionId: string, limit: number = 50) {
+    return this.prisma.webhookDelivery.findMany({
+      where: { webhookSubscriptionId: subscriptionId },
+      orderBy: { createdAt: 'desc' },
+      take: limit,
+    });
+  }
+
+  async incrementFailureCount(subscriptionId: string) {
+    return this.prisma.webhookSubscription.update({
+      where: { id: subscriptionId },
+      data: {
+        failureCount: {
+          increment: 1,
+        },
+      },
+    });
+  }
+
+  async resetFailureCount(subscriptionId: string) {
+    return this.prisma.webhookSubscription.update({
+      where: { id: subscriptionId },
+      data: {
+        failureCount: 0,
+      },
+    });
+  }
+}
+
+@Injectable()
+export class WebhooksService {
+  private readonly MAX_RETRY_ATTEMPTS = 5;
+  private readonly RETRY_DELAYS = [60, 300, 900, 3600, 7200];
+  
+  constructor(private readonly webhooksRepository: WebhooksRepository) {}
+
+  private generateSignature(payload: string, secret: string): string {
+    return crypto
+      .createHmac('sha256', secret)
+      .update(payload)
+      .digest('hex');
+  }
+
+  async createWebhookSubscription(userId: string, url: string, events: WebhookEventType[]) {
+    if (!url || !url.startsWith('https://') && !url.startsWith('http://')) {
+      throw new BadRequestException('Invalid webhook URL. Must be HTTP or HTTPS.');
+    }
+
+    if (!events || events.length === 0) {
+      throw new BadRequestException('At least one event type is required.');
+    }
+
+    return this.webhooksRepository.createSubscription({
+      userId,
+      url,
+      events,
+    });
+  }
+
+  async getUserWebhooks(userId: string) {
+    return this.webhooksRepository.findSubscriptionsByUser(userId);
+  }
+
+  async getWebhookSubscription(userId: string, webhookId: string) {
+    const webhook = await this.webhooksRepository.findSubscriptionById(webhookId);
+    
+    if (!webhook || webhook.userId !== userId) {
+      throw new NotFoundException('Webhook subscription not found');
+    }
+
+    return webhook;
+  }
+
+  async updateWebhookSubscription(userId: string, webhookId: string, data: {
+    url?: string;
+    events?: WebhookEventType[];
+    isActive?: boolean;
+  }) {
+    const webhook = await this.getWebhookSubscription(userId, webhookId);
+
+    if (data.url && !data.url.startsWith('https://') && !data.url.startsWith('http://')) {
+      throw new BadRequestException('Invalid webhook URL. Must be HTTP or HTTPS.');
+    }
+
+    return this.webhooksRepository.updateSubscription(webhook.id, data);
+  }
+
+  async deleteWebhookSubscription(userId: string, webhookId: string) {
+    const webhook = await this.getWebhookSubscription(userId, webhookId);
+    
+    return this.webhooksRepository.deleteSubscription(webhook.id);
+  }
+
+  async triggerWebhook(userId: string, event: WebhookEventType, payload: any) {
+    const subscriptions = await this.webhooksRepository.findActiveSubscriptionsByEvent(userId, event);
+
+    const webhookPayload: WebhookPayload = {
+      event,
+      timestamp: new Date().toISOString(),
+      data: payload,
+    };
+
+    const deliveries = await Promise.all(
+      subscriptions.map(subscription =>
+        this.webhooksRepository.createDelivery({
+          webhookSubscriptionId: subscription.id,
+          eventType: event,
+          payload: webhookPayload,
+        })
+      )
+    );
+
+    await this.processPendingDeliveries();
+
+    return {
+      triggered: deliveries.length,
+      deliveryIds: deliveries.map(d => d.id),
+    };
+  }
+
+  async processPendingDeliveries() {
+    const deliveries = await this.webhooksRepository.findPendingDeliveries(50);
+
+    const results = await Promise.allSettled(
+      deliveries.map(delivery => this.deliverWebhook(delivery))
+    );
+
+    return {
+      processed: results.length,
+      successful: results.filter(r => r.status === 'fulfilled').length,
+      failed: results.filter(r => r.status === 'rejected').length,
+    };
+  }
+
+  private async deliverWebhook(delivery: any) {
+    const subscription = delivery.webhookSubscription;
+    const payloadString = JSON.stringify(delivery.payload);
+    const signature = this.generateSignature(payloadString, subscription.secret);
+
+    try {
+      const response = await axios.post(subscription.url, delivery.payload, {
+        headers: {
+          'Content-Type': 'application/json',
+          'X-Nexus-Signature': signature,
+          'X-Nexus-Event': delivery.eventType,
+          'X-Nexus-Delivery-ID': delivery.id,
+        },
+        timeout: 10000,
+      });
+
+      await this.webhooksRepository.updateDelivery(delivery.id, {
+        status: WebhookDeliveryStatus.SUCCESS,
+        responseStatus: response.status,
+        responseBody: JSON.stringify(response.data).substring(0, 1000),
+        attemptCount: delivery.attemptCount + 1,
+        deliveredAt: new Date(),
+      });
+
+      await this.webhooksRepository.resetFailureCount(subscription.id);
+      await this.webhooksRepository.updateSubscription(subscription.id, {
+        isActive: true,
+      });
+
+      return { success: true };
+    } catch (error) {
+      const attemptCount = delivery.attemptCount + 1;
+      
+      if (attemptCount >= this.MAX_RETRY_ATTEMPTS) {
+        await this.webhooksRepository.updateDelivery(delivery.id, {
+          status: WebhookDeliveryStatus.FAILED,
+          responseStatus: error.response?.status,
+          responseBody: error.message.substring(0, 1000),
+          attemptCount,
+          failedAt: new Date(),
+        });
+
+        await this.webhooksRepository.incrementFailureCount(subscription.id);
+
+        if (subscription.failureCount >= 10) {
+          await this.webhooksRepository.updateSubscription(subscription.id, {
+            isActive: false,
+          });
+        }
+
+        throw error;
+      }
+
+      const nextRetryDelay = this.RETRY_DELAYS[attemptCount - 1] || 7200;
+      const nextRetryAt = new Date(Date.now() + nextRetryDelay * 1000);
+
+      await this.webhooksRepository.updateDelivery(delivery.id, {
+        status: WebhookDeliveryStatus.RETRYING,
+        responseStatus: error.response?.status,
+        responseBody: error.message.substring(0, 1000),
+        attemptCount,
+        nextRetryAt,
+      });
+
+      return { success: false, willRetry: true };
+    }
+  }
+
+  async getWebhookDeliveries(userId: string, webhookId: string, limit: number = 50) {
+    const webhook = await this.getWebhookSubscription(userId, webhookId);
+    
+    return this.webhooksRepository.findDeliveriesBySubscription(webhook.id, limit);
+  }
+
+  async retryDelivery(userId: string, webhookId: string, deliveryId: string) {
+    const webhook = await this.getWebhookSubscription(userId, webhookId);
+    
+    const delivery = await this.webhooksRepository.findPendingDeliveries(1000);
+    const targetDelivery = delivery.find(d => d.id === deliveryId && d.webhookSubscriptionId === webhook.id);
+
+    if (!targetDelivery) {
+      throw new NotFoundException('Delivery not found');
+    }
+
+    if (targetDelivery.status === WebhookDeliveryStatus.SUCCESS) {
+      throw new BadRequestException('Cannot retry a successful delivery');
+    }
+
+    await this.webhooksRepository.updateDelivery(deliveryId, {
+      status: WebhookDeliveryStatus.PENDING,
+      attemptCount: 0,
+      nextRetryAt: null,
+    });
+
+    await this.deliverWebhook(targetDelivery);
+
+    return { success: true };
+  }
+}

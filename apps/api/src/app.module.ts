@@ -18,6 +18,7 @@ import { ApiKeysModule } from './api-keys/api-keys.module';
 import { PublicApiV1Module } from './public-api-v1/public-api-v1.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { TemplatesModule } from './templates/templates.module';
+import { ShareLinksModule } from './share-links/share-links.module';
 
 @Module({
   imports: [
@@ -46,6 +47,7 @@ import { TemplatesModule } from './templates/templates.module';
     PublicApiV1Module,
     WebhooksModule,
     TemplatesModule,
+    ShareLinksModule,
   ],
   controllers: [AppController],
   providers: [AppService],

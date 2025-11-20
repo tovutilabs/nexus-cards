@@ -36,3 +36,18 @@ export enum AnalyticsSource {
   SOCIAL = 'SOCIAL',
   OTHER = 'OTHER',
 }
+
+export enum CardPrivacyMode {
+  PUBLIC = 'PUBLIC',
+  PRIVATE = 'PRIVATE',
+  PASSWORD_PROTECTED = 'PASSWORD_PROTECTED',
+}
+
+export enum ShareChannel {
+  DIRECT = 'DIRECT',
+  WHATSAPP = 'WHATSAPP',
+  TELEGRAM = 'TELEGRAM',
+  SMS = 'SMS',
+  EMAIL = 'EMAIL',
+  LINKEDIN = 'LINKEDIN',
+}

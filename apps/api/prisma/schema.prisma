@@ -32,6 +32,21 @@ enum CardStatus {
   ARCHIVED
 }
 
+enum CardPrivacyMode {
+  PUBLIC
+  PRIVATE
+  PASSWORD_PROTECTED
+}
+
+enum ShareChannel {
+  DIRECT
+  WHATSAPP
+  TELEGRAM
+  SMS
+  EMAIL
+  LINKEDIN
+}
+
 enum NfcTagStatus {
   UNASSOCIATED
   ASSOCIATED
@@ -171,6 +186,11 @@ model Card {
   coverImageUrl   String?
   logoUrl         String?
   
+  // Privacy and sharing
+  privacyMode     CardPrivacyMode @default(PUBLIC)
+  defaultPassword String?
+  allowContactSubmission Boolean @default(true)
+  
   // Theme and styling
   theme           Json?
   customCss       String?
@@ -211,11 +231,13 @@ model Card {
   contacts        Contact[]
   analyticsEvents AnalyticsEvent[]
   analyticsDailies AnalyticsCardDaily[]
+  shareLinks      ShareLink[]
 
   @@index([userId])
   @@index([slug])
   @@index([status])
   @@index([templateId])
+  @@index([privacyMode])
   @@map("cards")
 }
 
@@ -548,4 +570,29 @@ model WebhookDelivery {
   @@index([deliveredAt])
   @@index([nextRetryAt])
   @@map("webhook_deliveries")
+}
+
+model ShareLink {
+  id                    String          @id @default(cuid())
+  cardId                String
+  token                 String          @unique
+  name                  String?
+  privacyMode           CardPrivacyMode @default(PUBLIC)
+  passwordHash          String?
+  expiresAt             DateTime?
+  allowContactSubmission Boolean        @default(true)
+  channel               ShareChannel    @default(DIRECT)
+  shareCount            Int             @default(0)
+  lastAccessedAt        DateTime?
+  revokedAt             DateTime?
+  createdAt             DateTime        @default(now())
+  updatedAt             DateTime        @updatedAt
+
+  card                  Card            @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@index([cardId])
+  @@index([token])
+  @@index([expiresAt])
+  @@index([revokedAt])
+  @@map("share_links")
 }

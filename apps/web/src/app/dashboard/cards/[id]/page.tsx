@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Save, Eye } from 'lucide-react';
+import { ArrowLeft, Save, Eye, Share2 } from 'lucide-react';
 
 interface CardData {
   id: string;
@@ -154,6 +154,14 @@ export default function EditCardPage() {
           >
             {card.status}
           </Badge>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => router.push(`/dashboard/cards/${cardId}/sharing`)}
+          >
+            <Share2 className="h-4 w-4 mr-2" />
+            Share
+          </Button>
           <Button
             variant="outline"
             size="sm"

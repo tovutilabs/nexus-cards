@@ -68,6 +68,10 @@ export class CreateCardDto {
   socialLinks?: Record<string, string>;
 
   @IsOptional()
+  @IsUrl()
+  logoUrl?: string;
+
+  @IsOptional()
   @IsString()
   @MaxLength(50)
   templateId?: string;
@@ -79,6 +83,45 @@ export class CreateCardDto {
   @IsOptional()
   @IsString()
   customCss?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  fontFamily?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  fontSize?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  layout?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  backgroundType?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(50)
+  backgroundColor?: string;
+
+  @IsOptional()
+  @IsString()
+  backgroundImage?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  borderRadius?: string;
+
+  @IsOptional()
+  @IsString()
+  @MaxLength(20)
+  shadowPreset?: string;
 
   @IsOptional()
   @IsEnum(CardStatus)

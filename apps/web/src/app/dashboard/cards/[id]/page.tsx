@@ -178,6 +178,15 @@ export default function EditCardPage() {
           <TabsTrigger value="nfc">NFC Tags ({nfcTags.length})</TabsTrigger>
         </TabsList>
 
+        <div className="flex justify-end">
+          <Button
+            variant="outline"
+            onClick={() => router.push(`/dashboard/cards/${cardId}/customize`)}
+          >
+            🎨 Customize Appearance
+          </Button>
+        </div>
+
         <TabsContent value="info">
           <Card className="p-6">
             <div className="space-y-6">

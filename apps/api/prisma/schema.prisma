@@ -169,9 +169,28 @@ model Card {
   bio             String?
   avatarUrl       String?
   coverImageUrl   String?
+  logoUrl         String?
+  
+  // Theme and styling
   theme           Json?
   customCss       String?
   socialLinks     Json?
+  
+  // Typography settings
+  fontFamily      String?     @default("inter")
+  fontSize        String?     @default("base")
+  
+  // Layout settings
+  layout          String?     @default("vertical")
+  
+  // Background settings
+  backgroundType  String?     @default("solid")
+  backgroundColor String?     @default("#ffffff")
+  backgroundImage String?
+  
+  // Border and shadow
+  borderRadius    String?     @default("md")
+  shadowPreset    String?     @default("sm")
   
   // Bilingual support fields
   secondaryLanguage String?   // 'es', 'fr', etc.
@@ -187,6 +206,7 @@ model Card {
   updatedAt       DateTime    @updatedAt
 
   user            User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  template        CardTemplate? @relation(fields: [templateId], references: [id], onDelete: SetNull)
   nfcTags         NfcTag[]
   contacts        Contact[]
   analyticsEvents AnalyticsEvent[]
@@ -195,7 +215,41 @@ model Card {
   @@index([userId])
   @@index([slug])
   @@index([status])
+  @@index([templateId])
   @@map("cards")
+}
+
+model CardTemplate {
+  id              String   @id @default(cuid())
+  name            String
+  slug            String   @unique
+  description     String?
+  category        String   // 'tech', 'corporate', 'creative', 'legal', 'healthcare', 'general'
+  industry        String[]
+  previewImageUrl String?
+  
+  // Template configuration
+  config          Json     // Stores complete template configuration
+  
+  // Tier restrictions
+  minTier         SubscriptionTier @default(FREE)
+  
+  // Status
+  isActive        Boolean  @default(true)
+  isFeatured      Boolean  @default(false)
+  
+  // Metadata
+  usageCount      Int      @default(0)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  
+  cards           Card[]
+
+  @@index([category])
+  @@index([slug])
+  @@index([minTier])
+  @@index([isActive])
+  @@map("card_templates")
 }
 
 model NfcTag {

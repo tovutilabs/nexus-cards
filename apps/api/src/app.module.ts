@@ -17,6 +17,7 @@ import { ExperimentsModule } from './experiments/experiments.module';
 import { ApiKeysModule } from './api-keys/api-keys.module';
 import { PublicApiV1Module } from './public-api-v1/public-api-v1.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
+import { TemplatesModule } from './templates/templates.module';
 
 @Module({
   imports: [
@@ -44,6 +45,7 @@ import { WebhooksModule } from './webhooks/webhooks.module';
     ApiKeysModule,
     PublicApiV1Module,
     WebhooksModule,
+    TemplatesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -19,6 +19,12 @@ import {
   Download,
   MessageSquare,
 } from 'lucide-react';
+import {
+  getCardClasses,
+  getCardStyles,
+  getLayoutContainerClass,
+  getTextSizeClass,
+} from '@/lib/card-styles';
 
 interface CardData {
   id: string;
@@ -44,6 +50,16 @@ interface CardData {
   jobTitle_es?: string;
   company_es?: string;
   bio_es?: string;
+  logoUrl?: string;
+  fontFamily?: string;
+  fontSize?: string;
+  layout?: string;
+  backgroundType?: string;
+  backgroundColor?: string;
+  backgroundImage?: string;
+  borderRadius?: string;
+  shadowPreset?: string;
+  customCss?: string;
 }
 
 export default function PublicCardPage() {
@@ -213,11 +229,28 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
   const displayBio =
     language === 'secondary' && card.bio_es ? card.bio_es : card.bio;
 
+  const cardClasses = getCardClasses({
+    borderRadius: card.borderRadius || 'md',
+    shadowPreset: card.shadowPreset || 'md',
+  });
+
+  const cardStyles = getCardStyles({
+    backgroundType: card.backgroundType || 'solid',
+    backgroundColor: card.backgroundColor || primaryColor,
+    backgroundImage: card.backgroundImage,
+  });
+
+  const layoutClass = getLayoutContainerClass(card.layout || 'vertical');
+  const textSizeClass = getTextSizeClass(card.fontSize || 'base');
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+      {card.customCss && (
+        <style dangerouslySetInnerHTML={{ __html: card.customCss }} />
+      )}
       <div className="max-w-2xl mx-auto px-4 py-8 sm:px-6 lg:px-8">
         {/* Main Card */}
-        <Card className="overflow-hidden shadow-xl">
+        <Card className={`overflow-hidden ${cardClasses}`} style={cardStyles}>
           {/* Header with gradient and language switcher */}
           <div
             className="relative h-32 bg-gradient-to-r from-indigo-600 to-purple-600"
@@ -244,13 +277,23 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
           </div>
 
           {/* Profile Section */}
-          <div className="relative px-6 pb-6">
+          <div className={`relative px-6 pb-6 ${layoutClass} ${textSizeClass}`}>
             <div className="flex flex-col items-center -mt-16">
-              {/* Avatar placeholder */}
-              <div className="w-32 h-32 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center text-4xl font-bold text-indigo-600">
-                {card.firstName[0]}
-                {card.lastName[0]}
-              </div>
+              {/* Avatar or Logo */}
+              {card.logoUrl ? (
+                <div className="w-32 h-32 rounded-full bg-white border-4 border-white shadow-lg overflow-hidden">
+                  <img
+                    src={card.logoUrl}
+                    alt={`${displayName} logo`}
+                    className="w-full h-full object-cover"
+                  />
+                </div>
+              ) : (
+                <div className="w-32 h-32 rounded-full bg-white border-4 border-white shadow-lg flex items-center justify-center text-4xl font-bold text-indigo-600">
+                  {card.firstName[0]}
+                  {card.lastName[0]}
+                </div>
+              )}
 
               <h1 className="mt-4 text-3xl font-bold text-gray-900">
                 {displayName}

@@ -1,9 +1,13 @@
 import { Injectable } from '@nestjs/common';
 import { AnalyticsRepository } from './analytics.repository';
+import { CacheService } from './cache.service';
 
 @Injectable()
 export class AnalyticsService {
-  constructor(private analyticsRepository: AnalyticsRepository) {}
+  constructor(
+    private analyticsRepository: AnalyticsRepository,
+    private cacheService: CacheService
+  ) {}
 
   async logCardView(
     cardId: string,
@@ -78,10 +82,24 @@ export class AnalyticsService {
     return this.analyticsRepository.getRecentEvents(params);
   }
 
-  async getUserAnalytics(userId: string, days: number = 7, cardId?: string) {
+  async getUserAnalytics(userId: string, days: number = 7, cardId?: string, granularity: 'daily' | 'weekly' | 'monthly' = 'daily') {
     const endDate = new Date();
     const startDate = new Date();
     startDate.setDate(startDate.getDate() - days);
+
+    const cacheKey = this.cacheService.generateKey(
+      'analytics',
+      'user',
+      userId,
+      cardId,
+      days.toString(),
+      granularity
+    );
+
+    const cached = await this.cacheService.get<any>(cacheKey);
+    if (cached) {
+      return cached;
+    }
 
     const stats = await this.analyticsRepository.getUserStats(
       userId,
@@ -90,10 +108,11 @@ export class AnalyticsService {
       cardId
     );
 
-    const viewsOverTime = await this.analyticsRepository.getDailyViewsForUser(
+    const viewsOverTime = await this.analyticsRepository.getTimeSeriesAnalytics(
       userId,
       startDate,
       endDate,
+      granularity,
       cardId
     );
 
@@ -112,14 +131,36 @@ export class AnalyticsService {
         cardId
       );
 
-    return {
+    const browserBreakdown =
+      await this.analyticsRepository.getBrowserBreakdownForUser(
+        userId,
+        startDate,
+        endDate,
+        cardId
+      );
+
+    const geoData = await this.analyticsRepository.getGeoRegionBreakdownForUser(
+      userId,
+      startDate,
+      endDate,
+      cardId
+    );
+
+    const linkClicks = await this.analyticsRepository.getLinkClicksForUser(
+      userId,
+      startDate,
+      endDate,
+      cardId
+    );
+
+    const result = {
       views: stats.totalViews || 0,
       uniqueVisitors: stats.uniqueVisitors || 0,
       contactExchanges: stats.contactExchanges || 0,
       linkClicks: stats.linkClicks || 0,
       viewsOverTime: viewsOverTime.map((item) => ({
         label: item.date,
-        value: item.count,
+        value: item.views,
       })),
       topReferrers: topReferrers.map((item) => ({
         label: item.referrer || 'Direct',
@@ -129,6 +170,91 @@ export class AnalyticsService {
         label: item.deviceType || 'Unknown',
         value: item.count,
       })),
+      browserBreakdown: browserBreakdown.map((item) => ({
+        label: item.browser || 'Unknown',
+        value: item.count,
+      })),
+      geoData: {
+        countries: geoData.countries.map((item) => ({
+          label: item.country,
+          value: item.count,
+        })),
+        regions: geoData.regions.map((item) => ({
+          label: `${item.region}, ${item.country}`,
+          value: item.count,
+        })),
+      },
+      topLinks: linkClicks.slice(0, 10).map((item) => ({
+        url: item.url,
+        label: item.label,
+        clicks: item.clicks,
+      })),
     };
+
+    await this.cacheService.set(cacheKey, result, 300);
+
+    return result;
+  }
+
+  async exportAnalytics(
+    userId: string,
+    format: 'csv' | 'json',
+    startDate?: Date,
+    endDate?: Date,
+    cardId?: string
+  ) {
+    const start = startDate || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+    const end = endDate || new Date();
+
+    const analytics = await this.getUserAnalytics(
+      userId,
+      Math.ceil((end.getTime() - start.getTime()) / (24 * 60 * 60 * 1000)),
+      cardId,
+      'daily'
+    );
+
+    if (format === 'json') {
+      return {
+        format: 'json',
+        data: analytics,
+        metadata: {
+          exportedAt: new Date().toISOString(),
+          userId,
+          cardId,
+          startDate: start.toISOString(),
+          endDate: end.toISOString(),
+        },
+      };
+    }
+
+    if (format === 'csv') {
+      const rows = [
+        ['Date', 'Views', 'Unique Visitors', 'Contact Exchanges', 'Link Clicks'].join(','),
+        ...analytics.viewsOverTime.map((item: any, index: number) => {
+          const row = analytics.viewsOverTime[index];
+          return [
+            row.label,
+            row.value,
+            analytics.uniqueVisitors,
+            analytics.contactExchanges,
+            analytics.linkClicks,
+          ].join(',');
+        }),
+      ].join('\n');
+
+      return {
+        format: 'csv',
+        data: rows,
+        metadata: {
+          exportedAt: new Date().toISOString(),
+          userId,
+          cardId,
+          startDate: start.toISOString(),
+          endDate: end.toISOString(),
+        },
+      };
+    }
+
+    return null;
   }
 }

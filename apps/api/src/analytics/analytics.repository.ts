@@ -189,6 +189,21 @@ export class AnalyticsRepository {
     cardId: string;
     eventType: string;
     metadata?: any;
+    ipAddress?: string;
+    userAgent?: string;
+    referralUrl?: string;
+    country?: string;
+    region?: string;
+    city?: string;
+    deviceType?: string;
+    deviceModel?: string;
+    os?: string;
+    browser?: string;
+    browserVersion?: string;
+    linkUrl?: string;
+    linkLabel?: string;
+    scrollDepth?: number;
+    sessionId?: string;
   }): Promise<AnalyticsEvent> {
     const eventTypeMap: Record<string, string> = {
       VIEW: 'CARD_VIEW',
@@ -204,6 +219,21 @@ export class AnalyticsRepository {
       },
       eventType: prismaEventType as any,
       metadata: data.metadata || {},
+      ipAddress: data.ipAddress,
+      userAgent: data.userAgent,
+      referralUrl: data.referralUrl,
+      country: data.country,
+      region: data.region,
+      city: data.city,
+      deviceType: data.deviceType,
+      deviceModel: data.deviceModel,
+      os: data.os,
+      browser: data.browser,
+      browserVersion: data.browserVersion,
+      linkUrl: data.linkUrl,
+      linkLabel: data.linkLabel,
+      scrollDepth: data.scrollDepth,
+      sessionId: data.sessionId,
       timestamp: new Date(),
     });
   }
@@ -635,13 +665,13 @@ export class AnalyticsRepository {
     const events = await this.prisma.analyticsEvent.findMany({
       where,
       select: {
-        metadata: true,
+        deviceType: true,
       },
     });
 
     const deviceCounts = events.reduce(
       (acc: Record<string, number>, event: any) => {
-        const device = event.metadata?.device_type || 'Unknown';
+        const device = event.deviceType || 'Unknown';
         acc[device] = (acc[device] || 0) + 1;
         return acc;
       },
@@ -651,5 +681,271 @@ export class AnalyticsRepository {
     return Object.entries(deviceCounts)
       .map(([deviceType, count]) => ({ deviceType, count }))
       .sort((a, b) => b.count - a.count);
+  }
+
+  async getBrowserBreakdownForUser(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+    cardId?: string
+  ) {
+    const where: Prisma.AnalyticsEventWhereInput = {
+      card: {
+        userId,
+      },
+      timestamp: {
+        gte: startDate,
+        lte: endDate,
+      },
+      eventType: 'CARD_VIEW',
+    };
+
+    if (cardId) {
+      where.cardId = cardId;
+    }
+
+    const events = await this.prisma.analyticsEvent.findMany({
+      where,
+      select: {
+        browser: true,
+        browserVersion: true,
+      },
+    });
+
+    const browserCounts = events.reduce(
+      (acc: Record<string, number>, event: any) => {
+        const browser = event.browser || 'Unknown';
+        acc[browser] = (acc[browser] || 0) + 1;
+        return acc;
+      },
+      {}
+    );
+
+    return Object.entries(browserCounts)
+      .map(([browser, count]) => ({ browser, count }))
+      .sort((a, b) => b.count - a.count);
+  }
+
+  async getGeoRegionBreakdownForUser(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+    cardId?: string
+  ) {
+    const where: Prisma.AnalyticsEventWhereInput = {
+      card: {
+        userId,
+      },
+      timestamp: {
+        gte: startDate,
+        lte: endDate,
+      },
+      eventType: 'CARD_VIEW',
+    };
+
+    if (cardId) {
+      where.cardId = cardId;
+    }
+
+    const events = await this.prisma.analyticsEvent.findMany({
+      where,
+      select: {
+        country: true,
+        region: true,
+        city: true,
+      },
+    });
+
+    const countryCounts = events.reduce(
+      (acc: Record<string, number>, event: any) => {
+        const country = event.country || 'Unknown';
+        acc[country] = (acc[country] || 0) + 1;
+        return acc;
+      },
+      {}
+    );
+
+    const regionCounts = events.reduce(
+      (acc: Record<string, { country: string; count: number }>, event: any) => {
+        if (event.region) {
+          const key = `${event.country || 'Unknown'}-${event.region}`;
+          if (!acc[key]) {
+            acc[key] = { country: event.country || 'Unknown', count: 0 };
+          }
+          acc[key].count++;
+        }
+        return acc;
+      },
+      {}
+    );
+
+    return {
+      countries: Object.entries(countryCounts)
+        .map(([country, count]) => ({ country, count }))
+        .sort((a, b) => b.count - a.count),
+      regions: Object.entries(regionCounts)
+        .map(([key, data]) => ({
+          region: key.split('-')[1],
+          country: data.country,
+          count: data.count,
+        }))
+        .sort((a, b) => b.count - a.count),
+    };
+  }
+
+  async getLinkClicksForUser(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+    cardId?: string
+  ) {
+    const where: Prisma.AnalyticsEventWhereInput = {
+      card: {
+        userId,
+      },
+      timestamp: {
+        gte: startDate,
+        lte: endDate,
+      },
+      eventType: 'LINK_CLICK',
+    };
+
+    if (cardId) {
+      where.cardId = cardId;
+    }
+
+    const events = await this.prisma.analyticsEvent.findMany({
+      where,
+      select: {
+        linkUrl: true,
+        linkLabel: true,
+      },
+    });
+
+    const linkCounts = events.reduce(
+      (acc: Record<string, { url: string; label: string; clicks: number }>, event: any) => {
+        const url = event.linkUrl || 'Unknown';
+        if (!acc[url]) {
+          acc[url] = {
+            url,
+            label: event.linkLabel || url,
+            clicks: 0,
+          };
+        }
+        acc[url].clicks++;
+        return acc;
+      },
+      {}
+    );
+
+    return Object.values(linkCounts).sort((a, b) => b.clicks - a.clicks);
+  }
+
+  async getTimeSeriesAnalytics(
+    userId: string,
+    startDate: Date,
+    endDate: Date,
+    granularity: 'daily' | 'weekly' | 'monthly',
+    cardId?: string
+  ) {
+    const where: Prisma.AnalyticsCardDailyWhereInput = {
+      card: {
+        userId,
+      },
+      date: {
+        gte: startDate,
+        lte: endDate,
+      },
+    };
+
+    if (cardId) {
+      where.cardId = cardId;
+    }
+
+    const dailyStats = await this.prisma.analyticsCardDaily.findMany({
+      where,
+      orderBy: {
+        date: 'asc',
+      },
+    });
+
+    if (granularity === 'daily') {
+      return dailyStats.map((stat) => ({
+        date: stat.date.toISOString().split('T')[0],
+        views: stat.views,
+        contactExchanges: stat.contactExchanges,
+        linkClicks: stat.linkClicks,
+        qrScans: stat.qrScans,
+        nfcTaps: stat.nfcTaps,
+        shares: stat.shares,
+        uniqueVisitors: stat.uniqueVisitors,
+      }));
+    }
+
+    if (granularity === 'weekly') {
+      const weeklyData: Record<string, any> = {};
+      dailyStats.forEach((stat) => {
+        const date = new Date(stat.date);
+        const weekStart = new Date(date);
+        weekStart.setDate(date.getDate() - date.getDay());
+        const weekKey = weekStart.toISOString().split('T')[0];
+
+        if (!weeklyData[weekKey]) {
+          weeklyData[weekKey] = {
+            date: weekKey,
+            views: 0,
+            contactExchanges: 0,
+            linkClicks: 0,
+            qrScans: 0,
+            nfcTaps: 0,
+            shares: 0,
+            uniqueVisitors: 0,
+          };
+        }
+
+        weeklyData[weekKey].views += stat.views;
+        weeklyData[weekKey].contactExchanges += stat.contactExchanges;
+        weeklyData[weekKey].linkClicks += stat.linkClicks;
+        weeklyData[weekKey].qrScans += stat.qrScans;
+        weeklyData[weekKey].nfcTaps += stat.nfcTaps;
+        weeklyData[weekKey].shares += stat.shares;
+        weeklyData[weekKey].uniqueVisitors += stat.uniqueVisitors;
+      });
+
+      return Object.values(weeklyData);
+    }
+
+    if (granularity === 'monthly') {
+      const monthlyData: Record<string, any> = {};
+      dailyStats.forEach((stat) => {
+        const date = new Date(stat.date);
+        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-01`;
+
+        if (!monthlyData[monthKey]) {
+          monthlyData[monthKey] = {
+            date: monthKey,
+            views: 0,
+            contactExchanges: 0,
+            linkClicks: 0,
+            qrScans: 0,
+            nfcTaps: 0,
+            shares: 0,
+            uniqueVisitors: 0,
+          };
+        }
+
+        monthlyData[monthKey].views += stat.views;
+        monthlyData[monthKey].contactExchanges += stat.contactExchanges;
+        monthlyData[monthKey].linkClicks += stat.linkClicks;
+        monthlyData[monthKey].qrScans += stat.qrScans;
+        monthlyData[monthKey].nfcTaps += stat.nfcTaps;
+        monthlyData[monthKey].shares += stat.shares;
+        monthlyData[monthKey].uniqueVisitors += stat.uniqueVisitors;
+      });
+
+      return Object.values(monthlyData);
+    }
+
+    return [];
   }
 }

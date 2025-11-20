@@ -346,10 +346,19 @@ model AnalyticsEvent {
   ipAddress   String?
   userAgent   String?
   referer     String?
+  referralUrl String?
   country     String?
+  region      String?
   city        String?
-  device      String?
+  deviceType  String?
+  deviceModel String?
+  os          String?
   browser     String?
+  browserVersion String?
+  linkUrl     String?
+  linkLabel   String?
+  scrollDepth Int?
+  sessionId   String?
   timestamp   DateTime            @default(now())
 
   card        Card                @relation(fields: [cardId], references: [id], onDelete: Cascade)
@@ -357,24 +366,34 @@ model AnalyticsEvent {
   @@index([cardId])
   @@index([eventType])
   @@index([timestamp])
+  @@index([country])
+  @@index([deviceType])
+  @@index([browser])
+  @@index([sessionId])
   @@map("analytics_events")
 }
 
 model AnalyticsCardDaily {
-  id              String   @id @default(cuid())
-  cardId          String
-  date            DateTime @db.Date
-  views           Int      @default(0)
-  contactExchanges Int     @default(0)
-  linkClicks      Int      @default(0)
-  qrScans         Int      @default(0)
-  nfcTaps         Int      @default(0)
-  shares          Int      @default(0)
-  uniqueVisitors  Int      @default(0)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  id               String   @id @default(cuid())
+  cardId           String
+  date             DateTime @db.Date
+  views            Int      @default(0)
+  contactExchanges Int      @default(0)
+  linkClicks       Int      @default(0)
+  qrScans          Int      @default(0)
+  nfcTaps          Int      @default(0)
+  shares           Int      @default(0)
+  uniqueVisitors   Int      @default(0)
+  avgScrollDepth   Float?
+  topReferrers     Json?
+  topCountries     Json?
+  deviceBreakdown  Json?
+  browserBreakdown Json?
+  linkCtr          Json?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
 
-  card            Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  card             Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
 
   @@unique([cardId, date])
   @@index([cardId])

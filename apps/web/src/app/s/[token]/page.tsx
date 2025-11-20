@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,6 @@ import { Lock } from 'lucide-react';
 export default function ShareTokenPage() {
   const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
   const token = params.token as string;
 
   const [loading, setLoading] = useState(true);

@@ -51,3 +51,15 @@ export enum ShareChannel {
   EMAIL = 'EMAIL',
   LINKEDIN = 'LINKEDIN',
 }
+
+export enum ContactSource {
+  FORM = 'FORM',
+  QR = 'QR',
+  IMPORTED = 'IMPORTED',
+  MANUAL = 'MANUAL',
+}
+
+export enum ExportFormat {
+  CSV = 'CSV',
+  VCF = 'VCF',
+}

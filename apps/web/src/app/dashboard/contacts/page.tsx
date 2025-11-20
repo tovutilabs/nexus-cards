@@ -1,13 +1,15 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import { createApiClient } from '@/lib/api-client';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, Download, Mail, Phone, Building2, Trash2 } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Search, Download, Mail, Phone, Building2, Trash2, UserPlus, QrCode, Star, Upload } from 'lucide-react';
 
 interface Contact {
   id: string;
@@ -19,34 +21,70 @@ interface Contact {
   jobTitle?: string;
   notes?: string;
   tags: string[];
+  category?: string;
+  favorite: boolean;
+  source: string;
   exchangedAt: string;
   metadata?: Record<string, any>;
 }
 
 export default function ContactsPage() {
+  const router = useRouter();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [filteredContacts, setFilteredContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('all');
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [selectedTags, setSelectedTags] = useState<string[]>([]);
 
   useEffect(() => {
     loadContacts();
   }, []);
 
   useEffect(() => {
+    let filtered = contacts;
+
+    // Search filter
     if (searchTerm) {
-      const filtered = contacts.filter(
+      filtered = filtered.filter(
         (contact) =>
           contact.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           contact.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
           contact.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
           contact.company?.toLowerCase().includes(searchTerm.toLowerCase())
       );
-      setFilteredContacts(filtered);
-    } else {
-      setFilteredContacts(contacts);
     }
-  }, [searchTerm, contacts]);
+
+    // Category filter
+    if (selectedCategory !== 'all') {
+      filtered = filtered.filter(
+        (contact) => contact.category === selectedCategory
+      );
+    }
+
+    // Favorites filter
+    if (showFavoritesOnly) {
+      filtered = filtered.filter((contact) => contact.favorite);
+    }
+
+    // Tags filter
+    if (selectedTags.length > 0) {
+      filtered = filtered.filter((contact) =>
+        selectedTags.some((tag) => contact.tags.includes(tag))
+      );
+    }
+
+    setFilteredContacts(filtered);
+  }, [searchTerm, contacts, selectedCategory, showFavoritesOnly, selectedTags]);
+
+  const allTags = Array.from(
+    new Set(contacts.flatMap((contact) => contact.tags))
+  );
+
+  const categories = Array.from(
+    new Set(contacts.map((contact) => contact.category).filter(Boolean))
+  );
 
   const loadContacts = async () => {
     try {
@@ -76,12 +114,24 @@ export default function ContactsPage() {
     }
   };
 
-  const handleExport = async (format: 'vcf' | 'csv') => {
+  const handleExport = async (format: 'CSV' | 'VCF') => {
     try {
+      const exportData = {
+        format,
+        tags: selectedTags.length > 0 ? selectedTags : undefined,
+        category: selectedCategory !== 'all' ? selectedCategory : undefined,
+        favoritesOnly: showFavoritesOnly || undefined,
+      };
+
       const response = await fetch(
-        `http://localhost:3001/api/contacts/export/${format}`,
+        `http://localhost:3001/api/contacts/export`,
         {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
           credentials: 'include',
+          body: JSON.stringify(exportData),
         }
       );
 
@@ -91,7 +141,7 @@ export default function ContactsPage() {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = `contacts.${format}`;
+      a.download = `contacts.${format.toLowerCase()}`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
@@ -125,30 +175,91 @@ export default function ContactsPage() {
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Contacts</h1>
           <p className="text-gray-600 mt-1">
-            {contacts.length} contact{contacts.length !== 1 ? 's' : ''}{' '}
-            collected
+            {filteredContacts.length} of {contacts.length} contact{contacts.length !== 1 ? 's' : ''}
           </p>
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => handleExport('csv')}>
-            <Download className="h-4 w-4 mr-2" />
-            Export CSV
+          <Button variant="outline" onClick={() => router.push('/dashboard/contacts/import')}>
+            <Upload className="h-4 w-4 mr-2" />
+            Import
           </Button>
-          <Button variant="outline" onClick={() => handleExport('vcf')}>
-            <Download className="h-4 w-4 mr-2" />
-            Export VCF
+          <Button variant="outline" onClick={() => router.push('/dashboard/contacts/scan')}>
+            <QrCode className="h-4 w-4 mr-2" />
+            Scan QR
+          </Button>
+          <Button onClick={() => router.push('/dashboard/contacts/add')}>
+            <UserPlus className="h-4 w-4 mr-2" />
+            Add Contact
           </Button>
         </div>
       </div>
 
-      <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-        <Input
-          placeholder="Search contacts..."
-          className="pl-10"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="md:col-span-2">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+            <Input
+              placeholder="Search contacts..."
+              className="pl-10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
+        </div>
+
+        <Select value={selectedCategory} onValueChange={setSelectedCategory}>
+          <SelectTrigger>
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {categories.map((category) => (
+              <SelectItem key={category} value={category!}>
+                {category}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+
+        <Button
+          variant={showFavoritesOnly ? 'default' : 'outline'}
+          onClick={() => setShowFavoritesOnly(!showFavoritesOnly)}
+        >
+          <Star className="h-4 w-4 mr-2" fill={showFavoritesOnly ? 'currentColor' : 'none'} />
+          Favorites
+        </Button>
+      </div>
+
+      {allTags.length > 0 && (
+        <div className="flex flex-wrap gap-2">
+          {allTags.map((tag) => (
+            <Badge
+              key={tag}
+              variant={selectedTags.includes(tag) ? 'default' : 'outline'}
+              className="cursor-pointer"
+              onClick={() => {
+                if (selectedTags.includes(tag)) {
+                  setSelectedTags(selectedTags.filter((t) => t !== tag));
+                } else {
+                  setSelectedTags([...selectedTags, tag]);
+                }
+              }}
+            >
+              {tag}
+            </Badge>
+          ))}
+        </div>
+      )}
+
+      <div className="flex gap-2">
+        <Button variant="outline" onClick={() => handleExport('CSV')}>
+          <Download className="h-4 w-4 mr-2" />
+          Export CSV
+        </Button>
+        <Button variant="outline" onClick={() => handleExport('VCF')}>
+          <Download className="h-4 w-4 mr-2" />
+          Export VCF
+        </Button>
       </div>
 
       {filteredContacts.length === 0 ? (
@@ -175,11 +286,15 @@ export default function ContactsPage() {
               <div className="flex items-start justify-between">
                 <div className="flex-1">
                   <div className="flex items-center gap-3 mb-2">
+                    {contact.favorite && <Star className="h-5 w-5 text-yellow-500" fill="currentColor" />}
                     <h3 className="text-lg font-semibold text-gray-900">
                       {contact.firstName} {contact.lastName}
                     </h3>
-                    {contact.metadata?.source && (
-                      <Badge variant="outline">{contact.metadata.source}</Badge>
+                    {contact.source && (
+                      <Badge variant="outline">{contact.source}</Badge>
+                    )}
+                    {contact.category && (
+                      <Badge variant="secondary">{contact.category}</Badge>
                     )}
                     {contact.tags.map((tag) => (
                       <Badge key={tag} variant="secondary">

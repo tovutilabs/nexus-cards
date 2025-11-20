@@ -4,11 +4,15 @@ import {
   ForbiddenException,
   BadRequestException,
 } from '@nestjs/common';
+import { ContactSource } from '@nexus-cards/shared';
 import { ContactsRepository } from './contacts.repository';
 import { CardsRepository } from '../cards/cards.repository';
 import { UsersService } from '../users/users.service';
 import { SubmitContactDto } from './dto/submit-contact.dto';
 import { UpdateContactDto } from './dto/update-contact.dto';
+import { ImportContactsDto } from './dto/import-contacts.dto';
+import { CreateManualContactDto } from './dto/manual-contact.dto';
+import { ExportContactsDto } from './dto/export-contacts.dto';
 
 @Injectable()
 export class ContactsService {
@@ -45,8 +49,101 @@ export class ContactsService {
     });
   }
 
-  async getUserContacts(userId: string) {
-    return this.contactsRepository.findByUserId(userId);
+  async getUserContacts(
+    userId: string,
+    filters?: {
+      tags?: string[];
+      category?: string;
+      favoritesOnly?: boolean;
+      search?: string;
+    }
+  ) {
+    return this.contactsRepository.findByUserId(userId, filters);
+  }
+
+  async createManualContact(userId: string, dto: CreateManualContactDto) {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const currentContactCount = await this.contactsRepository.countByUserId(userId);
+    await this.usersService.canAddContact(userId, currentContactCount);
+
+    // Get user's default card for manual contacts
+    const userCards = await this.cardsRepository.findByUserId(userId);
+    if (userCards.length === 0) {
+      throw new BadRequestException('You must have at least one card to add contacts');
+    }
+
+    const defaultCard = userCards.find((c) => c.status === 'PUBLISHED') || userCards[0];
+
+    return this.contactsRepository.createContact({
+      firstName: dto.firstName,
+      lastName: dto.lastName,
+      email: dto.email,
+      phone: dto.phone,
+      company: dto.company,
+      notes: dto.notes,
+      userId,
+      cardId: defaultCard.id,
+      tags: dto.tags,
+      category: dto.category,
+      favorite: dto.favorite,
+      source: dto.source || ContactSource.MANUAL,
+      metadata: { source: 'manual', createdBy: userId },
+    });
+  }
+
+  async importContacts(userId: string, dto: ImportContactsDto) {
+    const user = await this.usersService.findById(userId);
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    const currentContactCount = await this.contactsRepository.countByUserId(userId);
+    const newContactCount = currentContactCount + dto.contacts.length;
+
+    await this.usersService.canAddContact(userId, newContactCount);
+
+    // Get user's default card for imported contacts
+    const userCards = await this.cardsRepository.findByUserId(userId);
+    if (userCards.length === 0) {
+      throw new BadRequestException('You must have at least one card to import contacts');
+    }
+
+    const defaultCard = userCards.find((c) => c.status === 'PUBLISHED') || userCards[0];
+
+    const imported = [];
+    const errors = [];
+
+    for (let i = 0; i < dto.contacts.length; i++) {
+      try {
+        const contact = await this.contactsRepository.createContact({
+          ...dto.contacts[i],
+          userId,
+          cardId: defaultCard.id,
+          tags: dto.tags || [],
+          favorite: dto.favorite || false,
+          source: ContactSource.IMPORTED,
+          metadata: { source: 'import', importedAt: new Date().toISOString() },
+        });
+        imported.push(contact);
+      } catch (error) {
+        errors.push({
+          row: i + 1,
+          data: dto.contacts[i],
+          error: error.message,
+        });
+      }
+    }
+
+    return {
+      success: imported.length,
+      failed: errors.length,
+      imported,
+      errors,
+    };
   }
 
   async getContactById(id: string, userId: string) {
@@ -89,12 +186,18 @@ export class ContactsService {
     return { message: 'Contact deleted successfully' };
   }
 
-  async exportContacts(userId: string, format: 'VCF' | 'CSV') {
-    const contacts = await this.contactsRepository.findByUserId(userId);
+  async exportContacts(userId: string, dto: ExportContactsDto) {
+    const filters = {
+      tags: dto.tags,
+      category: dto.category,
+      favoritesOnly: dto.favoritesOnly,
+    };
 
-    if (format === 'VCF') {
+    const contacts = await this.contactsRepository.findByUserId(userId, filters);
+
+    if (dto.format === 'VCF') {
       return this.generateVCF(contacts);
-    } else if (format === 'CSV') {
+    } else if (dto.format === 'CSV') {
       return this.generateCSV(contacts);
     }
 
@@ -137,8 +240,12 @@ export class ContactsService {
       'Email',
       'Phone',
       'Company',
-      'Notes',
       'Job Title',
+      'Notes',
+      'Category',
+      'Tags',
+      'Favorite',
+      'Source',
       'Exchanged At',
     ];
     const rows = contacts.map((contact) => [
@@ -147,8 +254,12 @@ export class ContactsService {
       this.escapeCsvValue(contact.email || ''),
       this.escapeCsvValue(contact.phone || ''),
       this.escapeCsvValue(contact.company || ''),
-      this.escapeCsvValue(contact.notes || ''),
       this.escapeCsvValue(contact.jobTitle || ''),
+      this.escapeCsvValue(contact.notes || ''),
+      this.escapeCsvValue(contact.category || ''),
+      this.escapeCsvValue(contact.tags?.join('; ') || ''),
+      contact.favorite ? 'Yes' : 'No',
+      contact.source || 'FORM',
       contact.exchangedAt.toISOString(),
     ]);
 

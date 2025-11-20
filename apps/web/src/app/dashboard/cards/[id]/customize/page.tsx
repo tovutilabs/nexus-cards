@@ -291,7 +291,7 @@ export default function CustomizeCardPage({ params }: CustomizeCardPageProps) {
             ← Back to Card Editor
           </button>
           <h1 className="text-3xl font-bold">Customize Card Design</h1>
-          <p className="text-muted-foreground">Personalize your card's appearance</p>
+          <p className="text-muted-foreground">Personalize your card&apos;s appearance</p>
         </div>
 
         {error && (

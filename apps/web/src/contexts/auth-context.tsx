@@ -16,7 +16,7 @@ import { User, LoginData, RegisterData, UpdateProfileData } from '@/lib/auth';
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  login: (data: LoginData) => Promise<void>;
+  login: (data: LoginData) => Promise<any>;
   register: (data: RegisterData) => Promise<void>;
   logout: () => void;
   updateProfile: (data: UpdateProfileData) => Promise<void>;
@@ -49,9 +49,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (data: LoginData) => {
     const apiClient = createApiClient();
-    const result = await apiClient.post<{ user: User }>('/auth/login', data);
-    setUser(result.user);
-    router.push('/dashboard');
+    const result = await apiClient.post<{ user?: User; requires2FA?: boolean }>('/auth/login', data);
+    
+    // Check if 2FA is required
+    if (result.requires2FA) {
+      return result; // Return the result so login page can handle redirect
+    }
+    
+    if (result.user) {
+      setUser(result.user);
+      router.push('/dashboard');
+    }
+    
+    return result;
   };
 
   const register = async (data: RegisterData) => {

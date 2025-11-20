@@ -1,17 +1,20 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { JwtService } from '@nestjs/jwt';
+import { ConfigService } from '@nestjs/config';
 import { UnauthorizedException, ConflictException } from '@nestjs/common';
 import * as argon2 from 'argon2';
 import { AuthService } from './auth.service';
-import { UsersService } from '../users/users.service';
+import { UsersRepository } from '../users/users.repository';
+import { CryptoService } from './crypto.service';
+import { TwoFactorService } from './two-factor.service';
 import { RegisterDto, LoginDto } from './dto/auth.dto';
 
 describe('AuthService', () => {
   let service: AuthService;
-  let _usersService: UsersService;
+  let _usersRepository: UsersRepository;
   let _jwtService: JwtService;
 
-  const mockUsersService = {
+  const mockUsersRepository = {
     findByEmail: jest.fn(),
     create: jest.fn(),
   };
@@ -20,23 +23,48 @@ describe('AuthService', () => {
     sign: jest.fn(),
   };
 
+  const mockCryptoService = {
+    hashPassword: jest.fn().mockImplementation((password: string) => argon2.hash(password)),
+    verifyPassword: jest.fn().mockImplementation((hash: string, password: string) => argon2.verify(hash, password)),
+  };
+
+  const mockTwoFactorService = {
+    verify2FACode: jest.fn(),
+  };
+
+  const mockConfigService = {
+    get: jest.fn().mockReturnValue('mock-secret'),
+  };
+
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         AuthService,
         {
-          provide: UsersService,
-          useValue: mockUsersService,
+          provide: UsersRepository,
+          useValue: mockUsersRepository,
         },
         {
           provide: JwtService,
           useValue: mockJwtService,
         },
+        {
+          provide: CryptoService,
+          useValue: mockCryptoService,
+        },
+        {
+          provide: TwoFactorService,
+          useValue: mockTwoFactorService,
+        },
+        {
+          provide: ConfigService,
+          useValue: mockConfigService,
+        },
       ],
     }).compile();
 
     service = module.get<AuthService>(AuthService);
-    _usersService = module.get<UsersService>(UsersService);
+    _usersRepository = module.get<UsersRepository>(UsersRepository);
     _jwtService = module.get<JwtService>(JwtService);
   });
 
@@ -53,8 +81,8 @@ describe('AuthService', () => {
         lastName: 'User',
       };
 
-      mockUsersService.findByEmail.mockResolvedValue(null);
-      mockUsersService.create.mockResolvedValue({
+      mockUsersRepository.findByEmail.mockResolvedValue(null);
+      mockUsersRepository.create.mockResolvedValue({
         id: '1',
         email: registerDto.email,
         role: 'USER',
@@ -65,10 +93,10 @@ describe('AuthService', () => {
 
       expect(result).toHaveProperty('user');
       expect(result.user.email).toBe(registerDto.email);
-      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(
+      expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith(
         registerDto.email
       );
-      expect(mockUsersService.create).toHaveBeenCalled();
+      expect(mockUsersRepository.create).toHaveBeenCalled();
     });
 
     it('should throw ConflictException if email already exists', async () => {
@@ -79,7 +107,7 @@ describe('AuthService', () => {
         lastName: 'User',
       };
 
-      mockUsersService.findByEmail.mockResolvedValue({
+      mockUsersRepository.findByEmail.mockResolvedValue({
         id: '1',
         email: registerDto.email,
       });
@@ -87,7 +115,7 @@ describe('AuthService', () => {
       await expect(service.register(registerDto)).rejects.toThrow(
         ConflictException
       );
-      expect(mockUsersService.create).not.toHaveBeenCalled();
+      expect(mockUsersRepository.create).not.toHaveBeenCalled();
     });
 
     it('should hash password using argon2', async () => {
@@ -98,8 +126,8 @@ describe('AuthService', () => {
         lastName: 'User',
       };
 
-      mockUsersService.findByEmail.mockResolvedValue(null);
-      mockUsersService.create.mockImplementation(async (data) => ({
+      mockUsersRepository.findByEmail.mockResolvedValue(null);
+      mockUsersRepository.create.mockImplementation(async (data) => ({
         id: '1',
         ...data,
         createdAt: new Date(),
@@ -107,7 +135,7 @@ describe('AuthService', () => {
 
       await service.register(registerDto);
 
-      const createCallArgs = mockUsersService.create.mock.calls[0][0];
+      const createCallArgs = mockUsersRepository.create.mock.calls[0][0];
       expect(createCallArgs.passwordHash).toBeDefined();
       expect(createCallArgs.passwordHash).not.toBe(registerDto.password);
 
@@ -136,14 +164,16 @@ describe('AuthService', () => {
         name: 'Test User',
       };
 
-      mockUsersService.findByEmail.mockResolvedValue(mockUser);
+      mockUsersRepository.findByEmail.mockResolvedValue(mockUser);
       mockJwtService.sign.mockReturnValue('mock.jwt.token');
 
       const result = await service.login(loginDto);
 
       expect(result).toHaveProperty('accessToken', 'mock.jwt.token');
       expect(result).toHaveProperty('user');
-      expect(result.user.email).toBe(loginDto.email);
+      if ('user' in result && result.user) {
+        expect(result.user.email).toBe(loginDto.email);
+      }
       expect(mockJwtService.sign).toHaveBeenCalledWith({
         sub: mockUser.id,
         email: mockUser.email,
@@ -157,7 +187,7 @@ describe('AuthService', () => {
         password: 'SecurePassword123!',
       };
 
-      mockUsersService.findByEmail.mockResolvedValue(null);
+      mockUsersRepository.findByEmail.mockResolvedValue(null);
 
       await expect(service.login(loginDto)).rejects.toThrow(
         UnauthorizedException
@@ -179,7 +209,7 @@ describe('AuthService', () => {
         role: 'USER',
       };
 
-      mockUsersService.findByEmail.mockResolvedValue(mockUser);
+      mockUsersRepository.findByEmail.mockResolvedValue(mockUser);
 
       await expect(service.login(loginDto)).rejects.toThrow(
         UnauthorizedException
@@ -202,12 +232,12 @@ describe('AuthService', () => {
         role: 'USER',
       };
 
-      mockUsersService.findByEmail.mockResolvedValue(mockUser);
+      mockUsersRepository.findByEmail.mockResolvedValue(mockUser);
 
       const result = await service.validateUser(payload.email, 'password123');
 
       expect(result).toEqual(mockUser);
-      expect(mockUsersService.findByEmail).toHaveBeenCalledWith(payload.email);
+      expect(mockUsersRepository.findByEmail).toHaveBeenCalledWith(payload.email);
     });
 
     it('should return null for invalid user', async () => {
@@ -217,7 +247,7 @@ describe('AuthService', () => {
         role: 'USER',
       };
 
-      mockUsersService.findByEmail.mockResolvedValue(null);
+      mockUsersRepository.findByEmail.mockResolvedValue(null);
 
       const result = await service.validateUser(payload.email, 'wrongpass');
 

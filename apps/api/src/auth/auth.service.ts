@@ -8,12 +8,14 @@ import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import { UsersRepository } from '../users/users.repository';
 import { CryptoService } from './crypto.service';
+import { TwoFactorService } from './two-factor.service';
 import {
   RegisterDto,
   LoginDto,
   ForgotPasswordDto,
   ResetPasswordDto,
 } from './dto/auth.dto';
+import { Login2FADto } from './dto/login-2fa.dto';
 import { User } from '@prisma/client';
 
 @Injectable()
@@ -22,6 +24,7 @@ export class AuthService {
     private usersRepository: UsersRepository,
     private jwtService: JwtService,
     private cryptoService: CryptoService,
+    private twoFactorService: TwoFactorService,
     private configService: ConfigService
   ) {}
 
@@ -73,6 +76,17 @@ export class AuthService {
       throw new UnauthorizedException('Invalid credentials');
     }
 
+    // Check if 2FA is enabled
+    if (user.twoFactorEnabled) {
+      // Return a flag indicating 2FA is required
+      // Frontend should prompt for 2FA code
+      return {
+        requires2FA: true,
+        userId: user.id,
+        message: 'Two-factor authentication required',
+      };
+    }
+
     const tokens = await this.generateTokens(user);
 
     return {
@@ -84,7 +98,7 @@ export class AuthService {
   async validateUser(email: string, password: string): Promise<User | null> {
     const user = await this.usersRepository.findByEmail(email);
 
-    if (!user) {
+    if (!user || !user.passwordHash) {
       return null;
     }
 
@@ -146,6 +160,35 @@ export class AuthService {
     });
 
     return { message: 'Password reset successful' };
+  }
+
+  async loginWith2FA(login2FADto: Login2FADto) {
+    const user = await this.validateUser(login2FADto.email, login2FADto.password);
+
+    if (!user) {
+      throw new UnauthorizedException('Invalid credentials');
+    }
+
+    if (!user.twoFactorEnabled) {
+      throw new BadRequestException('Two-factor authentication is not enabled');
+    }
+
+    // Verify 2FA code
+    const verified = await this.twoFactorService.verify2FACode(
+      user.id,
+      login2FADto.twoFactorCode
+    );
+
+    if (!verified) {
+      throw new UnauthorizedException('Invalid two-factor authentication code');
+    }
+
+    const tokens = await this.generateTokens(user);
+
+    return {
+      user: this.sanitizeUser(user),
+      ...tokens,
+    };
   }
 
   async generateTokens(user: User) {

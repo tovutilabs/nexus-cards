@@ -27,6 +27,8 @@ export interface User {
   id: string;
   email: string;
   role: 'USER' | 'ADMIN';
+  emailVerified: boolean;
+  twoFactorEnabled: boolean;
   createdAt: string;
   updatedAt: string;
   profile?: UserProfile;

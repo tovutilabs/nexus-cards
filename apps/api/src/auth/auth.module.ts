@@ -5,8 +5,14 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { CryptoService } from './crypto.service';
+import { OAuthService } from './oauth.service';
+import { TwoFactorService } from './two-factor.service';
+import { EmailVerificationService } from './email-verification.service';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { LocalStrategy } from './strategies/local.strategy';
+import { GoogleStrategy } from './strategies/google.strategy';
+import { LinkedInStrategy } from './strategies/linkedin.strategy';
+import { MicrosoftStrategy } from './strategies/microsoft.strategy';
 import { UsersModule } from '../users/users.module';
 
 @Module({
@@ -27,7 +33,24 @@ import { UsersModule } from '../users/users.module';
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, CryptoService, JwtStrategy, LocalStrategy],
-  exports: [AuthService, CryptoService],
+  providers: [
+    AuthService,
+    CryptoService,
+    OAuthService,
+    TwoFactorService,
+    EmailVerificationService,
+    JwtStrategy,
+    LocalStrategy,
+    GoogleStrategy,
+    LinkedInStrategy,
+    MicrosoftStrategy,
+  ],
+  exports: [
+    AuthService,
+    CryptoService,
+    OAuthService,
+    TwoFactorService,
+    EmailVerificationService,
+  ],
 })
 export class AuthModule {}

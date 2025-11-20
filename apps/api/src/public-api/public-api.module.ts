@@ -4,9 +4,10 @@ import { PublicApiController } from './public-api.controller';
 import { CardsModule } from '../cards/cards.module';
 import { AnalyticsModule } from '../analytics/analytics.module';
 import { ContactsModule } from '../contacts/contacts.module';
+import { ConnectionsModule } from '../connections/connections.module';
 
 @Module({
-  imports: [CardsModule, AnalyticsModule, ContactsModule],
+  imports: [CardsModule, AnalyticsModule, ContactsModule, ConnectionsModule],
   providers: [PublicApiService],
   controllers: [PublicApiController],
 })

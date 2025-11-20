@@ -19,6 +19,8 @@ import { PublicApiV1Module } from './public-api-v1/public-api-v1.module';
 import { WebhooksModule } from './webhooks/webhooks.module';
 import { TemplatesModule } from './templates/templates.module';
 import { ShareLinksModule } from './share-links/share-links.module';
+import { ConnectionsModule } from './connections/connections.module';
+import { SuggestionsModule } from './suggestions/suggestions.module';
 
 @Module({
   imports: [
@@ -48,6 +50,8 @@ import { ShareLinksModule } from './share-links/share-links.module';
     WebhooksModule,
     TemplatesModule,
     ShareLinksModule,
+    ConnectionsModule,
+    SuggestionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

@@ -3,6 +3,7 @@
 import { useAuth } from '@/contexts/auth-context';
 import { NexusCard } from '@/components/nexus';
 import { NexusButton } from '@/components/nexus';
+import SuggestionsWidget from '@/components/nexus/SuggestionsWidget';
 import Link from 'next/link';
 
 export default function DashboardPage() {
@@ -47,6 +48,8 @@ export default function DashboardPage() {
           <p className="text-sm text-gray-600 mt-2">views today</p>
         </NexusCard>
       </div>
+
+      <SuggestionsWidget />
 
       <NexusCard>
         <h2 className="text-xl font-semibold text-gray-900 mb-4">

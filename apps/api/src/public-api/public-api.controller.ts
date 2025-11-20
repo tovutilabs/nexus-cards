@@ -7,19 +7,23 @@ import {
   Body,
   Req,
   Headers,
+  UseGuards,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { CardsService } from '../cards/cards.service';
 import { AnalyticsService } from '../analytics/analytics.service';
 import { ContactsService } from '../contacts/contacts.service';
+import { ConnectionsService } from '../connections/connections.service';
 import { SubmitContactDto } from '../contacts/dto/submit-contact.dto';
+import { OptionalJwtAuthGuard } from '../auth/optional-jwt-auth.guard';
 
 @Controller('public')
 export class PublicApiController {
   constructor(
     private readonly cardsService: CardsService,
     private readonly analyticsService: AnalyticsService,
-    private readonly contactsService: ContactsService
+    private readonly contactsService: ContactsService,
+    private readonly connectionsService: ConnectionsService
   ) {}
 
   private extractMetadata(req: Request, headers: any) {
@@ -42,10 +46,11 @@ export class PublicApiController {
   }
 
   @Get('cards/:slug')
+  @UseGuards(OptionalJwtAuthGuard)
   async getPublicCard(
     @Param('slug') slug: string,
     @Query('uid') uid?: string,
-    @Req() req?: Request,
+    @Req() req?: any,
     @Headers() headers?: any
   ) {
     const card = await this.cardsService.findPublicBySlug(slug);
@@ -57,6 +62,13 @@ export class PublicApiController {
       source: uid ? 'nfc' : 'web',
       ...metadata,
     });
+
+    if (req.user && req.user.id && req.user.id !== card.userId) {
+      await this.connectionsService.recordCardView(req.user.id, card.userId, {
+        cardId: card.id,
+        source: uid ? 'nfc' : 'web',
+      });
+    }
 
     return card;
   }

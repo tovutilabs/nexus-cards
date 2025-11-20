@@ -111,6 +111,8 @@ model User {
   activities        ActivityLog[]
   assignedNfcTags   NfcTag[]        @relation("AssignedNfcTags")
   oauthProviders    OAuthProvider[]
+  connectionsAsUserA Connection[]   @relation("ConnectionsAsUserA")
+  connectionsAsUserB Connection[]   @relation("ConnectionsAsUserB")
 
   @@index([email])
   @@map("users")
@@ -607,4 +609,29 @@ model ShareLink {
   @@index([expiresAt])
   @@index([revokedAt])
   @@map("share_links")
+}
+
+model Connection {
+  id                    String   @id @default(cuid())
+  userAId               String
+  userBId               String
+  isMutual              Boolean  @default(false)
+  firstInteractionDate  DateTime @default(now())
+  lastInteractionDate   DateTime @default(now())
+  viewCountAtoB         Int      @default(0)
+  viewCountBtoA         Int      @default(0)
+  strengthScore         Int      @default(0)
+  metadata              Json?
+  createdAt             DateTime @default(now())
+  updatedAt             DateTime @updatedAt
+
+  userA                 User     @relation("ConnectionsAsUserA", fields: [userAId], references: [id], onDelete: Cascade)
+  userB                 User     @relation("ConnectionsAsUserB", fields: [userBId], references: [id], onDelete: Cascade)
+
+  @@unique([userAId, userBId])
+  @@index([userAId])
+  @@index([userBId])
+  @@index([isMutual])
+  @@index([strengthScore])
+  @@map("connections")
 }

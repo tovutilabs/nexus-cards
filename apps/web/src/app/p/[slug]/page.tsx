@@ -241,7 +241,6 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
   });
 
   const layoutClass = getLayoutContainerClass(card.layout || 'vertical');
-  const textSizeClass = getTextSizeClass(card.fontSize || 'base');
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
@@ -277,7 +276,7 @@ ${card.jobTitle ? `TITLE:${card.jobTitle}\n` : ''}${card.company ? `ORG:${card.c
           </div>
 
           {/* Profile Section */}
-          <div className={`relative px-6 pb-6 ${layoutClass} ${textSizeClass}`}>
+          <div className={`relative px-6 pb-6 ${layoutClass}`}>
             <div className="flex flex-col items-center -mt-16">
               {/* Avatar or Logo */}
               {card.logoUrl ? (

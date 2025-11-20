@@ -6,12 +6,19 @@ import {
   MaxLength,
   MinLength,
   IsEnum,
+  IsBoolean,
 } from 'class-validator';
 
 enum CardStatus {
   DRAFT = 'DRAFT',
   PUBLISHED = 'PUBLISHED',
   ARCHIVED = 'ARCHIVED',
+}
+
+enum CardPrivacyMode {
+  PUBLIC = 'PUBLIC',
+  PRIVATE = 'PRIVATE',
+  PASSWORD_PROTECTED = 'PASSWORD_PROTECTED',
 }
 
 export class CreateCardDto {
@@ -156,4 +163,17 @@ export class CreateCardDto {
   @IsString()
   @MaxLength(500)
   bio_es?: string;
+
+  @IsOptional()
+  @IsEnum(CardPrivacyMode)
+  privacyMode?: CardPrivacyMode;
+
+  @IsOptional()
+  @IsString()
+  @MinLength(6)
+  defaultPassword?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  allowContactSubmission?: boolean;
 }

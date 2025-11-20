@@ -3,8 +3,9 @@
   "compilerOptions": {
     "types": ["jest", "node", "supertest"],
     "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "allowSyntheticDefaultImports": true,
+    "typeRoots": ["../node_modules/@types", "../src"]
   },
-  "include": ["*.e2e-spec.ts"],
+  "include": ["*.e2e-spec.ts", "../src/**/*.d.ts"],
   "exclude": []
 }

@@ -24,7 +24,7 @@ export interface Card {
   bio?: string;
   avatarUrl?: string;
   coverImageUrl?: string;
-  theme?: Record<string, any>;
+  theme?: Record<string, unknown>;
   customCss?: string;
   socialLinks?: Record<string, string>;
   secondaryLanguage?: string;

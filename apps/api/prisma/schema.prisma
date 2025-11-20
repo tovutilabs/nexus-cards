@@ -67,7 +67,7 @@ enum AnalyticsEventType {
 model User {
   id                String   @id @default(cuid())
   email             String   @unique
-  passwordHash      String
+  passwordHash      String?
   role              UserRole @default(USER)
   emailVerified     Boolean  @default(false)
   emailVerificationToken String?
@@ -75,6 +75,7 @@ model User {
   passwordResetExpires DateTime?
   twoFactorEnabled  Boolean  @default(false)
   twoFactorSecret   String?
+  backupCodes       String[]
   createdAt         DateTime @default(now())
   updatedAt         DateTime @updatedAt
 
@@ -87,6 +88,7 @@ model User {
   integrations      Integration[]
   activities        ActivityLog[]
   assignedNfcTags   NfcTag[]        @relation("AssignedNfcTags")
+  oauthProviders    OAuthProvider[]
 
   @@index([email])
   @@map("users")
@@ -418,6 +420,32 @@ model ExperimentEvent {
   @@index([sessionId])
   @@index([eventType])
   @@map("experiment_events")
+}
+
+enum OAuthProviderType {
+  GOOGLE
+  LINKEDIN
+  MICROSOFT
+}
+
+model OAuthProvider {
+  id          String            @id @default(cuid())
+  userId      String
+  provider    OAuthProviderType
+  providerId  String
+  email       String?
+  accessToken String?
+  refreshToken String?
+  isPrimary   Boolean           @default(false)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+
+  user        User              @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerId])
+  @@index([userId])
+  @@index([provider])
+  @@map("oauth_providers")
 }
 
 enum WebhookEventType {

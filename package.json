@@ -16,7 +16,14 @@
     "build:web": "pnpm --filter @nexus-cards/web build",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
-    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\""
+    "format": "prettier --write \"**/*.{ts,tsx,js,jsx,json,md}\"",
+    "seed": "docker exec nexus-api sh -c 'cd /app/apps/api && pnpm seed'",
+    "seed:local": "pnpm --filter @nexus-cards/api seed",
+    "seed:prod": "pnpm --filter @nexus-cards/api seed:prod",
+    "db:migrate": "docker exec nexus-api sh -c 'cd /app/apps/api && pnpm prisma migrate deploy'",
+    "db:migrate:local": "pnpm --filter @nexus-cards/api prisma migrate deploy",
+    "db:reset": "docker exec nexus-api sh -c 'cd /app/apps/api && pnpm prisma migrate reset'",
+    "db:studio": "docker exec -it nexus-api sh -c 'cd /app/apps/api && pnpm prisma studio'"
   },
   "devDependencies": {
     "@lhci/cli": "^0.15.1",

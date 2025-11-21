@@ -100,6 +100,7 @@ services:
     environment:
       NODE_ENV: development
       NEXT_PUBLIC_API_URL: http://localhost:3001
+      API_URL_INTERNAL: http://nexus-api:3001
       NEXT_TELEMETRY_DISABLED: 1
     volumes:
       - ./apps/web/src:/app/apps/web/src

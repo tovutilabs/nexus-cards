@@ -12,7 +12,15 @@ export default function Home() {
 
   useEffect(() => {
     if (!loading && user) {
-      router.push('/dashboard');
+      console.log('[HomePage] User detected:', user);
+      console.log('[HomePage] User role:', user.role);
+      if (user.role === 'ADMIN') {
+        console.log('[HomePage] Redirecting to /admin');
+        router.push('/admin');
+      } else {
+        console.log('[HomePage] Redirecting to /dashboard');
+        router.push('/dashboard');
+      }
     }
   }, [user, loading, router]);
 

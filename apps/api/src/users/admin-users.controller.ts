@@ -8,11 +8,14 @@ import {
   Query,
   ParseIntPipe,
   DefaultValuePipe,
+  Post,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { RolesGuard } from '../auth/guards/roles.guard';
 import { Roles } from '../auth/decorators/roles.decorator';
+import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { User } from '@prisma/client';
 import {
   UpdateUserRoleDto,
   UpdateUserSubscriptionDto,
@@ -73,5 +76,13 @@ export class AdminUsersController {
   @Get('stats/overview')
   async getUserStats() {
     return this.usersService.getUserStatsAdmin();
+  }
+
+  @Post(':userId/impersonate')
+  async impersonateUser(
+    @Param('userId') targetUserId: string,
+    @CurrentUser() admin: User,
+  ) {
+    return this.usersService.impersonateUser(admin.id, targetUserId);
   }
 }

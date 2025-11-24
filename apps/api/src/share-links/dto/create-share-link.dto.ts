@@ -1,4 +1,4 @@
-import { IsString, IsOptional, IsBoolean, IsEnum, IsDate, MinLength, MaxLength } from 'class-validator';
+import { IsString, IsOptional, IsBoolean, IsEnum, IsDate, MinLength, MaxLength, IsInt, IsPositive } from 'class-validator';
 import { Type } from 'class-transformer';
 import { CardPrivacyMode, ShareChannel } from '@prisma/client';
 
@@ -32,6 +32,11 @@ export class CreateShareLinkDto {
   @IsEnum(ShareChannel)
   @IsOptional()
   channel?: ShareChannel;
+
+  @IsInt()
+  @IsPositive()
+  @IsOptional()
+  maxUses?: number; // Null = unlimited, positive number = limited uses
 }
 
 export class UpdateShareLinkDto {
@@ -57,6 +62,11 @@ export class UpdateShareLinkDto {
   @IsBoolean()
   @IsOptional()
   allowContactSubmission?: boolean;
+
+  @IsInt()
+  @IsPositive()
+  @IsOptional()
+  maxUses?: number; // Null = unlimited, positive number = limited uses
 }
 
 export class ValidateShareLinkDto {

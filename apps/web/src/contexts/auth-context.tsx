@@ -51,14 +51,36 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     const apiClient = createApiClient();
     const result = await apiClient.post<{ user?: User; requires2FA?: boolean }>('/auth/login', data);
     
+    console.log('[AUTH] Login result:', JSON.stringify(result, null, 2));
+    
     // Check if 2FA is required
     if (result.requires2FA) {
+      console.log('[AUTH] 2FA required, not redirecting');
       return result; // Return the result so login page can handle redirect
     }
     
     if (result.user) {
+      console.log('[AUTH] User from login:', result.user.email);
+      console.log('[AUTH] User role:', result.user.role);
+      console.log('[AUTH] Setting user state...');
+      
+      // Set user state immediately to prevent race condition
       setUser(result.user);
-      router.push('/dashboard');
+      
+      // Use setTimeout to ensure state update completes before navigation
+      // This prevents race condition where admin layout checks before user is set
+      await new Promise(resolve => setTimeout(resolve, 0));
+      
+      // Redirect admin users to admin dashboard, regular users to dashboard
+      const targetPath = result.user.role === 'ADMIN' ? '/admin' : '/dashboard';
+      console.log('[AUTH] Target redirect path:', targetPath);
+      console.log('[AUTH] Calling router.push(' + targetPath + ')');
+      
+      router.push(targetPath);
+      
+      console.log('[AUTH] router.push called');
+    } else {
+      console.log('[AUTH] No user in result');
     }
     
     return result;

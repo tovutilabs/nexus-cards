@@ -35,5 +35,8 @@
     "lighthouse": "^13.0.1",
     "prettier": "^3.2.5",
     "typescript": "^5.3.3"
+  },
+  "dependencies": {
+    "chrome-devtools-mcp": "^0.10.2"
   }
 }

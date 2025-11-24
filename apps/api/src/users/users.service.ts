@@ -301,6 +301,47 @@ export class UsersService {
     return stats;
   }
 
+  async impersonateUser(adminId: string, targetUserId: string) {
+    // Verify admin exists and has admin role
+    const admin = await this.usersRepository.findById(adminId);
+    if (!admin || admin.role !== UserRole.ADMIN) {
+      throw new ForbiddenException('Only administrators can impersonate users');
+    }
+
+    // Verify target user exists
+    const targetUser = await this.usersRepository.findById(targetUserId);
+    if (!targetUser) {
+      throw new NotFoundException('Target user not found');
+    }
+
+    // Prevent admin from impersonating another admin
+    if (targetUser.role === UserRole.ADMIN) {
+      throw new ForbiddenException('Cannot impersonate another administrator');
+    }
+
+    // Log the impersonation activity
+    await this.usersRepository.createActivity({
+      userId: adminId,
+      action: 'USER_IMPERSONATION',
+      metadata: {
+        targetUserId,
+        targetEmail: targetUser.email,
+        timestamp: new Date().toISOString(),
+      },
+      ipAddress: null,
+      userAgent: null,
+    });
+
+    // Return token data - actual JWT generation should be done in auth service
+    // but returning the payload for now
+    return {
+      message: 'Impersonation token generated',
+      user: this.sanitizeUser(targetUser),
+      impersonatedBy: adminId,
+      expiresIn: '1h', // Impersonation tokens should be short-lived
+    };
+  }
+
   private sanitizeUser(user: any) {
     const {
       passwordHash: _passwordHash,

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { CardsRepository } from '../cards/cards.repository';
 import { UsersService } from '../users/users.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 export interface Suggestion {
   id: string;
@@ -24,7 +25,8 @@ export interface ProfileCompletenessScore {
 export class SuggestionsService {
   constructor(
     private readonly cardsRepository: CardsRepository,
-    private readonly usersService: UsersService
+    private readonly usersService: UsersService,
+    private readonly prisma: PrismaService
   ) {}
 
   async getUserSuggestions(userId: string): Promise<Suggestion[]> {
@@ -35,6 +37,9 @@ export class SuggestionsService {
 
     const cardSuggestions = await this.getCardSuggestions(userId);
     suggestions.push(...cardSuggestions);
+
+    const connectionSuggestions = await this.getConnectionSuggestions(userId);
+    suggestions.push(...connectionSuggestions);
 
     const featureSuggestions = await this.getFeatureSuggestions(userId);
     suggestions.push(...featureSuggestions);
@@ -252,5 +257,227 @@ export class SuggestionsService {
     }
 
     return suggestions;
+  }
+
+  /**
+   * Get connection-based suggestions using mutual connections, industry, and company matching
+   */
+  private async getConnectionSuggestions(userId: string): Promise<Suggestion[]> {
+    const suggestions: Suggestion[] = [];
+    
+    // Get user's profile data
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: { profile: true },
+    });
+
+    if (!user?.profile) {
+      return suggestions;
+    }
+
+    // Get user's existing connections
+    const existingConnections = await this.prisma.connection.findMany({
+      where: {
+        OR: [
+          { userAId: userId },
+          { userBId: userId },
+        ],
+      },
+    });
+
+    const connectedUserIds = new Set(
+      existingConnections.map((conn) =>
+        conn.userAId === userId ? conn.userBId : conn.userAId
+      )
+    );
+
+    // Find mutual connections (2nd degree connections)
+    const mutualConnectionCandidates = await this.findMutualConnectionCandidates(
+      userId,
+      connectedUserIds
+    );
+
+    // Find users in same company
+    const companyMatches = user.profile.company
+      ? await this.findCompanyMatches(userId, user.profile.company, connectedUserIds)
+      : [];
+
+    // Find users in same industry (based on jobTitle keywords)
+    const industryMatches = user.profile.jobTitle
+      ? await this.findIndustryMatches(userId, user.profile.jobTitle, connectedUserIds)
+      : [];
+
+    // Generate suggestions based on findings
+    if (mutualConnectionCandidates.length > 0) {
+      const topCandidate = mutualConnectionCandidates[0];
+      suggestions.push({
+        id: `connect-mutual-${topCandidate.userId}`,
+        type: 'profile',
+        priority: 'high',
+        title: 'Connect with mutual connections',
+        description: `You have ${topCandidate.mutualCount} mutual connection(s) with ${topCandidate.name}. Expand your network!`,
+        actionText: 'View Profile',
+        actionUrl: `/dashboard/network/users/${topCandidate.userId}`,
+        metadata: { 
+          userId: topCandidate.userId,
+          mutualCount: topCandidate.mutualCount,
+          type: 'mutual',
+        },
+      });
+    }
+
+    if (companyMatches.length > 0) {
+      suggestions.push({
+        id: `connect-company`,
+        type: 'profile',
+        priority: 'medium',
+        title: `Connect with colleagues at ${user.profile.company}`,
+        description: `${companyMatches.length} user(s) from your company are on Nexus Cards. Build your internal network!`,
+        actionText: 'View Colleagues',
+        actionUrl: `/dashboard/network/suggestions?type=company`,
+        metadata: { 
+          count: companyMatches.length,
+          company: user.profile.company,
+          type: 'company',
+        },
+      });
+    }
+
+    if (industryMatches.length > 0 && suggestions.length < 3) {
+      suggestions.push({
+        id: `connect-industry`,
+        type: 'profile',
+        priority: 'low',
+        title: 'Connect with industry peers',
+        description: `${industryMatches.length} professional(s) in your industry. Grow your professional circle!`,
+        actionText: 'View Peers',
+        actionUrl: `/dashboard/network/suggestions?type=industry`,
+        metadata: { 
+          count: industryMatches.length,
+          type: 'industry',
+        },
+      });
+    }
+
+    return suggestions;
+  }
+
+  /**
+   * Find users who share mutual connections with the current user
+   */
+  private async findMutualConnectionCandidates(
+    userId: string,
+    existingConnections: Set<string>
+  ): Promise<Array<{ userId: string; name: string; mutualCount: number }>> {
+    // Get all connections of user's connections (2nd degree)
+    const connections = await this.prisma.connection.findMany({
+      where: {
+        OR: [
+          { userAId: { in: Array.from(existingConnections) } },
+          { userBId: { in: Array.from(existingConnections) } },
+        ],
+      },
+      include: {
+        userA: { include: { profile: true } },
+        userB: { include: { profile: true } },
+      },
+    });
+
+    // Count mutual connections for each candidate
+    const mutualConnectionMap = new Map<string, { count: number; user: any }>();
+
+    connections.forEach((conn) => {
+      const candidateId = existingConnections.has(conn.userAId) ? conn.userBId : conn.userAId;
+      
+      // Skip if already connected or is the current user
+      if (candidateId === userId || existingConnections.has(candidateId)) {
+        return;
+      }
+
+      const candidate = existingConnections.has(conn.userAId) ? conn.userB : conn.userA;
+      
+      if (!mutualConnectionMap.has(candidateId)) {
+        mutualConnectionMap.set(candidateId, { count: 0, user: candidate });
+      }
+      
+      mutualConnectionMap.get(candidateId)!.count++;
+    });
+
+    // Convert to array and sort by mutual connection count
+    return Array.from(mutualConnectionMap.entries())
+      .map(([userId, data]) => ({
+        userId,
+        name: data.user.profile
+          ? `${data.user.profile.firstName || ''} ${data.user.profile.lastName || ''}`.trim() || 'User'
+          : 'User',
+        mutualCount: data.count,
+      }))
+      .sort((a, b) => b.mutualCount - a.mutualCount)
+      .slice(0, 5); // Top 5 candidates
+  }
+
+  /**
+   * Find users in the same company
+   */
+  private async findCompanyMatches(
+    userId: string,
+    company: string,
+    existingConnections: Set<string>
+  ): Promise<string[]> {
+    const matches = await this.prisma.userProfile.findMany({
+      where: {
+        company: {
+          equals: company,
+          mode: 'insensitive',
+        },
+        userId: {
+          not: userId,
+          notIn: Array.from(existingConnections),
+        },
+      },
+      select: { userId: true },
+      take: 10,
+    });
+
+    return matches.map((m) => m.userId);
+  }
+
+  /**
+   * Find users in similar industry based on job title keywords
+   */
+  private async findIndustryMatches(
+    userId: string,
+    jobTitle: string,
+    existingConnections: Set<string>
+  ): Promise<string[]> {
+    // Extract industry keywords from job title
+    const keywords = jobTitle.toLowerCase().split(/[\s,]+/);
+    const industryKeywords = keywords.filter(
+      (k) =>
+        k.length > 3 &&
+        !['the', 'and', 'for', 'with', 'from'].includes(k)
+    );
+
+    if (industryKeywords.length === 0) {
+      return [];
+    }
+
+    // Search for users with similar job titles
+    const matches = await this.prisma.userProfile.findMany({
+      where: {
+        jobTitle: {
+          contains: industryKeywords[0], // Use first keyword for search
+          mode: 'insensitive',
+        },
+        userId: {
+          not: userId,
+          notIn: Array.from(existingConnections),
+        },
+      },
+      select: { userId: true },
+      take: 10,
+    });
+
+    return matches.map((m) => m.userId);
   }
 }

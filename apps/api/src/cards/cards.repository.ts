@@ -36,6 +36,13 @@ export class CardsRepository {
     });
   }
 
+  async existsBySlug(slug: string): Promise<boolean> {
+    const count = await this.prisma.card.count({
+      where: { slug },
+    });
+    return count > 0;
+  }
+
   async findByUserId(userId: string): Promise<Card[]> {
     return this.prisma.card.findMany({
       where: {

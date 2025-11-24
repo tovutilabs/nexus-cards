@@ -162,4 +162,22 @@ export class UsersRepository {
       activeSubscriptions,
     };
   }
+
+  async createActivity(data: {
+    userId: string;
+    action: string;
+    metadata: any;
+    ipAddress: string | null;
+    userAgent: string | null;
+  }) {
+    return this.prisma.activityLog.create({
+      data: {
+        userId: data.userId,
+        action: data.action,
+        metadata: data.metadata,
+        ipAddress: data.ipAddress,
+        userAgent: data.userAgent,
+      },
+    });
+  }
 }

@@ -54,7 +54,7 @@ export default function CustomizeCardPage({ params }: CustomizeCardPageProps) {
   const fetchCard = async () => {
     try {
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/cards/${params.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/cards/${params.id}`,
         {
           credentials: 'include',
         }
@@ -145,7 +145,7 @@ export default function CustomizeCardPage({ params }: CustomizeCardPageProps) {
     try {
       setSaving(true);
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/cards/${params.id}`,
+        `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/cards/${params.id}`,
         {
           method: 'PATCH',
           headers: {

@@ -22,8 +22,14 @@ export class CardsService {
 
     const fullName = `${createCardDto.firstName} ${createCardDto.lastName}`;
     const baseSlug = generateSlug(fullName);
-    const existingSlugs = userCards.map((card) => card.slug);
-    const slug = generateUniqueSlug(baseSlug, existingSlugs);
+    
+    // Generate globally unique slug by checking database
+    let slug = baseSlug;
+    let counter = 1;
+    while (await this.cardsRepository.existsBySlug(slug)) {
+      slug = `${baseSlug}-${counter}`;
+      counter++;
+    }
 
     const card = await this.cardsRepository.create({
       userId,
@@ -83,7 +89,11 @@ export class CardsService {
       throw new ForbiddenException('This card is not published');
     }
 
-    return this.sanitizePublicCard(card);
+    const sanitized = this.sanitizePublicCard(card);
+    return {
+      ...sanitized,
+      userId: card.userId,
+    };
   }
 
   async update(id: string, userId: string, updateCardDto: UpdateCardDto) {

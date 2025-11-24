@@ -23,6 +23,8 @@ import { ConnectionsModule } from './connections/connections.module';
 import { SuggestionsModule } from './suggestions/suggestions.module';
 import { NotificationsModule } from './notifications/notifications.module';
 import { ComplianceModule } from './compliance/compliance.module';
+import { RedirectController } from './redirect.controller';
+import { FileUploadModule } from './file-upload/file-upload.module';
 
 @Module({
   imports: [
@@ -56,8 +58,9 @@ import { ComplianceModule } from './compliance/compliance.module';
     SuggestionsModule,
     NotificationsModule,
     ComplianceModule,
+    FileUploadModule,
   ],
-  controllers: [AppController],
+  controllers: [AppController, RedirectController],
   providers: [AppService],
 })
 export class AppModule {}

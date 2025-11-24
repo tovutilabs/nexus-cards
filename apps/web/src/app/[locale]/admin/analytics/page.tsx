@@ -76,24 +76,25 @@ export default function AdminAnalyticsPage() {
 
       const [overviewData, dailyData, topCardsData, tierData] =
         await Promise.all([
-          apiClient.get<Overview>(
+          apiClient.get<any>(
             `/admin/analytics/overview?days=${dateRange}`
           ),
-          apiClient.get<{ stats: DailyStat[] }>(
+          apiClient.get<any>(
             `/admin/analytics/daily?days=${dateRange}`
           ),
-          apiClient.get<{ cards: TopCard[] }>(
+          apiClient.get<any>(
             '/admin/analytics/top-cards?limit=10'
           ),
-          apiClient.get<{ stats: TierStats[] }>(
+          apiClient.get<any>(
             `/admin/analytics/by-tier?days=${dateRange}`
           ),
         ]);
 
-      setOverview(overviewData);
-      setDailyStats(dailyData.stats);
-      setTopCards(topCardsData.cards);
-      setTierStats(tierData.stats);
+      // Handle different response structures
+      setOverview(overviewData?.overview || overviewData);
+      setDailyStats(dailyData?.stats || dailyData?.data || []);
+      setTopCards(topCardsData?.cards || topCardsData?.data || []);
+      setTierStats(tierData?.stats || tierData?.data || []);
     } catch (error) {
       console.error('Failed to load analytics:', error);
       toast({
@@ -168,7 +169,7 @@ export default function AdminAnalyticsPage() {
               <div>
                 <p className="text-sm text-gray-600">Total Views</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {overview.totalViews.toLocaleString()}
+                  {(overview.totalViews ?? 0).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -182,7 +183,7 @@ export default function AdminAnalyticsPage() {
               <div>
                 <p className="text-sm text-gray-600">Total Taps</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {overview.totalTaps.toLocaleString()}
+                  {(overview.totalTaps ?? 0).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -196,7 +197,7 @@ export default function AdminAnalyticsPage() {
               <div>
                 <p className="text-sm text-gray-600">Exchanges</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {overview.totalExchanges.toLocaleString()}
+                  {(overview.totalExchanges ?? 0).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -210,7 +211,7 @@ export default function AdminAnalyticsPage() {
               <div>
                 <p className="text-sm text-gray-600">Total Cards</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {overview.totalCards.toLocaleString()}
+                  {(overview.totalCards ?? 0).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -224,7 +225,7 @@ export default function AdminAnalyticsPage() {
               <div>
                 <p className="text-sm text-gray-600">Total Users</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {overview.totalUsers.toLocaleString()}
+                  {(overview.totalUsers ?? 0).toLocaleString()}
                 </p>
               </div>
             </div>
@@ -237,7 +238,7 @@ export default function AdminAnalyticsPage() {
           <h2 className="text-lg font-semibold text-gray-900 mb-4">
             Daily Activity
           </h2>
-          {dailyStats.length === 0 ? (
+          {!dailyStats || dailyStats.length === 0 ? (
             <p className="text-gray-500 text-center py-8">
               No activity data yet
             </p>
@@ -287,7 +288,7 @@ export default function AdminAnalyticsPage() {
             <Award className="h-5 w-5 text-yellow-500" />
             Top Performing Cards
           </h2>
-          {topCards.length === 0 ? (
+          {!topCards || topCards.length === 0 ? (
             <p className="text-gray-500 text-center py-8">No cards yet</p>
           ) : (
             <div className="space-y-3">
@@ -336,7 +337,7 @@ export default function AdminAnalyticsPage() {
         <h2 className="text-lg font-semibold text-gray-900 mb-4">
           Performance by Subscription Tier
         </h2>
-        {tierStats.length === 0 ? (
+        {!tierStats || tierStats.length === 0 ? (
           <p className="text-gray-500 text-center py-8">No tier data yet</p>
         ) : (
           <div className="grid gap-4 md:grid-cols-3">

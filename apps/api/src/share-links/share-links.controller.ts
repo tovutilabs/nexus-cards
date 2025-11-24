@@ -8,7 +8,10 @@ import {
   Param,
   UseGuards,
   Request,
+  Res,
+  HttpStatus,
 } from '@nestjs/common';
+import { Response } from 'express';
 import { ShareLinksService } from './share-links.service';
 import { CreateShareLinkDto, UpdateShareLinkDto, ValidateShareLinkDto } from './dto/create-share-link.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
@@ -62,5 +65,17 @@ export class ShareLinksController {
     @Body() body: { shareUrl: string; cardTitle: string },
   ) {
     return this.shareLinksService.generateChannelUrls(body.shareUrl, body.cardTitle);
+  }
+
+  @Get(':id/qrcode')
+  @UseGuards(JwtAuthGuard)
+  async generateQRCode(
+    @Request() req: any,
+    @Param('id') id: string,
+    @Res() res: Response,
+  ) {
+    const qrCode = await this.shareLinksService.generateQRCode(req.user.sub, id);
+    res.setHeader('Content-Type', 'image/png');
+    res.status(HttpStatus.OK).send(qrCode);
   }
 }

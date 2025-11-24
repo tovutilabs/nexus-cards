@@ -1,8 +1,8 @@
-const CACHE_NAME = 'nexus-cards-v2';
-const STATIC_CACHE = 'nexus-static-v2';
-const DYNAMIC_CACHE = 'nexus-dynamic-v2';
-const IMAGE_CACHE = 'nexus-images-v2';
-const TRANSLATION_CACHE = 'nexus-translations-v2';
+const CACHE_NAME = 'nexus-cards-v3';
+const STATIC_CACHE = 'nexus-static-v3';
+const DYNAMIC_CACHE = 'nexus-dynamic-v3';
+const IMAGE_CACHE = 'nexus-images-v3';
+const TRANSLATION_CACHE = 'nexus-translations-v3';
 
 const STATIC_ASSETS = [
   '/',

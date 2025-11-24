@@ -117,6 +117,8 @@ model User {
   notificationPreferences NotificationPreferences?
   dataExports       UserDataExport[]
   cookieConsents    CookieConsent[]
+  cardAccessGranted CardAccessList[] @relation("CardAccessGranted")
+  cardAccessGrantedBy CardAccessList[] @relation("CardAccessGrantedBy")
 
   @@index([email])
   @@map("users")
@@ -203,6 +205,7 @@ model Card {
   privacyMode     CardPrivacyMode @default(PUBLIC)
   defaultPassword String?
   allowContactSubmission Boolean @default(true)
+  fieldVisibility Json?           // Per-field privacy controls: { email: 'public', phone: 'private', etc. }
   
   // Theme and styling
   theme           Json?
@@ -245,6 +248,7 @@ model Card {
   analyticsEvents AnalyticsEvent[]
   analyticsDailies AnalyticsCardDaily[]
   shareLinks      ShareLink[]
+  accessList      CardAccessList[]
 
   @@index([userId])
   @@index([slug])
@@ -345,7 +349,6 @@ model AnalyticsEvent {
   metadata    Json?
   ipAddress   String?
   userAgent   String?
-  referer     String?
   referralUrl String?
   country     String?
   region      String?
@@ -619,6 +622,8 @@ model ShareLink {
   privacyMode           CardPrivacyMode @default(PUBLIC)
   passwordHash          String?
   expiresAt             DateTime?
+  maxUses               Int?            // Null = unlimited, positive number = limited uses
+  usedCount             Int             @default(0)
   allowContactSubmission Boolean        @default(true)
   channel               ShareChannel    @default(DIRECT)
   shareCount            Int             @default(0)
@@ -636,6 +641,24 @@ model ShareLink {
   @@map("share_links")
 }
 
+model CardAccessList {
+  id          String   @id @default(cuid())
+  cardId      String
+  userId      String   // User who is granted access
+  grantedBy   String   // Admin or card owner who granted access
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  card        Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  user        User     @relation("CardAccessGranted", fields: [userId], references: [id], onDelete: Cascade)
+  grantedByUser User   @relation("CardAccessGrantedBy", fields: [grantedBy], references: [id], onDelete: Cascade)
+
+  @@unique([cardId, userId])
+  @@index([cardId])
+  @@index([userId])
+  @@map("card_access_list")
+}
+
 model Connection {
   id                    String   @id @default(cuid())
   userAId               String
@@ -646,6 +669,8 @@ model Connection {
   viewCountAtoB         Int      @default(0)
   viewCountBtoA         Int      @default(0)
   strengthScore         Int      @default(0)
+  notes                 String?         // Personal notes about this connection
+  tags                  String[]        // Tags for categorizing connections: ['client', 'colleague', 'lead']
   metadata              Json?
   createdAt             DateTime @default(now())
   updatedAt             DateTime @updatedAt

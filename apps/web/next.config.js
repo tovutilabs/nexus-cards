@@ -11,6 +11,22 @@ const nextConfig = {
   env: {
     API_URL: process.env.API_URL || 'http://localhost:3001',
   },
+  async rewrites() {
+    return [
+      {
+        source: '/api/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/:path*`,
+      },
+      {
+        source: '/templates/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/templates/:path*`,
+      },
+      {
+        source: '/cards/:path*',
+        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/cards/:path*`,
+      },
+    ];
+  },
   headers: async () => [
     {
       source: '/sw.js',

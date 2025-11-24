@@ -10,6 +10,7 @@ import { CreateShareLinkDto, UpdateShareLinkDto, ValidateShareLinkDto } from './
 import { CardPrivacyMode, ShareChannel } from '@prisma/client';
 import * as argon2 from 'argon2';
 import { randomBytes } from 'crypto';
+import * as QRCode from 'qrcode';
 
 @Injectable()
 export class ShareLinksService {
@@ -62,6 +63,7 @@ export class ShareLinksService {
         privacyMode: dto.privacyMode || CardPrivacyMode.PUBLIC,
         passwordHash,
         expiresAt: dto.expiresAt,
+        maxUses: dto.maxUses,
         allowContactSubmission: dto.allowContactSubmission ?? true,
         channel: dto.channel || ShareChannel.DIRECT,
       },
@@ -173,6 +175,7 @@ export class ShareLinksService {
         privacyMode: dto.privacyMode,
         passwordHash: passwordHash !== undefined ? passwordHash : undefined,
         expiresAt: dto.expiresAt,
+        maxUses: dto.maxUses,
         allowContactSubmission: dto.allowContactSubmission,
       },
     });
@@ -234,6 +237,11 @@ export class ShareLinksService {
       throw new UnauthorizedException('This share link has expired');
     }
 
+    // Check if max uses reached
+    if (shareLink.maxUses && shareLink.usedCount >= shareLink.maxUses) {
+      throw new UnauthorizedException('This share link has reached its maximum number of uses');
+    }
+
     // Check password if required
     if (shareLink.passwordHash) {
       if (!dto.password) {
@@ -246,11 +254,12 @@ export class ShareLinksService {
       }
     }
 
-    // Increment share count and update last accessed
+    // Increment share count, used count, and update last accessed
     await this.prisma.shareLink.update({
       where: { id: shareLink.id },
       data: {
         shareCount: { increment: 1 },
+        usedCount: { increment: 1 },
         lastAccessedAt: new Date(),
       },
     });
@@ -285,9 +294,16 @@ export class ShareLinksService {
       return null;
     }
 
+    // Check if max uses reached
+    if (shareLink.maxUses && shareLink.usedCount >= shareLink.maxUses) {
+      return null;
+    }
+
     return {
       ...shareLink,
       requiresPassword: !!shareLink.passwordHash,
+      isExhausted: shareLink.maxUses ? shareLink.usedCount >= shareLink.maxUses : false,
+      usesRemaining: shareLink.maxUses ? Math.max(0, shareLink.maxUses - shareLink.usedCount) : null,
     };
   }
 
@@ -314,5 +330,41 @@ export class ShareLinksService {
       email: `mailto:?subject=${encodeURIComponent(cardTitle)}&body=${message}%20${encodedUrl}`,
       linkedin: `https://www.linkedin.com/sharing/share-offsite/?url=${encodedUrl}`,
     };
+  }
+
+  /**
+   * Generate QR code for a share link
+   */
+  async generateQRCode(userId: string, id: string): Promise<Buffer> {
+    const shareLink = await this.prisma.shareLink.findUnique({
+      where: { id },
+      include: { card: true },
+    });
+
+    if (!shareLink) {
+      throw new NotFoundException('Share link not found');
+    }
+
+    if (shareLink.card.userId !== userId) {
+      throw new ForbiddenException('You do not have permission to generate QR code for this share link');
+    }
+
+    const shareUrl = this.generateShareUrl(shareLink.token);
+    
+    try {
+      const qrCodeBuffer = await QRCode.toBuffer(shareUrl, {
+        type: 'png',
+        width: 512,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF',
+        },
+      });
+      
+      return qrCodeBuffer;
+    } catch (error) {
+      throw new BadRequestException('Failed to generate QR code');
+    }
   }
 }

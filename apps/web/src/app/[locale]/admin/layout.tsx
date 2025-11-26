@@ -24,25 +24,17 @@ export default function AdminLayout({
   const [isChecking, setIsChecking] = useState(true);
 
   useEffect(() => {
-    console.log('[AdminLayout] useEffect triggered', { loading, user: user?.email, role: user?.role });
-    
     // Wait for auth context to finish loading
     if (loading) {
       return;
     }
     
-    // Additional check: give a small delay to ensure state is fully propagated
-    const checkTimer = setTimeout(() => {
-      if (!user || user.role !== 'ADMIN') {
-        console.log('[AdminLayout] Not admin, redirecting to dashboard');
-        router.push('/dashboard');
-      } else {
-        console.log('[AdminLayout] Admin verified, showing admin panel');
-        setIsChecking(false);
-      }
-    }, 50);
-
-    return () => clearTimeout(checkTimer);
+    // Check authentication immediately
+    if (!user || user.role !== 'ADMIN') {
+      router.push('/dashboard');
+    } else {
+      setIsChecking(false);
+    }
   }, [user, loading, router]);
 
   // Show loading state while checking authentication

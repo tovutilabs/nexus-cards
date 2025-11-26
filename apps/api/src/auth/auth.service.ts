@@ -9,6 +9,7 @@ import { ConfigService } from '@nestjs/config';
 import { UsersRepository } from '../users/users.repository';
 import { CryptoService } from './crypto.service';
 import { TwoFactorService } from './two-factor.service';
+import { MailService } from '../mail/mail.service';
 import {
   RegisterDto,
   LoginDto,
@@ -25,7 +26,8 @@ export class AuthService {
     private jwtService: JwtService,
     private cryptoService: CryptoService,
     private twoFactorService: TwoFactorService,
-    private configService: ConfigService
+    private configService: ConfigService,
+    private mailService: MailService
   ) {}
 
   async register(registerDto: RegisterDto) {
@@ -130,6 +132,16 @@ export class AuthService {
       passwordResetToken: resetToken,
       passwordResetExpires: resetExpires,
     });
+
+    // Get user profile for first name
+    const profile = await this.usersRepository.findProfile(user.id);
+
+    // Send password reset email
+    await this.mailService.sendPasswordResetEmail(
+      user.email,
+      resetToken,
+      profile?.firstName
+    );
 
     return { message: 'If the email exists, a reset link will be sent' };
   }

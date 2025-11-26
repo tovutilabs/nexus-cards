@@ -5,12 +5,14 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { CryptoService } from './crypto.service';
+import { MailService } from '../mail/mail.service';
 
 @Injectable()
 export class EmailVerificationService {
   constructor(
     private prisma: PrismaService,
-    private cryptoService: CryptoService
+    private cryptoService: CryptoService,
+    private mailService: MailService
   ) {}
 
   async sendVerificationEmail(userId: string) {
@@ -38,9 +40,18 @@ export class EmailVerificationService {
       });
     }
 
-    // TODO: Send actual email via email service
-    // For now, we'll just return success
-    // In production, integrate with email provider (SendGrid, Mailchimp, etc.)
+    // Get user profile for first name
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId },
+      select: { firstName: true },
+    });
+
+    // Send verification email
+    await this.mailService.sendVerificationEmail(
+      user.email,
+      verificationToken,
+      profile?.firstName
+    );
 
     return {
       message: 'Verification email sent',
@@ -71,6 +82,18 @@ export class EmailVerificationService {
         emailVerificationToken: null,
       },
     });
+
+    // Get user profile for welcome email
+    const profile = await this.prisma.profile.findUnique({
+      where: { userId: user.id },
+      select: { firstName: true },
+    });
+
+    // Send welcome email
+    await this.mailService.sendWelcomeEmail(
+      user.email,
+      profile?.firstName
+    );
 
     return {
       message: 'Email verified successfully',

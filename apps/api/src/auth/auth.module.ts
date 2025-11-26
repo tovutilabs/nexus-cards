@@ -14,10 +14,12 @@ import { GoogleStrategy } from './strategies/google.strategy';
 import { LinkedInStrategy } from './strategies/linkedin.strategy';
 import { MicrosoftStrategy } from './strategies/microsoft.strategy';
 import { UsersModule } from '../users/users.module';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
     UsersModule,
+    MailModule,
     PassportModule,
     JwtModule.registerAsync({
       imports: [ConfigModule],

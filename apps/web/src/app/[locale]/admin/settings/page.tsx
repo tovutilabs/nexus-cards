@@ -64,10 +64,11 @@ export default function AdminSettingsPage() {
       const apiClient = createApiClient();
       const params =
         selectedCategory !== 'all' ? `?category=${selectedCategory}` : '';
-      const data = await apiClient.get<{ settings: Setting[] }>(
+      const data = await apiClient.get<any>(
         `/admin/settings${params}`
       );
-      setSettings(data.settings);
+      // Handle both array response and {settings: []} response
+      setSettings(Array.isArray(data) ? data : (data?.settings || []));
     } catch (error) {
       console.error('Failed to load settings:', error);
       toast({
@@ -290,7 +291,7 @@ export default function AdminSettingsPage() {
         </TabsList>
 
         <TabsContent value={selectedCategory} className="mt-6">
-          {settings.length === 0 ? (
+          {!settings || settings.length === 0 ? (
             <Card className="p-12 text-center">
               <div className="mx-auto w-24 h-24 mb-4 rounded-full bg-gray-100 flex items-center justify-center">
                 <Settings className="h-12 w-12 text-gray-400" />

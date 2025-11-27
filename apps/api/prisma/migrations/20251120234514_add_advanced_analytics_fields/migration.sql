@@ -1,19 +1,20 @@
+-- RenameColumn (do this first before adding new columns)
+ALTER TABLE "analytics_events" RENAME COLUMN "referer" TO "referralUrl";
+
 -- AlterTable
 ALTER TABLE "analytics_events" 
-ADD COLUMN "referralUrl" TEXT,
-ADD COLUMN "region" TEXT,
-ADD COLUMN "deviceType" TEXT,
-ADD COLUMN "deviceModel" TEXT,
-ADD COLUMN "os" TEXT,
-ADD COLUMN "browserVersion" TEXT,
-ADD COLUMN "linkUrl" TEXT,
-ADD COLUMN "linkLabel" TEXT,
-ADD COLUMN "scrollDepth" INTEGER,
-ADD COLUMN "sessionId" TEXT,
-DROP COLUMN "device" CASCADE;
+ADD COLUMN IF NOT EXISTS "region" TEXT,
+ADD COLUMN IF NOT EXISTS "deviceType" TEXT,
+ADD COLUMN IF NOT EXISTS "deviceModel" TEXT,
+ADD COLUMN IF NOT EXISTS "os" TEXT,
+ADD COLUMN IF NOT EXISTS "browserVersion" TEXT,
+ADD COLUMN IF NOT EXISTS "linkUrl" TEXT,
+ADD COLUMN IF NOT EXISTS "linkLabel" TEXT,
+ADD COLUMN IF NOT EXISTS "scrollDepth" INTEGER,
+ADD COLUMN IF NOT EXISTS "sessionId" TEXT;
 
--- RenameColumn
-ALTER TABLE "analytics_events" RENAME COLUMN "referer" TO "referralUrl";
+-- Drop device column if exists
+ALTER TABLE "analytics_events" DROP COLUMN IF EXISTS "device" CASCADE;
 
 -- CreateIndex
 CREATE INDEX "analytics_events_country_idx" ON "analytics_events"("country");

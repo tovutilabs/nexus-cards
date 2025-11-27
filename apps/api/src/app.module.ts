@@ -26,6 +26,7 @@ import { ComplianceModule } from './compliance/compliance.module';
 import { RedirectController } from './redirect.controller';
 import { FileUploadModule } from './file-upload/file-upload.module';
 import { ActivityLogModule } from './activity-log/activity-log.module';
+import { CardComponentsModule } from './card-components/card-components.module';
 
 @Module({
   imports: [
@@ -61,6 +62,7 @@ import { ActivityLogModule } from './activity-log/activity-log.module';
     ComplianceModule,
     FileUploadModule,
     ActivityLogModule,
+    CardComponentsModule,
   ],
   controllers: [AppController, RedirectController],
   providers: [AppService],

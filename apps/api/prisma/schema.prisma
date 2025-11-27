@@ -249,6 +249,7 @@ model Card {
   analyticsDailies AnalyticsCardDaily[]
   shareLinks      ShareLink[]
   accessList      CardAccessList[]
+  components      CardComponent[]
 
   @@index([userId])
   @@index([slug])
@@ -781,4 +782,57 @@ model CookieConsent {
   @@index([userId])
   @@index([consentedAt])
   @@map("cookie_consents")
+}
+
+enum ComponentType {
+  PROFILE
+  ABOUT
+  CONTACT
+  GALLERY
+  SOCIAL_LINKS
+  CUSTOM_LINKS
+  VIDEO
+  CALENDAR
+  FORM
+  TESTIMONIALS
+  SERVICES
+}
+
+model CardComponent {
+  id                      String        @id @default(cuid())
+  cardId                  String
+  type                    ComponentType
+  order                   Int           @default(0)
+  enabled                 Boolean       @default(true)
+  config                  Json          @default("{}")
+  backgroundType          String?       @default("solid")
+  backgroundColor         String?       @default("#ffffff")
+  backgroundGradientStart String?
+  backgroundGradientEnd   String?
+  backgroundImageUrl      String?
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @updatedAt
+
+  card                    Card          @relation(fields: [cardId], references: [id], onDelete: Cascade)
+
+  @@unique([cardId, order])
+  @@index([cardId])
+  @@index([type])
+  @@index([cardId, order])
+  @@map("card_components")
+}
+
+model ComponentTemplate {
+  id                String        @id @default(cuid())
+  name              String
+  description       String?
+  type              ComponentType
+  defaultConfig     Json
+  previewImageUrl   String?
+  isPremium         Boolean       @default(false)
+  createdAt         DateTime      @default(now())
+
+  @@index([type])
+  @@index([isPremium])
+  @@map("component_templates")
 }

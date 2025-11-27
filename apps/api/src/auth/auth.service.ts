@@ -133,14 +133,11 @@ export class AuthService {
       passwordResetExpires: resetExpires,
     });
 
-    // Get user profile for first name
-    const profile = await this.usersRepository.findProfile(user.id);
-
-    // Send password reset email
+    // Send password reset email (user already includes profile from findByEmail)
     await this.mailService.sendPasswordResetEmail(
       user.email,
       resetToken,
-      profile?.firstName
+      user.profile?.firstName || undefined
     );
 
     return { message: 'If the email exists, a reset link will be sent' };

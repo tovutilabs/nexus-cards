@@ -25,6 +25,7 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { ComplianceModule } from './compliance/compliance.module';
 import { RedirectController } from './redirect.controller';
 import { FileUploadModule } from './file-upload/file-upload.module';
+import { ActivityLogModule } from './activity-log/activity-log.module';
 
 @Module({
   imports: [
@@ -59,6 +60,7 @@ import { FileUploadModule } from './file-upload/file-upload.module';
     NotificationsModule,
     ComplianceModule,
     FileUploadModule,
+    ActivityLogModule,
   ],
   controllers: [AppController, RedirectController],
   providers: [AppService],

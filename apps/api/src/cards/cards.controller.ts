@@ -9,10 +9,12 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Put,
 } from '@nestjs/common';
 import { CardsService } from './cards.service';
 import { CreateCardDto } from './dto/create-card.dto';
 import { UpdateCardDto } from './dto/update-card.dto';
+import { UpdateSocialLinksDto } from './dto/update-social-links.dto';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 
@@ -52,5 +54,19 @@ export class CardsController {
   @HttpCode(HttpStatus.NO_CONTENT)
   remove(@Param('id') id: string, @CurrentUser() user: { id: string }) {
     return this.cardsService.remove(id, user.id);
+  }
+
+  @Put(':id/social-links')
+  updateSocialLinks(
+    @Param('id') id: string,
+    @CurrentUser() user: { id: string },
+    @Body() updateSocialLinksDto: UpdateSocialLinksDto
+  ) {
+    return this.cardsService.updateSocialLinks(id, user.id, updateSocialLinksDto.socialLinks);
+  }
+
+  @Get(':id/social-links')
+  getSocialLinks(@Param('id') id: string, @CurrentUser() user: { id: string }) {
+    return this.cardsService.getSocialLinks(id, user.id);
   }
 }

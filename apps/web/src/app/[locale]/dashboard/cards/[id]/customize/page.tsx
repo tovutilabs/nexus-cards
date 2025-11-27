@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { NexusCard, NexusButton } from '@/components/nexus';
+import { NexusCard, NexusButton, PhoneMockup, PhoneCardPreview } from '@/components/nexus';
 import { useAuth } from '@/contexts/auth-context';
 
 interface Template {
@@ -45,6 +45,8 @@ export default function CustomizeCardPage({ params }: CustomizeCardPageProps) {
   const [borderRadius, setBorderRadius] = useState('md');
   const [shadowPreset, setShadowPreset] = useState('sm');
   const [customCss, setCustomCss] = useState('');
+  const [deviceVariant, setDeviceVariant] = useState<'iphone' | 'android' | 'ipad'>('iphone');
+  const [deviceColor, setDeviceColor] = useState<'black' | 'white' | 'midnight' | 'purple' | 'silver'>('midnight');
 
   useEffect(() => {
     fetchCard();
@@ -593,19 +595,98 @@ export default function CustomizeCardPage({ params }: CustomizeCardPageProps) {
           {/* Live Preview */}
           <div className="lg:col-span-1">
             <div className="sticky top-4">
-              <NexusCard>
-                <h3 className="text-lg font-semibold mb-4">Live Preview</h3>
-                <div className="bg-gray-100 rounded-lg p-4 min-h-[400px] flex items-center justify-center">
-                  <p className="text-sm text-muted-foreground">Preview coming soon</p>
+              <NexusCard className="p-4">
+                {/* Device Selector */}
+                <div className="mb-4">
+                  <label className="block text-sm font-medium mb-3">Preview Device</label>
+                  <div className="grid grid-cols-3 gap-2 mb-3">
+                    <button
+                      onClick={() => setDeviceVariant('iphone')}
+                      className={`p-2 text-xs border rounded-lg transition-all ${
+                        deviceVariant === 'iphone'
+                          ? 'border-primary bg-primary/10 text-primary font-medium'
+                          : 'border-border hover:border-primary'
+                      }`}
+                    >
+                      iPhone
+                    </button>
+                    <button
+                      onClick={() => setDeviceVariant('android')}
+                      className={`p-2 text-xs border rounded-lg transition-all ${
+                        deviceVariant === 'android'
+                          ? 'border-primary bg-primary/10 text-primary font-medium'
+                          : 'border-border hover:border-primary'
+                      }`}
+                    >
+                      Android
+                    </button>
+                    <button
+                      onClick={() => setDeviceVariant('ipad')}
+                      className={`p-2 text-xs border rounded-lg transition-all ${
+                        deviceVariant === 'ipad'
+                          ? 'border-primary bg-primary/10 text-primary font-medium'
+                          : 'border-border hover:border-primary'
+                      }`}
+                    >
+                      Tablet
+                    </button>
+                  </div>
+
+                  {/* Device Color Selector */}
+                  <label className="block text-sm font-medium mb-2">Device Color</label>
+                  <div className="flex gap-2">
+                    {[
+                      { value: 'midnight', label: 'Midnight', color: 'bg-gradient-to-br from-blue-900 to-purple-900' },
+                      { value: 'black', label: 'Black', color: 'bg-gray-900' },
+                      { value: 'silver', label: 'Silver', color: 'bg-gradient-to-br from-gray-300 to-gray-400' },
+                      { value: 'purple', label: 'Purple', color: 'bg-gradient-to-br from-purple-600 to-pink-600' },
+                      { value: 'white', label: 'White', color: 'bg-gray-100 border border-gray-300' },
+                    ].map((colorOption) => (
+                      <button
+                        key={colorOption.value}
+                        onClick={() => setDeviceColor(colorOption.value as any)}
+                        className={`w-8 h-8 rounded-full ${colorOption.color} transition-all ${
+                          deviceColor === colorOption.value
+                            ? 'ring-2 ring-primary ring-offset-2'
+                            : 'hover:ring-2 hover:ring-gray-300'
+                        }`}
+                        title={colorOption.label}
+                      />
+                    ))}
+                  </div>
                 </div>
-                <div className="mt-4 text-sm text-muted-foreground">
-                  <p>Current Settings:</p>
-                  <ul className="mt-2 space-y-1">
-                    <li>• Layout: <span className="capitalize">{layout}</span></li>
-                    <li>• Font: <span className="capitalize">{fontFamily}</span></li>
-                    <li>• Corners: <span className="capitalize">{borderRadius}</span></li>
-                    <li>• Shadow: <span className="capitalize">{shadowPreset}</span></li>
-                  </ul>
+
+                {/* Phone Mockup */}
+                <div className="flex justify-center">
+                  <PhoneMockup variant={deviceVariant} deviceColor={deviceColor}>
+                    <PhoneCardPreview
+                      card={card}
+                      customization={{
+                        fontFamily,
+                        fontSize,
+                        layout,
+                        backgroundType,
+                        backgroundColor,
+                        backgroundImage,
+                        borderRadius,
+                        shadowPreset,
+                        customCss,
+                      }}
+                    />
+                  </PhoneMockup>
+                </div>
+
+                {/* Preview Info */}
+                <div className="mt-4 text-center space-y-1">
+                  <p className="text-sm font-medium text-foreground">Live Preview</p>
+                  <p className="text-xs text-muted-foreground">
+                    Changes update in real-time
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    {deviceVariant === 'iphone' && 'iPhone 14 Pro Max'}
+                    {deviceVariant === 'android' && 'Samsung Galaxy S23'}
+                    {deviceVariant === 'ipad' && 'iPad Pro 11"'}
+                  </p>
                 </div>
               </NexusCard>
             </div>

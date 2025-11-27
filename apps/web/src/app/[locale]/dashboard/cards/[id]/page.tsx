@@ -9,7 +9,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, Save, Eye, Share2 } from 'lucide-react';
+import { SocialLinksManager } from '@/components/nexus';
+import { ArrowLeft, Save, Eye, Share2, Paintbrush } from 'lucide-react';
+
+interface SocialLink {
+  platform: string;
+  url: string;
+  displayOrder?: number;
+}
 
 interface CardData {
   id: string;
@@ -22,7 +29,7 @@ interface CardData {
   phone?: string;
   bio?: string;
   status: string;
-  socialLinks?: Record<string, string>;
+  socialLinks?: SocialLink[];
   theme?: Record<string, any>;
 }
 
@@ -275,25 +282,26 @@ export default function EditCardPage() {
         <TabsContent value="design">
           <Card className="p-6">
             <div className="text-center py-12">
-              <p className="text-gray-600">Design customization coming soon</p>
-              <p className="text-sm text-gray-500 mt-2">
-                Customize colors, fonts, and layout
+              <Paintbrush className="h-12 w-12 mx-auto text-gray-400 mb-4" />
+              <h3 className="text-lg font-semibold mb-2">Card Design Customization</h3>
+              <p className="text-gray-600 mb-4">
+                Customize colors, fonts, layout, and more
               </p>
+              <Button onClick={() => router.push(`/dashboard/cards/${cardId}/customize`)}>
+                Open Customization Studio
+              </Button>
             </div>
           </Card>
         </TabsContent>
 
         <TabsContent value="social">
-          <Card className="p-6">
-            <div className="text-center py-12">
-              <p className="text-gray-600">
-                Social links management coming soon
-              </p>
-              <p className="text-sm text-gray-500 mt-2">
-                Add LinkedIn, Twitter, GitHub, and more
-              </p>
-            </div>
-          </Card>
+          <SocialLinksManager
+            cardId={cardId}
+            initialLinks={card?.socialLinks as any}
+            onUpdate={(links) => {
+              setCard(prev => prev ? { ...prev, socialLinks: links as any } : null);
+            }}
+          />
         </TabsContent>
 
         <TabsContent value="nfc">

@@ -41,7 +41,7 @@ export class EmailVerificationService {
     }
 
     // Get user profile for first name
-    const profile = await this.prisma.profile.findUnique({
+    const profile = await this.prisma.userProfile.findUnique({
       where: { userId },
       select: { firstName: true },
     });
@@ -50,7 +50,7 @@ export class EmailVerificationService {
     await this.mailService.sendVerificationEmail(
       user.email,
       verificationToken,
-      profile?.firstName
+      profile?.firstName || undefined
     );
 
     return {
@@ -84,7 +84,7 @@ export class EmailVerificationService {
     });
 
     // Get user profile for welcome email
-    const profile = await this.prisma.profile.findUnique({
+    const profile = await this.prisma.userProfile.findUnique({
       where: { userId: user.id },
       select: { firstName: true },
     });
@@ -92,7 +92,7 @@ export class EmailVerificationService {
     // Send welcome email
     await this.mailService.sendWelcomeEmail(
       user.email,
-      profile?.firstName
+      profile?.firstName || undefined
     );
 
     return {

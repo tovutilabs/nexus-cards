@@ -130,6 +130,16 @@ export class CardsService {
     await this.cardsRepository.incrementViewCount(card.id);
   }
 
+  async updateSocialLinks(id: string, userId: string, socialLinks: Record<string, string>) {
+    await this.findOne(id, userId);
+    return this.cardsRepository.update(id, { socialLinks });
+  }
+
+  async getSocialLinks(id: string, userId: string) {
+    const card = await this.findOne(id, userId);
+    return { socialLinks: card.socialLinks || {} };
+  }
+
   private sanitizePublicCard(card: any) {
     const {
       userId: _userId,

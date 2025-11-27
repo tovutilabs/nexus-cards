@@ -27,3 +27,7 @@ export type { CardPreviewProps } from './card-preview';
 
 export { DashboardShell } from './dashboard-shell';
 export type { DashboardShellProps } from './dashboard-shell';
+
+export { PhoneMockup, CardPreview as PhoneCardPreview } from './PhoneMockup';
+
+export { SocialLinksManager } from './SocialLinksManager';

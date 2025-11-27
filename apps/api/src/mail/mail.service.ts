@@ -26,7 +26,7 @@ export class MailService {
     const smtpPassword = this.configService.get<string>('SMTP_PASSWORD');
     const smtpSecure = this.configService.get<boolean>('SMTP_SECURE', false);
 
-    this.transporter = nodemailer.createTransporter({
+    this.transporter = nodemailer.createTransport({
       host: smtpHost,
       port: smtpPort,
       secure: smtpSecure,

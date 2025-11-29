@@ -927,7 +927,18 @@ docker-compose -f docker-compose.prod.yml --env-file .env.production build --no-
 
 **Solutions:**
 
-1. **Temporary fix - Disable ESLint during builds:**
+1. **Missing dependencies error** (`Cannot find module 'package-name'`):
+   
+   ```bash
+   # Install missing dependencies locally first
+   cd ~/nexus-cards
+   pnpm install
+   
+   # Then rebuild Docker images
+   docker-compose -f docker-compose.prod.yml --env-file .env.production build --no-cache
+   ```
+
+2. **Temporary fix - Disable ESLint during builds:**
    
    Edit `apps/web/next.config.js`:
    ```javascript
@@ -936,14 +947,15 @@ docker-compose -f docker-compose.prod.yml --env-file .env.production build --no-
    },
    ```
 
-2. **Proper fix - Fix the actual errors:**
+3. **Proper fix - Fix the actual errors:**
    
    Common issues:
    - **React Hooks called conditionally**: Move all hooks to the top of the component before any return statements
    - **Missing ESLint rules**: Update `.eslintrc` configuration
    - **TypeScript errors**: Fix type issues in the codebase
+   - **Missing dependencies**: Add them to `package.json`
 
-3. **Check specific errors:**
+4. **Check specific errors:**
    ```bash
    # View full build output
    docker-compose -f docker-compose.prod.yml --env-file .env.production build --progress=plain web

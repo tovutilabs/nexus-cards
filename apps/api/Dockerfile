@@ -26,20 +26,23 @@ RUN pnpm build
 FROM base AS production
 WORKDIR /app
 
+# Set CI environment variable for non-interactive installs
+ENV CI=true
+
 # Copy workspace files
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 
-# Copy built application and dependencies
+# Copy built application and dependencies from builder
 COPY --from=builder /app/packages ./packages
 COPY --from=builder /app/apps/api/package.json ./apps/api/
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
+
+# Copy node_modules from builder (skip reinstall)
 COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
 
 WORKDIR /app/apps/api
-
-# Install production dependencies only
-RUN pnpm install --prod --frozen-lockfile
 
 # Generate Prisma Client for production
 RUN pnpm prisma generate

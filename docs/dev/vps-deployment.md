@@ -979,6 +979,12 @@ docker-compose -f docker-compose.prod.yml --env-file .env.production build web
 docker-compose -f docker-compose.prod.yml --env-file .env.production build --progress=plain
 ```
 
+**Error:** `ERR_PNPM_ABORTED_REMOVE_MODULES_DIR_NO_TTY` or `Aborted removal of modules directory`
+
+**Cause:** PNPM cannot remove modules in non-interactive CI environment.
+
+**Solution:** The Dockerfile has been fixed to copy node_modules from builder instead of reinstalling. If you modified the Dockerfile, ensure it sets `ENV CI=true` and copies modules rather than running `pnpm install --prod`.
+
 ## Security Checklist
 
 - [ ] Strong passwords for database and Redis

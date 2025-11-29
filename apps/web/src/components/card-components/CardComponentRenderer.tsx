@@ -20,12 +20,7 @@ export function CardComponentRenderer({
   onDelete,
   onToggle,
 }: CardComponentRendererProps) {
-  // Don't render disabled components in preview mode
-  if (!component.enabled && !isEditing) {
-    return null;
-  }
-
-  // Apply component background styles
+  // Apply component background styles (moved before early return)
   const backgroundStyle = React.useMemo(() => {
     const style: React.CSSProperties = {};
 
@@ -43,6 +38,11 @@ export function CardComponentRenderer({
 
     return style;
   }, [component]);
+
+  // Don't render disabled components in preview mode
+  if (!component.enabled && !isEditing) {
+    return null;
+  }
 
   // Render the appropriate component based on type
   const renderComponent = () => {

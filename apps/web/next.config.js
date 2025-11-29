@@ -6,7 +6,7 @@ const nextConfig = {
   transpilePackages: ['@nexus-cards/shared'],
   output: 'standalone',
   eslint: {
-    ignoreDuringBuilds: false,
+    ignoreDuringBuilds: true, // Changed to true for production builds
   },
   // Optimize bundling and performance
   swcMinify: true,

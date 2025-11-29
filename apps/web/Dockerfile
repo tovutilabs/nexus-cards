@@ -3,37 +3,32 @@ FROM node:18-alpine AS base
 # Install pnpm
 RUN npm install -g pnpm@10.22.0
 
-# Dependencies stage
-FROM base AS deps
-WORKDIR /app
-
-# Copy workspace files
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
-COPY packages ./packages
-COPY apps/web/package.json ./apps/web/
-
-# Install dependencies
-RUN pnpm install --frozen-lockfile
-
 # Builder stage
 FROM base AS builder
 WORKDIR /app
 
-# Copy dependencies
-COPY --from=deps /app/node_modules ./node_modules
-COPY --from=deps /app/packages ./packages
-
-# Copy source
-COPY apps/web ./apps/web
+# Copy workspace configuration
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 
+# Copy all packages and apps needed for build
+COPY packages ./packages
+COPY apps/web ./apps/web
+
+# Install all dependencies (including dev dependencies for build)
+RUN pnpm install --frozen-lockfile
+
+# Generate Prisma Client if shared package needs it
+WORKDIR /app/packages/shared
+RUN if [ -f "prisma/schema.prisma" ]; then pnpm prisma generate; fi
+
+# Build web application
 WORKDIR /app/apps/web
 
 # Set environment variables for build
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV NODE_ENV=production
 
-# Build application
+# Build Next.js application
 RUN pnpm build
 
 # Production stage

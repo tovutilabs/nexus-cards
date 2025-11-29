@@ -27,9 +27,12 @@ export function GalleryComponent({
   const showCaptions = config.showCaptions !== false;
   const enableLightbox = config.lightbox !== false;
 
-  // Lightbox state
+  // Lightbox state (must be declared before any conditional returns)
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
+  
+  // Carousel state (declared here to avoid conditional hook calls)
+  const [carouselIndex, setCarouselIndex] = useState(0);
 
   const openLightbox = (index: number) => {
     if (enableLightbox && !isEditing) {
@@ -174,8 +177,6 @@ export function GalleryComponent({
 
   // Carousel layout (simplified version)
   if (layout === 'carousel') {
-    const [carouselIndex, setCarouselIndex] = useState(0);
-
     return (
       <div
         className={cn(

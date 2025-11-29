@@ -11,6 +11,7 @@
     "docker:down": "docker compose down",
     "docker:logs": "docker compose logs -f",
     "docker:restart": "docker compose restart",
+    "postinstall": "cd apps/api && pnpm prisma generate",
     "build": "pnpm -r build",
     "build:api": "pnpm --filter @nexus-cards/api build",
     "build:web": "pnpm --filter @nexus-cards/web build",

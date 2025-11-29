@@ -118,6 +118,18 @@ export function PhoneMockup({ children, theme = 'light', deviceColor = 'midnight
 
 // Card Preview Component for use inside PhoneMockup
 interface CardPreviewProps {
+  card?: any;
+  customization?: {
+    fontFamily?: string;
+    fontSize?: string;
+    layout?: string;
+    backgroundType?: string;
+    backgroundColor?: string;
+    backgroundImage?: string;
+    borderRadius?: string;
+    shadowPreset?: string;
+    customCss?: string;
+  };
   fontFamily?: string;
   fontSize?: string;
   layout?: string;
@@ -135,14 +147,23 @@ interface CardPreviewProps {
 }
 
 export function CardPreview({
-  fontFamily = 'inter',
-  fontSize = 'base',
-  layout = 'vertical',
-  backgroundColor = '#ffffff',
-  borderRadius = 'md',
-  shadowPreset = 'sm',
+  card,
+  customization,
+  fontFamily: fontFamilyProp = 'inter',
+  fontSize: fontSizeProp = 'base',
+  layout: layoutProp = 'vertical',
+  backgroundColor: backgroundColorProp = '#ffffff',
+  borderRadius: borderRadiusProp = 'md',
+  shadowPreset: shadowPresetProp = 'sm',
   cardData = {},
 }: CardPreviewProps) {
+  // Use customization props if provided, otherwise fall back to direct props
+  const fontFamily = customization?.fontFamily || fontFamilyProp;
+  const fontSize = customization?.fontSize || fontSizeProp;
+  const layout = customization?.layout || layoutProp;
+  const backgroundColor = customization?.backgroundColor || backgroundColorProp;
+  const borderRadius = customization?.borderRadius || borderRadiusProp;
+  const shadowPreset = customization?.shadowPreset || shadowPresetProp;
   const fontFamilyMap: Record<string, string> = {
     inter: 'font-sans',
     sans: 'font-sans',

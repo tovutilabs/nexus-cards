@@ -44,7 +44,7 @@ RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
 # Generate Prisma Client in production (now that @prisma/client is installed)
 WORKDIR /app/apps/api
-RUN npx prisma generate
+RUN pnpm prisma generate
 
 # Copy built application from builder
 WORKDIR /app

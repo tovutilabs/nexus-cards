@@ -36,19 +36,22 @@ COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY packages/shared/package.json ./packages/shared/
 COPY apps/api/package.json ./apps/api/
 
-# Install production dependencies (skip scripts to avoid postinstall errors)
-RUN pnpm install --frozen-lockfile --prod --ignore-scripts
-
-# Copy built application from builder
-COPY --from=builder /app/packages/shared/src ./packages/shared/src
-COPY --from=builder /app/apps/api/dist ./apps/api/dist
+# Copy prisma schema (needed for generation)
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 
-WORKDIR /app/apps/api
+# Install production dependencies (skip postinstall to avoid errors)
+RUN pnpm install --frozen-lockfile --prod --ignore-scripts
 
-# Copy Prisma Client from builder (generated during build stage)
-# PNPM stores it in apps/api/node_modules/.prisma/client
-COPY --from=builder /app/apps/api/node_modules/.prisma ./node_modules/.prisma
+# Generate Prisma Client in production (now that @prisma/client is installed)
+WORKDIR /app/apps/api
+RUN npx prisma generate
+
+# Copy built application from builder
+WORKDIR /app
+COPY --from=builder /app/packages/shared/src ./packages/shared/src
+COPY --from=builder /app/apps/api/dist ./apps/api/dist
+
+WORKDIR /app/apps/api
 
 EXPOSE 3001
 

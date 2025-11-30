@@ -72,10 +72,11 @@ docker-compose -f docker-compose.prod.yml --env-file .env.production build --no-
 **Expected build time:** 5-15 minutes depending on server specs.
 
 **Watch for these successful steps:**
-- ✓ `pnpm install --frozen-lockfile` in builder stage
-- ✓ `pnpm install --frozen-lockfile --prod` in production stage
-- ✓ `pnpm prisma generate`
-- ✓ Build completes without errors
+- ✓ Builder stage: `pnpm install --frozen-lockfile`
+- ✓ Builder stage: `pnpm prisma generate`
+- ✓ Builder stage: `pnpm build`
+- ✓ Production stage: `pnpm install --frozen-lockfile --prod --ignore-scripts`
+- ✓ Build completes without "Command prisma not found" errors
 
 ### Step 6: Start Services
 

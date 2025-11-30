@@ -196,6 +196,14 @@ If any placeholders or empty values are found, update them before proceeding.
 
 ## Step 5: Create Production Docker Compose
 
+**Option 1: Copy from template (Recommended):**
+
+```bash
+cp docker-compose.prod.yml.example docker-compose.prod.yml
+```
+
+**Option 2: Create manually:**
+
 Create `docker-compose.prod.yml`:
 
 ```bash
@@ -841,6 +849,187 @@ grep -E "(YOUR_|CHANGE_ME|_HERE)" .env.production
 
 # Verify critical variables are set
 grep -E "(DB_PASSWORD|REDIS_PASSWORD|JWT_SECRET)" .env.production
+```
+
+### Database/Redis Containers Unhealthy
+
+**Error:** `dependency failed to start: container nexus-db is unhealthy` or `container nexus-redis is unhealthy`
+
+**This is the most common production deployment error.** It means the database or Redis container started but failed its health check.
+
+**Step 1: Check container logs immediately**
+
+```bash
+# View database container logs
+docker logs nexus-db
+
+# View Redis container logs  
+docker logs nexus-redis
+
+# Common errors to look for:
+# - "FATAL: password authentication failed"
+# - "FATAL: database does not exist"
+# - "permission denied"
+# - Redis: "WRONGPASS invalid username-password pair"
+```
+
+**Step 2: Verify environment variables are loaded**
+
+```bash
+# Check if DB_PASSWORD is set in the database container
+docker exec nexus-db printenv POSTGRES_PASSWORD
+
+# Check if containers can see environment variables
+docker inspect nexus-db | grep -A 10 "Env"
+docker inspect nexus-redis | grep -A 10 "Env"
+
+# If variables are empty or missing, the --env-file flag didn't work
+```
+
+**Step 3: Common causes and fixes**
+
+**A) Missing or incorrect DB_PASSWORD/REDIS_PASSWORD:**
+
+The `docker-compose.prod.yml` file uses `${DB_PASSWORD}` and `${REDIS_PASSWORD}` variables. These MUST be defined in `.env.production`:
+
+```bash
+# Add to .env.production
+DB_PASSWORD=your_secure_database_password_here
+REDIS_PASSWORD=your_secure_redis_password_here
+```
+
+Then restart:
+```bash
+docker-compose -f docker-compose.prod.yml --env-file .env.production down
+docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
+```
+
+**B) DATABASE_URL doesn't match DB_PASSWORD:**
+
+Your `DATABASE_URL` in `.env.production` must use the SAME password as `DB_PASSWORD`:
+
+```env
+# These MUST match:
+DB_PASSWORD=MySecurePass123
+DATABASE_URL=postgresql://nexus_user:MySecurePass123@db:5432/nexus_cards
+#                                    ^^^^^^^^^^^^^^^^
+#                                    Must be the same password
+```
+
+**C) Redis password mismatch:**
+
+If using Redis password, both Redis container and REDIS_URL must match:
+
+```env
+# In docker-compose.prod.yml:
+# redis: --requirepass ${REDIS_PASSWORD}
+
+# In .env.production:
+REDIS_PASSWORD=MyRedisPass123
+REDIS_URL=redis://:MyRedisPass123@redis:6379
+#                  ^^^^^^^^^^^^^^^^
+#                  Must match REDIS_PASSWORD
+```
+
+**D) Port conflicts:**
+
+Check if ports 5432 or 6379 are already in use:
+
+```bash
+# Check what's using PostgreSQL port
+sudo lsof -i :5432
+
+# Check what's using Redis port
+sudo lsof -i :6379
+
+# If something else is using these ports, stop those services:
+sudo systemctl stop postgresql  # If system PostgreSQL is running
+sudo systemctl stop redis-server  # If system Redis is running
+```
+
+**E) Volume permission issues:**
+
+```bash
+# Stop containers
+docker-compose -f docker-compose.prod.yml --env-file .env.production down
+
+# Remove volumes (WARNING: This deletes all data!)
+docker volume rm nexus-cards_postgres_data
+docker volume rm nexus-cards_redis_data
+
+# Restart
+docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
+```
+
+**Step 4: Test database connection manually**
+
+```bash
+# Wait for container to be healthy
+docker-compose -f docker-compose.prod.yml --env-file .env.production ps
+
+# Test PostgreSQL connection
+docker exec nexus-db psql -U nexus_user -d nexus_cards -c "SELECT 1;"
+
+# If this fails with authentication error, password is wrong
+# If this fails with "database does not exist", database wasn't created
+```
+
+**Step 5: Verify health check commands work**
+
+```bash
+# Test database health check manually
+docker exec nexus-db pg_isready -U nexus_user
+
+# Test Redis health check manually  
+docker exec nexus-redis redis-cli --raw incr ping
+
+# If Redis requires password:
+docker exec nexus-redis redis-cli -a "YOUR_REDIS_PASSWORD" ping
+```
+
+**Step 6: Check Docker Compose configuration**
+
+Verify your `docker-compose.prod.yml` has correct variable substitution:
+
+```bash
+# View resolved configuration (shows actual values)
+docker-compose -f docker-compose.prod.yml --env-file .env.production config
+
+# Check database section shows correct password (not empty or placeholder)
+```
+
+**Step 7: Complete reset (if all else fails)**
+
+```bash
+# Stop everything
+docker-compose -f docker-compose.prod.yml --env-file .env.production down -v
+
+# Remove all containers and volumes
+docker rm -f nexus-db nexus-redis nexus-api nexus-web
+docker volume rm nexus-cards_postgres_data nexus-cards_redis_data
+
+# Verify environment variables are correct
+cat .env.production | grep -E "(DB_PASSWORD|REDIS_PASSWORD|DATABASE_URL|REDIS_URL)"
+
+# Start fresh
+docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
+
+# Watch logs in real-time
+docker-compose -f docker-compose.prod.yml --env-file .env.production logs -f
+```
+
+**Quick diagnostic command:**
+
+```bash
+# Run this single command to check everything:
+echo "=== Environment Variables ===" && \
+grep -E "(DB_PASSWORD|REDIS_PASSWORD)" .env.production && \
+echo -e "\n=== Container Status ===" && \
+docker-compose -f docker-compose.prod.yml --env-file .env.production ps && \
+echo -e "\n=== Database Logs ===" && \
+docker logs nexus-db --tail 20 && \
+echo -e "\n=== Redis Logs ===" && \
+docker logs nexus-redis --tail 20
 ```
 
 ### Services Not Starting

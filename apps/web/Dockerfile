@@ -14,8 +14,8 @@ COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY packages ./packages
 COPY apps/web ./apps/web
 
-# Install all dependencies (including dev dependencies for build)
-RUN pnpm install --frozen-lockfile
+# Install all dependencies (skip postinstall to avoid API-specific scripts)
+RUN pnpm install --frozen-lockfile --ignore-scripts
 
 # Generate Prisma Client if shared package needs it
 WORKDIR /app/packages/shared

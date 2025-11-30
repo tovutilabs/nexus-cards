@@ -108,7 +108,7 @@ RUN pnpm prisma generate
 
 ---
 
-## Final Dockerfile Structure (apps/api/Dockerfile)
+### 4. ✅ Prisma CLI Version Mismatch
 
 ```dockerfile
 FROM node:18-alpine AS base
@@ -120,7 +120,12 @@ WORKDIR /app
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 COPY packages ./packages
 COPY apps/api ./apps/api
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# Build shared package first
+WORKDIR /app/packages/shared
+RUN pnpm build
+
 WORKDIR /app/apps/api
 RUN pnpm prisma generate
 RUN pnpm build
@@ -149,7 +154,8 @@ RUN pnpm prisma generate
 
 # Copy built application from builder
 WORKDIR /app
-COPY --from=builder /app/packages/shared/src ./packages/shared/src
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app/packages/shared/package.json ./packages/shared/
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 
 WORKDIR /app/apps/api
@@ -207,6 +213,8 @@ Ensure all required variables are set in `.env.production`:
 3. **Docker Multi-Stage:** Use `--ignore-scripts` to avoid dependency mismatch errors
 4. **Lockfile Hygiene:** Always regenerate `pnpm-lock.yaml` after modifying `package.json`
 5. **Version Matching:** Ensure `prisma` and `@prisma/client` versions always match
+6. **Shared Package Build:** Compile TypeScript to JavaScript - Node.js cannot execute `.ts` files at runtime
+7. **Build Order:** Build shared packages before dependent packages in Docker multi-stage builds
 
 ---
 

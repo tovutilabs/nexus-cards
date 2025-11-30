@@ -1036,62 +1036,83 @@ docker logs nexus-redis --tail 20
 
 **Error:** `Error: Cannot find module '@nexus-cards/shared'` in nexus-api logs
 
-**Cause:** The shared package (`packages/shared`) is not properly included in the Docker build or its node_modules are missing.
+**Root Cause:** The shared package (`packages/shared`) is not properly declared as a workspace dependency in `apps/api/package.json` and `apps/web/package.json`.
 
-**Solutions:**
+**Solution:**
 
-**Step 1: Verify Dockerfile copies shared package correctly**
+**Step 1: Add workspace dependency to package.json files**
 
-Check `apps/api/Dockerfile` includes these lines in the production stage:
+This should already be fixed in the latest code, but verify:
 
-```dockerfile
-# Copy built application and dependencies from builder
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
-COPY --from=builder /app/packages/shared/node_modules ./packages/shared/node_modules
+```bash
+# Check API package.json includes shared dependency
+grep -A 1 '"dependencies":' apps/api/package.json | grep "@nexus-cards/shared"
+# Should output: "@nexus-cards/shared": "workspace:*",
+
+# Check web package.json includes shared dependency  
+grep -A 1 '"dependencies":' apps/web/package.json | grep "@nexus-cards/shared"
+# Should output: "@nexus-cards/shared": "workspace:*",
 ```
 
-**Step 2: Rebuild with no cache**
+If not present, add to both files:
+
+```json
+"dependencies": {
+  "@nexus-cards/shared": "workspace:*",
+  // ... other dependencies
+}
+```
+
+**Step 2: Rebuild Docker images with no cache**
 
 ```bash
 cd ~/nexus-cards
 
+# Pull latest code if on production server
+git pull origin main  # or your branch name
+
+# Reinstall dependencies locally
+pnpm install
+
 # Stop containers
 docker-compose -f docker-compose.prod.yml --env-file .env.production down
 
-# Remove old images
-docker rmi nexus-cards-api nexus-cards-web
+# Remove old images completely
+docker rmi -f $(docker images -q nexus-cards-api nexus-cards-web 2>/dev/null)
 
-# Rebuild without cache
+# Rebuild without cache (CRITICAL - cache may have incorrect symlinks)
 docker-compose -f docker-compose.prod.yml --env-file .env.production build --no-cache
 
 # Start services
 docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
 ```
 
-**Step 3: Verify shared package exists in container**
+**Step 3: Verify shared package is accessible in container**
 
 ```bash
-# Check if shared package is present
-docker exec nexus-api ls -la /app/packages/shared
+# Check if shared package source exists
+docker exec nexus-api ls -la /app/packages/shared/src
 
-# Check if node_modules are linked correctly
-docker exec nexus-api ls -la /app/node_modules/@nexus-cards
+# Check if pnpm created proper symlink
+docker exec nexus-api ls -la /app/node_modules/.pnpm
 
-# Verify package can be imported
+# Verify package can be resolved
 docker exec nexus-api node -e "console.log(require.resolve('@nexus-cards/shared'))"
+# Should output: /app/packages/shared/src/index.ts (or similar)
+
+# Check API logs for successful startup
+docker logs nexus-api --tail 50
 ```
 
-**Step 4: Check pnpm workspace configuration**
+**Why this happens:**
 
-Ensure `pnpm-workspace.yaml` in project root contains:
+PNPM workspaces require explicit dependency declarations in `package.json` even for local workspace packages. The TypeScript path mappings (`@nexus-cards/shared`) work during build time, but at runtime Node.js needs the actual npm package resolution via `node_modules/.pnpm` symlinks.
 
-```yaml
-packages:
-  - 'apps/*'
-  - 'packages/*'
-```
+The Dockerfile now:
+1. Copies `package.json` files for all workspace packages
+2. Runs `pnpm install --frozen-lockfile --prod` to create proper symlinks
+3. Copies source files from builder stage
+4. Ensures `/app/node_modules/.pnpm` contains the shared package symlink
 
 ### Database Name Mismatch
 

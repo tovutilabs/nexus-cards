@@ -29,19 +29,20 @@ WORKDIR /app
 # Set CI environment variable for non-interactive installs
 ENV CI=true
 
-# Copy workspace files
+# Copy workspace configuration
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 
-# Copy built application and dependencies from builder
-COPY --from=builder /app/packages ./packages
-COPY --from=builder /app/apps/api/package.json ./apps/api/
+# Copy package.json files for workspace packages
+COPY packages/shared/package.json ./packages/shared/
+COPY apps/api/package.json ./apps/api/
+
+# Install production dependencies (this creates proper symlinks for workspace packages)
+RUN pnpm install --frozen-lockfile --prod
+
+# Copy built application from builder
+COPY --from=builder /app/packages/shared/src ./packages/shared/src
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
-
-# Copy node_modules from builder (includes shared package dependencies)
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
-COPY --from=builder /app/packages/shared/node_modules ./packages/shared/node_modules
 
 WORKDIR /app/apps/api
 

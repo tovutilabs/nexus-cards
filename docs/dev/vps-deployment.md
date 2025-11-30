@@ -1023,13 +1023,109 @@ docker-compose -f docker-compose.prod.yml --env-file .env.production logs -f
 ```bash
 # Run this single command to check everything:
 echo "=== Environment Variables ===" && \
-grep -E "(DB_PASSWORD|REDIS_PASSWORD)" .env.production && \
+grep -E "(DB_PASSWORD|REDIS_PASSWORD|DATABASE_URL)" .env.production && \
 echo -e "\n=== Container Status ===" && \
 docker-compose -f docker-compose.prod.yml --env-file .env.production ps && \
 echo -e "\n=== Database Logs ===" && \
 docker logs nexus-db --tail 20 && \
 echo -e "\n=== Redis Logs ===" && \
 docker logs nexus-redis --tail 20
+```
+
+### API Container: Cannot find module '@nexus-cards/shared'
+
+**Error:** `Error: Cannot find module '@nexus-cards/shared'` in nexus-api logs
+
+**Cause:** The shared package (`packages/shared`) is not properly included in the Docker build or its node_modules are missing.
+
+**Solutions:**
+
+**Step 1: Verify Dockerfile copies shared package correctly**
+
+Check `apps/api/Dockerfile` includes these lines in the production stage:
+
+```dockerfile
+# Copy built application and dependencies from builder
+COPY --from=builder /app/packages ./packages
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=builder /app/packages/shared/node_modules ./packages/shared/node_modules
+```
+
+**Step 2: Rebuild with no cache**
+
+```bash
+cd ~/nexus-cards
+
+# Stop containers
+docker-compose -f docker-compose.prod.yml --env-file .env.production down
+
+# Remove old images
+docker rmi nexus-cards-api nexus-cards-web
+
+# Rebuild without cache
+docker-compose -f docker-compose.prod.yml --env-file .env.production build --no-cache
+
+# Start services
+docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
+```
+
+**Step 3: Verify shared package exists in container**
+
+```bash
+# Check if shared package is present
+docker exec nexus-api ls -la /app/packages/shared
+
+# Check if node_modules are linked correctly
+docker exec nexus-api ls -la /app/node_modules/@nexus-cards
+
+# Verify package can be imported
+docker exec nexus-api node -e "console.log(require.resolve('@nexus-cards/shared'))"
+```
+
+**Step 4: Check pnpm workspace configuration**
+
+Ensure `pnpm-workspace.yaml` in project root contains:
+
+```yaml
+packages:
+  - 'apps/*'
+  - 'packages/*'
+```
+
+### Database Name Mismatch
+
+**Error:** `FATAL: database "nexus_user" does not exist`
+
+**Cause:** The `DATABASE_URL` is incorrectly formatted, using the username as the database name.
+
+**Solution:**
+
+Edit `.env.production` and ensure `DATABASE_URL` follows this exact format:
+
+```env
+# Correct format:
+DATABASE_URL=postgresql://USERNAME:PASSWORD@HOST:PORT/DATABASE_NAME
+#                         ^^^^^^^^         ^^^^^^^^     ^^^^^^^^^^^^^
+#                         User            Password      Actual DB name
+
+# Example (must match docker-compose.prod.yml):
+DATABASE_URL=postgresql://nexus_user:MySecurePass123@db:5432/nexus_cards
+#                                                              ^^^^^^^^^^^
+#                                                              This is the database name (not nexus_user)
+```
+
+**Verification:**
+
+```bash
+# Check DATABASE_URL format
+grep DATABASE_URL .env.production
+
+# Should end with /nexus_cards, not /nexus_user
+
+# Restart containers after fixing
+docker-compose -f docker-compose.prod.yml --env-file .env.production down
+docker-compose -f docker-compose.prod.yml --env-file .env.production up -d
 ```
 
 ### Services Not Starting

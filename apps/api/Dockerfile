@@ -1,5 +1,8 @@
 FROM node:18-alpine AS base
 
+# Install OpenSSL 1.1 compatibility for Prisma
+RUN apk add --no-cache openssl1.1-compat
+
 # Install pnpm
 RUN npm install -g pnpm@10.22.0
 

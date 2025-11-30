@@ -660,17 +660,19 @@ export default function CustomizeCardPage({ params }: CustomizeCardPageProps) {
                 <div className="flex justify-center">
                   <PhoneMockup variant={deviceVariant} deviceColor={deviceColor}>
                     <PhoneCardPreview
-                      card={card}
-                      customization={{
-                        fontFamily,
-                        fontSize,
-                        layout,
-                        backgroundType,
-                        backgroundColor,
-                        backgroundImage,
-                        borderRadius,
-                        shadowPreset,
-                        customCss,
+                      fontFamily={fontFamily}
+                      fontSize={fontSize}
+                      layout={layout}
+                      backgroundColor={backgroundType === 'solid' ? backgroundColor : undefined}
+                      borderRadius={borderRadius}
+                      shadowPreset={shadowPreset}
+                      cardData={{
+                        name: card?.name,
+                        title: card?.title,
+                        company: card?.company,
+                        email: card?.email,
+                        phone: card?.phone,
+                        avatarUrl: card?.avatarUrl,
                       }}
                     />
                   </PhoneMockup>

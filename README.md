@@ -216,6 +216,15 @@ Run tests in watch mode:
 npm test -- --watch
 ```
 
+### Chrome DevTools MCP Relay
+
+The workspace includes Chrome DevTools MCP (Model Context Protocol) integration for browser automation and debugging through GitHub Copilot Chat. See [`docs/dev/chrome-devtools-mcp.md`](docs/dev/chrome-devtools-mcp.md) for setup and usage instructions.
+
+Example commands in Copilot Chat:
+- `Navigate to http://localhost:3000 and take a screenshot`
+- `Test the login flow with admin@nexus.cards`
+- `Run a performance trace on the dashboard`
+
 ## Production Deployment
 
 The application is designed for containerized VPS deployment:

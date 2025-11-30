@@ -6,6 +6,7 @@
     "dev": "ts-node -r tsconfig-paths/register src/main.ts",
     "dev:watch": "nest start --watch --exec 'node -r tsconfig-paths/register dist/apps/api/src/main'",
     "dev:debug": "nest start --debug --watch --exec 'node -r tsconfig-paths/register dist/apps/api/src/main'",
+    "prebuild": "pnpm prisma generate",
     "build": "nest build",
     "start": "node dist/apps/api/src/main",
     "start:prod": "node dist/apps/api/src/main",

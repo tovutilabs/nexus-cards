@@ -19,7 +19,7 @@ RUN pnpm install --frozen-lockfile
 WORKDIR /app/apps/api
 RUN pnpm prisma generate
 
-# Build application
+# Build application (automatically includes shared package)
 RUN pnpm build
 
 # Production stage
@@ -38,9 +38,10 @@ COPY --from=builder /app/apps/api/package.json ./apps/api/
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 
-# Copy node_modules from builder (skip reinstall)
+# Copy node_modules from builder (includes shared package dependencies)
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/apps/api/node_modules ./apps/api/node_modules
+COPY --from=builder /app/packages/shared/node_modules ./packages/shared/node_modules
 
 WORKDIR /app/apps/api
 

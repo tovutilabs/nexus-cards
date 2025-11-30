@@ -28,11 +28,28 @@ grep DATABASE_URL .env.production
 #                                                          ^^^^^^^^^^^
 #                                                          Database name (NOT nexus_user)
 
-# Check for missing passwords
-grep -E "(DB_PASSWORD|REDIS_PASSWORD)" .env.production
+# Check for missing passwords and keys
+grep -E "(DB_PASSWORD|REDIS_PASSWORD|JWT_SECRET|ENCRYPTION_KEY)" .env.production
 ```
 
-**If DATABASE_URL is wrong**, edit it:
+**Critical: Generate ENCRYPTION_KEY**
+
+The `ENCRYPTION_KEY` **must be exactly 64 hex characters (32 bytes)**:
+
+```bash
+# Generate encryption key
+openssl rand -hex 32
+
+# Example output:
+# a1b2c3d4e5f6789012345678901234567890abcdef1234567890abcdef123456
+# ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+# Must be EXACTLY 64 characters
+
+# Add to .env.production:
+ENCRYPTION_KEY=<paste_the_64_character_output_here>
+```
+
+**If DATABASE_URL or ENCRYPTION_KEY is wrong**, edit it:
 
 ```bash
 nano .env.production
@@ -42,6 +59,9 @@ nano .env.production
 
 # To:
 # DATABASE_URL=postgresql://nexus_user:PASSWORD@db:5432/nexus_cards
+
+# And ensure ENCRYPTION_KEY is set:
+# ENCRYPTION_KEY=<64_character_hex_string_from_openssl_rand_-hex_32>
 ```
 
 ### Step 3: Stop Containers

@@ -17,6 +17,10 @@ COPY apps/web ./apps/web
 # Install all dependencies (skip postinstall to avoid API-specific scripts)
 RUN pnpm install --frozen-lockfile --ignore-scripts
 
+# Build shared package first (required by web)
+WORKDIR /app/packages/shared
+RUN pnpm build
+
 # Generate Prisma Client if shared package needs it
 WORKDIR /app/packages/shared
 RUN if [ -f "prisma/schema.prisma" ]; then pnpm prisma generate; fi

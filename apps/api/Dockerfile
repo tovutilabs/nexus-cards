@@ -13,7 +13,11 @@ COPY packages ./packages
 COPY apps/api ./apps/api
 
 # Install dependencies
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# Build shared package first (required by API)
+WORKDIR /app/packages/shared
+RUN pnpm build
 
 # Generate Prisma Client
 WORKDIR /app/apps/api
@@ -48,7 +52,8 @@ RUN pnpm prisma generate
 
 # Copy built application from builder
 WORKDIR /app
-COPY --from=builder /app/packages/shared/src ./packages/shared/src
+COPY --from=builder /app/packages/shared/dist ./packages/shared/dist
+COPY --from=builder /app/packages/shared/package.json ./packages/shared/
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 
 WORKDIR /app/apps/api

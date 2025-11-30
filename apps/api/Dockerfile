@@ -44,11 +44,11 @@ COPY --from=builder /app/packages/shared/src ./packages/shared/src
 COPY --from=builder /app/apps/api/dist ./apps/api/dist
 COPY --from=builder /app/apps/api/prisma ./apps/api/prisma
 
-# Copy Prisma Client from builder (already generated)
-COPY --from=builder /app/node_modules/.prisma ./node_modules/.prisma
-COPY --from=builder /app/node_modules/@prisma/client ./node_modules/@prisma/client
-
 WORKDIR /app/apps/api
+
+# Copy Prisma Client from builder (generated during build stage)
+# PNPM stores it in apps/api/node_modules/.prisma/client
+COPY --from=builder /app/apps/api/node_modules/.prisma ./node_modules/.prisma
 
 EXPOSE 3001
 

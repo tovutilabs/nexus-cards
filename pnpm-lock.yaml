@@ -137,6 +137,9 @@ importers:
       passport-microsoft:
         specifier: ^2.1.0
         version: 2.1.0
+      prisma:
+        specifier: ^5.22.0
+        version: 5.22.0
       qrcode:
         specifier: ^1.5.4
         version: 1.5.4
@@ -192,9 +195,6 @@ importers:
       jest:
         specifier: ^29.7.0
         version: 29.7.0(@types/node@20.19.25)(ts-node@10.9.2(@swc/core@1.15.2)(@types/node@20.19.25)(typescript@5.9.3))
-      prisma:
-        specifier: ^5.22.0
-        version: 5.22.0
       supertest:
         specifier: ^6.3.4
         version: 6.3.4

@@ -5,6 +5,12 @@ import { AboutComponent } from './AboutComponent';
 import { ContactComponent } from './ContactComponent';
 import { SocialLinksComponent } from './SocialLinksComponent';
 import { GalleryComponent } from './GalleryComponent';
+import { CustomLinksComponent } from './CustomLinksComponent';
+import { VideoComponent } from './VideoComponent';
+import { CalendarComponent } from './CalendarComponent';
+import { FormComponent } from './FormComponent';
+import { TestimonialsComponent } from './TestimonialsComponent';
+import { ServicesComponent } from './ServicesComponent';
 
 /**
  * CardComponentRenderer
@@ -72,46 +78,22 @@ export function CardComponentRenderer({
         return <GalleryComponent {...baseProps} />;
       
       case 'CUSTOM_LINKS':
-        return (
-          <div className="p-6 text-center text-gray-500">
-            Custom Links component (coming soon)
-          </div>
-        );
+        return <CustomLinksComponent {...baseProps} />;
       
       case 'VIDEO':
-        return (
-          <div className="p-6 text-center text-gray-500">
-            Video component (coming soon)
-          </div>
-        );
+        return <VideoComponent {...baseProps} />;
       
       case 'CALENDAR':
-        return (
-          <div className="p-6 text-center text-gray-500">
-            Calendar component (coming soon)
-          </div>
-        );
+        return <CalendarComponent {...baseProps} />;
       
       case 'FORM':
-        return (
-          <div className="p-6 text-center text-gray-500">
-            Form component (coming soon)
-          </div>
-        );
+        return <FormComponent {...baseProps} />;
       
       case 'TESTIMONIALS':
-        return (
-          <div className="p-6 text-center text-gray-500">
-            Testimonials component (coming soon)
-          </div>
-        );
+        return <TestimonialsComponent {...baseProps} />;
       
       case 'SERVICES':
-        return (
-          <div className="p-6 text-center text-gray-500">
-            Services component (coming soon)
-          </div>
-        );
+        return <ServicesComponent {...baseProps} />;
       
       default:
         return (

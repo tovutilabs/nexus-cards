@@ -5,52 +5,72 @@ import { ReactNode } from 'react';
 interface PhoneMockupProps {
   children: ReactNode;
   theme?: 'light' | 'dark';
-  deviceColor?: 'black' | 'white' | 'midnight' | 'purple' | 'silver';
-  variant?: 'iphone' | 'android' | 'ipad';
+  deviceColor?: 'black' | 'white' | 'midnight' | 'purple' | 'silver' | 'gold' | 'blue' | 'green';
+  variant?: 'iphone-14' | 'iphone-14-pro' | 'iphone-15' | 'iphone-15-pro-max' | 'samsung-s23' | 'samsung-s24' | 'samsung-fold' | 'pixel-8' | 'ipad-air' | 'ipad-pro' | 'galaxy-tab';
 }
 
-export function PhoneMockup({ children, theme = 'light', deviceColor = 'midnight', variant = 'iphone' }: PhoneMockupProps) {
+export function PhoneMockup({ children, theme = 'light', deviceColor = 'midnight', variant = 'iphone-15' }: PhoneMockupProps) {
   const deviceColors = {
     black: 'bg-gray-900',
     white: 'bg-gray-100',
     silver: 'bg-gradient-to-br from-gray-300 to-gray-400',
     midnight: 'bg-gradient-to-br from-blue-900 to-purple-900',
     purple: 'bg-gradient-to-br from-purple-600 to-pink-600',
+    gold: 'bg-gradient-to-br from-yellow-600 to-amber-700',
+    blue: 'bg-gradient-to-br from-blue-500 to-blue-700',
+    green: 'bg-gradient-to-br from-green-600 to-emerald-700',
   };
 
   const dimensions = {
-    iphone: { width: '320px', height: '650px', rounded: '3rem', padding: '2.5' },
-    android: { width: '340px', height: '680px', rounded: '2.5rem', padding: '2' },
-    ipad: { width: '500px', height: '700px', rounded: '2rem', padding: '3' },
+    'iphone-14': { width: '320px', height: '650px', rounded: '3rem', padding: '10px', type: 'iphone' },
+    'iphone-14-pro': { width: '325px', height: '670px', rounded: '3rem', padding: '10px', type: 'iphone-pro' },
+    'iphone-15': { width: '320px', height: '655px', rounded: '3rem', padding: '10px', type: 'iphone' },
+    'iphone-15-pro-max': { width: '340px', height: '700px', rounded: '3rem', padding: '10px', type: 'iphone-pro' },
+    'samsung-s23': { width: '330px', height: '670px', rounded: '2.5rem', padding: '8px', type: 'android' },
+    'samsung-s24': { width: '335px', height: '685px', rounded: '2.5rem', padding: '8px', type: 'android' },
+    'samsung-fold': { width: '380px', height: '720px', rounded: '2rem', padding: '10px', type: 'android' },
+    'pixel-8': { width: '325px', height: '665px', rounded: '2.5rem', padding: '8px', type: 'android' },
+    'ipad-air': { width: '480px', height: '680px', rounded: '2rem', padding: '12px', type: 'tablet' },
+    'ipad-pro': { width: '540px', height: '740px', rounded: '2rem', padding: '12px', type: 'tablet' },
+    'galaxy-tab': { width: '500px', height: '700px', rounded: '2rem', padding: '12px', type: 'tablet' },
   };
 
-  const { width, height, rounded, padding } = dimensions[variant];
+  const { width, height, rounded, padding, type } = dimensions[variant];
 
-  // Android uses punch-hole camera, iPhone uses dynamic island, iPad has thicker bezels
+  // Android uses punch-hole camera, iPhone uses dynamic island, iPhone Pro has pill-shaped, Tablet has no notch
   const renderNotch = () => {
-    if (variant === 'android') {
+    if (type === 'android') {
       return (
         <div className="absolute top-4 right-8 w-3 h-3 bg-black rounded-full z-20 border-2 border-gray-800" />
       );
     }
-    if (variant === 'iphone') {
+    if (type === 'iphone') {
       return (
         <div className="absolute top-0 left-1/2 -translate-x-1/2 w-32 h-7 bg-black rounded-b-3xl z-20">
           <div className="absolute top-2 left-1/2 -translate-x-1/2 w-16 h-1.5 bg-gray-800 rounded-full" />
         </div>
       );
     }
-    return null; // iPad has no notch
+    if (type === 'iphone-pro') {
+      return (
+        <div className="absolute top-3 left-1/2 -translate-x-1/2 w-28 h-8 bg-black rounded-full z-20 flex items-center justify-center gap-2">
+          <div className="w-2 h-2 bg-purple-900 rounded-full" />
+          <div className="w-1.5 h-1.5 bg-purple-900 rounded-full" />
+        </div>
+      );
+    }
+    return null; // Tablet has no notch
   };
 
   const buttonPositions = {
-    iphone: { power: 'right-0 top-32 h-16', volumeUp: 'left-0 top-28 h-12', volumeDown: 'left-0 top-44 h-12' },
-    android: { power: 'right-0 top-28 h-14', volumeUp: 'left-0 top-24 h-10', volumeDown: 'left-0 top-40 h-10' },
-    ipad: { power: 'top-20 right-0 h-12', volumeUp: 'top-40 right-0 h-10', volumeDown: 'top-56 right-0 h-10' },
+    'iphone': { power: 'right-0 top-32 h-16', volumeUp: 'left-0 top-28 h-12', volumeDown: 'left-0 top-44 h-12' },
+    'iphone-pro': { power: 'right-0 top-32 h-16', volumeUp: 'left-0 top-28 h-12', volumeDown: 'left-0 top-44 h-12' },
+    'android': { power: 'right-0 top-28 h-14', volumeUp: 'left-0 top-24 h-10', volumeDown: 'left-0 top-40 h-10' },
+    'tablet': { power: 'top-20 right-0 h-12', volumeUp: 'top-40 right-0 h-10', volumeDown: 'top-56 right-0 h-10' },
   };
 
-  const buttons = buttonPositions[variant];
-  const screenRadius = variant === 'ipad' ? '1.5rem' : '2.5rem';
+  const buttons = buttonPositions[type];
+  const screenRadius = type === 'tablet' ? '1.5rem' : '2.5rem';
 
   return (
     <div className="relative mx-auto" style={{ width, height }}>
@@ -99,7 +119,7 @@ export function PhoneMockup({ children, theme = 'light', deviceColor = 'midnight
             </div>
 
             {/* Home Indicator - only for iPhone/Android */}
-            {variant !== 'ipad' && (
+            {type !== 'tablet' && (
               <div className="fixed bottom-2 left-1/2 -translate-x-1/2 w-32 h-1.5 bg-black/30 rounded-full" />
             )}
           </div>

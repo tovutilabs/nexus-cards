@@ -1,4 +1,8 @@
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
+// Use empty base URL for browser requests to go through Next.js proxy
+// Server-side requests can still use NEXT_PUBLIC_API_URL if needed
+const API_BASE_URL = typeof window === 'undefined' 
+  ? (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001')
+  : '';
 
 export interface ApiError {
   message: string;
@@ -17,8 +21,9 @@ export class ApiClient {
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> {
-    const apiEndpoint = endpoint.startsWith('/') ? `/api${endpoint}` : endpoint;
-    const url = `${this.baseUrl}${apiEndpoint}`;
+    // Ensure endpoint starts with /api for proper routing
+    const apiEndpoint = endpoint.startsWith('/api') ? endpoint : `/api${endpoint}`;
+    const url = this.baseUrl ? `${this.baseUrl}${apiEndpoint}` : apiEndpoint;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
       ...(options.headers as Record<string, string>),

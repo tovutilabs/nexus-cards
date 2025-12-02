@@ -1,10 +1,7 @@
 import type { Metadata, Viewport } from 'next';
 import './globals.css';
-import { AuthProvider } from '@/contexts/auth-context';
 import { ServiceWorkerRegistration } from '@/components/service-worker-registration';
 import { SkipToContent } from '@/components/skip-to-content';
-import { NextIntlClientProvider } from 'next-intl';
-import { getLocale, getMessages } from 'next-intl/server';
 
 export const metadata: Metadata = {
   title: 'Nexus Cards',
@@ -15,6 +12,9 @@ export const metadata: Metadata = {
     statusBarStyle: 'default',
     title: 'Nexus Cards',
   },
+  other: {
+    'mobile-web-app-capable': 'yes',
+  },
 };
 
 export const viewport: Viewport = {
@@ -24,24 +24,17 @@ export const viewport: Viewport = {
   themeColor: '#4f46e5',
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const locale = await getLocale();
-  const messages = await getMessages();
-
   return (
-    <html lang={locale}>
+    <html lang="en" suppressHydrationWarning>
       <body>
         <SkipToContent />
-        <NextIntlClientProvider locale={locale} messages={messages}>
-          <AuthProvider>
-            <ServiceWorkerRegistration />
-            {children}
-          </AuthProvider>
-        </NextIntlClientProvider>
+        <ServiceWorkerRegistration />
+        {children}
       </body>
     </html>
   );

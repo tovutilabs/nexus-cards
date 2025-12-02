@@ -105,6 +105,7 @@ services:
     volumes:
       - ./apps/web/src:/app/apps/web/src
       - ./apps/web/public:/app/apps/web/public
+      - ./apps/web/next.config.js:/app/apps/web/next.config.js
       - ./packages:/app/packages
       - /app/apps/web/.next
       - /app/node_modules

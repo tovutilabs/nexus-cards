@@ -31,3 +31,7 @@ export type { DashboardShellProps } from './dashboard-shell';
 export { PhoneMockup, CardPreview as PhoneCardPreview } from './PhoneMockup';
 
 export { SocialLinksManager } from './SocialLinksManager';
+
+export { ImageUpload } from './ImageUpload';
+
+export { VideoUpload } from './VideoUpload';

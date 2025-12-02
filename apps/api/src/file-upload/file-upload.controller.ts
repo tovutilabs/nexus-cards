@@ -73,6 +73,45 @@ export class FileUploadController {
     };
   }
 
+  @Post('gallery-image')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadGalleryImage(
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: User,
+  ) {
+    const result = await this.fileUploadService.saveFile(file, 'gallery');
+    return {
+      message: 'Gallery image uploaded successfully',
+      file: result,
+    };
+  }
+
+  @Post('video-thumbnail')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadVideoThumbnail(
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: User,
+  ) {
+    const result = await this.fileUploadService.saveFile(file, 'videos');
+    return {
+      message: 'Video thumbnail uploaded successfully',
+      file: result,
+    };
+  }
+
+  @Post('video')
+  @UseInterceptors(FileInterceptor('file'))
+  async uploadVideo(
+    @UploadedFile() file: Express.Multer.File,
+    @CurrentUser() user: User,
+  ) {
+    const result = await this.fileUploadService.saveFile(file, 'videos', 100 * 1024 * 1024);
+    return {
+      message: 'Video uploaded successfully',
+      file: result,
+    };
+  }
+
   @Get(':subdir/:filename')
   async getFile(
     @Param('subdir') subdir: string,

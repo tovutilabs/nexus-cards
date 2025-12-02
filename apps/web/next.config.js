@@ -21,18 +21,19 @@ const nextConfig = {
     API_URL: process.env.API_URL || 'http://localhost:3001',
   },
   async rewrites() {
+    const apiUrl = process.env.API_URL_INTERNAL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
     return [
       {
         source: '/api/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/:path*`,
+        destination: `${apiUrl}/api/:path*`,
       },
       {
         source: '/templates/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/templates/:path*`,
+        destination: `${apiUrl}/templates/:path*`,
       },
       {
         source: '/cards/:path*',
-        destination: `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/api/cards/:path*`,
+        destination: `${apiUrl}/api/cards/:path*`,
       },
     ];
   },

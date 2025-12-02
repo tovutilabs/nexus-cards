@@ -27,7 +27,7 @@ interface ReorderComponentsDto {
   components: Array<{ id: string; order: number }>;
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001/api';
+const API_BASE_URL = '/api';
 
 // Fetch all components for a card
 export function useCardComponents(cardId: string) {

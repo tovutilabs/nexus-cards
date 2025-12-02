@@ -97,14 +97,12 @@ export function CardComponentList({
                   >
                     {/* Drag handle and controls */}
                     <div className="absolute top-2 right-2 z-10 flex items-center gap-1 bg-background/80 backdrop-blur-sm rounded-md p-1 shadow-sm">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        className="h-8 w-8 cursor-grab active:cursor-grabbing"
+                      <div
                         {...provided.dragHandleProps}
+                        className="inline-flex items-center justify-center h-8 w-8 rounded-md hover:bg-accent hover:text-accent-foreground cursor-grab active:cursor-grabbing transition-colors"
                       >
                         <GripVertical className="h-4 w-4" />
-                      </Button>
+                      </div>
                       <Button
                         variant="ghost"
                         size="icon"
@@ -140,6 +138,7 @@ export function CardComponentList({
                       <CardComponentRenderer
                         component={component}
                         cardData={cardData}
+                        isEditing={isEditable}
                       />
                     </div>
                   </div>

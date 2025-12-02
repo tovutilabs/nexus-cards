@@ -29,16 +29,21 @@ export class FileUploadService {
       'application/pdf',
       'text/vcard',
       'text/x-vcard',
+      'video/mp4',
+      'video/webm',
+      'video/ogg',
+      'video/quicktime',
     ]);
   }
 
-  async validateFile(file: Express.Multer.File): Promise<void> {
+  async validateFile(file: Express.Multer.File, maxSize?: number): Promise<void> {
     if (!file) {
       throw new BadRequestException('No file provided');
     }
 
-    if (file.size > this.maxFileSize) {
-      throw new BadRequestException(`File size exceeds maximum of ${this.maxFileSize / 1024 / 1024}MB`);
+    const sizeLimit = maxSize || this.maxFileSize;
+    if (file.size > sizeLimit) {
+      throw new BadRequestException(`File size exceeds maximum of ${sizeLimit / 1024 / 1024}MB`);
     }
 
     if (!this.allowedMimeTypes.has(file.mimetype)) {
@@ -46,8 +51,8 @@ export class FileUploadService {
     }
   }
 
-  async saveFile(file: Express.Multer.File, subdir: string = ''): Promise<UploadResult> {
-    await this.validateFile(file);
+  async saveFile(file: Express.Multer.File, subdir: string = '', maxSize?: number): Promise<UploadResult> {
+    await this.validateFile(file, maxSize);
 
     // Generate unique filename
     const ext = path.extname(file.originalname);

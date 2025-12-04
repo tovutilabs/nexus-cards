@@ -20,13 +20,6 @@ async function bootstrap() {
     exclude: [
       'p/:slug',
       's/:token',
-      'templates',
-      'templates/featured',
-      'templates/category/:category',
-      'templates/slug/:slug',
-      'templates/apply/:cardId',
-      'templates/custom-css/:cardId',
-      'templates/:id',
     ],
   });
 

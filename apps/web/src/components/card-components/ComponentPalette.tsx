@@ -126,6 +126,8 @@ interface ComponentPaletteProps {
   userTier: 'FREE' | 'PRO' | 'PREMIUM';
   onAddComponent: (type: ComponentType) => void;
   disabledTypes?: ComponentType[];
+  open?: boolean;
+  onClose?: () => void;
 }
 
 /**
@@ -138,8 +140,12 @@ export function ComponentPalette({
   userTier,
   onAddComponent,
   disabledTypes = [],
+  open: externalOpen,
+  onClose: externalOnClose,
 }: ComponentPaletteProps) {
-  const [isOpen, setIsOpen] = useState(false);
+  const [internalOpen, setInternalOpen] = useState(false);
+  const isOpen = externalOpen !== undefined ? externalOpen : internalOpen;
+  const setIsOpen = externalOnClose ? externalOnClose : (value: boolean) => setInternalOpen(value);
 
   // Tier hierarchy for filtering
   const tierLevel = { FREE: 1, PRO: 2, PREMIUM: 3 };
@@ -155,23 +161,23 @@ export function ComponentPalette({
 
   const handleAddComponent = (type: ComponentType) => {
     onAddComponent(type);
-    setIsOpen(false);
+    if (externalOnClose) {
+      externalOnClose();
+    } else {
+      setInternalOpen(false);
+    }
   };
 
   return (
     <>
-      {/* Add Component Button */}
-      <Button
-        onClick={() => setIsOpen(true)}
-        className="w-full sm:w-auto"
-        size="lg"
-      >
-        <Plus className="h-5 w-5 mr-2" />
-        Add Component
-      </Button>
-
       {/* Component Selection Dialog */}
-      <Dialog open={isOpen} onOpenChange={setIsOpen}>
+      <Dialog open={isOpen} onOpenChange={(open) => {
+        if (externalOnClose && !open) {
+          externalOnClose();
+        } else {
+          setInternalOpen(open);
+        }
+      }}>
         <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Add Component</DialogTitle>

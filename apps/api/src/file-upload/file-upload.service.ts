@@ -69,7 +69,7 @@ export class FileUploadService {
 
     // Return upload result
     const baseUrl = this.configService.get<string>('API_URL', 'http://localhost:3001');
-    const url = `${baseUrl}/uploads/${subdir ? subdir + '/' : ''}${filename}`;
+    const url = `${baseUrl}/api/file-upload/${subdir ? subdir + '/' : ''}${filename}`;
 
     return {
       filename,

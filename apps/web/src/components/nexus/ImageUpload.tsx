@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { Upload, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +16,17 @@ interface ImageUploadProps {
   accept?: string;
 }
 
+// Helper to validate URL
+const isValidUrl = (urlString: string): boolean => {
+  if (!urlString) return false;
+  try {
+    const url = new URL(urlString);
+    return url.protocol === 'http:' || url.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 export function ImageUpload({
   value,
   onChange,
@@ -26,7 +37,14 @@ export function ImageUpload({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [useUrl, setUseUrl] = useState(false);
+  const [urlInput, setUrlInput] = useState(value || '');
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const debounceTimerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // Sync urlInput with value prop changes
+  useEffect(() => {
+    setUrlInput(value || '');
+  }, [value]);
 
   const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -59,12 +77,19 @@ export function ImageUpload({
       });
 
       if (!response.ok) {
-        throw new Error('Upload failed');
+        const errorData = await response.json().catch(() => ({}));
+        const errorMessage = errorData.message || `Upload failed with status ${response.status}`;
+        throw new Error(errorMessage);
       }
 
       const result = await response.json();
-      onChange(result.file.url);
+      if (result.file && result.file.url) {
+        onChange(result.file.url);
+      } else {
+        throw new Error('Invalid response from server');
+      }
     } catch (err: any) {
+      console.error('Upload error:', err);
       setError(err.message || 'Failed to upload image');
     } finally {
       setUploading(false);
@@ -74,16 +99,52 @@ export function ImageUpload({
     }
   };
 
+  const handleUrlInputChange = (newUrl: string) => {
+    setUrlInput(newUrl);
+    setError(null);
+
+    // Clear any existing debounce timer
+    if (debounceTimerRef.current) {
+      clearTimeout(debounceTimerRef.current);
+    }
+
+    // Only validate and call onChange if URL is valid or empty
+    if (!newUrl) {
+      onChange('');
+      return;
+    }
+
+    // Debounce validation by 500ms
+    debounceTimerRef.current = setTimeout(() => {
+      if (isValidUrl(newUrl)) {
+        onChange(newUrl);
+        setError(null);
+      } else {
+        setError('Please enter a valid URL (must start with http:// or https://)');
+      }
+    }, 500);
+  };
+
   const handleRemove = () => {
     onChange('');
+    setUrlInput('');
     setError(null);
   };
+
+  // Cleanup debounce timer on unmount
+  useEffect(() => {
+    return () => {
+      if (debounceTimerRef.current) {
+        clearTimeout(debounceTimerRef.current);
+      }
+    };
+  }, []);
 
   return (
     <div className="space-y-2">
       {label && <Label>{label}</Label>}
       
-      {value ? (
+      {value && isValidUrl(value) ? (
         <div className="relative">
           <div className="relative w-full h-40 rounded-lg overflow-hidden border">
             <Image
@@ -120,8 +181,8 @@ export function ImageUpload({
             <Input
               type="url"
               placeholder="https://example.com/image.jpg"
-              value={value || ''}
-              onChange={(e) => onChange(e.target.value)}
+              value={urlInput}
+              onChange={(e) => handleUrlInputChange(e.target.value)}
             />
           ) : (
             <div>

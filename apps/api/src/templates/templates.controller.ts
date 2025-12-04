@@ -77,7 +77,7 @@ export class TemplatesController {
     return this.templatesService.applyTemplateToCard(
       cardId,
       dto.templateId,
-      req.user.userId,
+      req.user.id,
       dto.preserveContent !== false,
     );
   }
@@ -89,6 +89,6 @@ export class TemplatesController {
     @Body('customCss') customCss: string,
     @Request() req: any,
   ) {
-    return this.templatesService.updateCardCustomCss(cardId, req.user.userId, customCss);
+    return this.templatesService.updateCardCustomCss(cardId, req.user.id, customCss);
   }
 }

@@ -9,14 +9,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Badge } from '@/components/ui/badge';
-import { SocialLinksManager } from '@/components/nexus';
-import { ArrowLeft, Save, Eye, Share2, Paintbrush } from 'lucide-react';
-
-interface SocialLink {
-  platform: string;
-  url: string;
-  displayOrder?: number;
-}
+import { TemplateSelector } from '@/components/nexus';
+import { ArrowLeft, Save, Eye, Share2, Palette } from 'lucide-react';
 
 interface CardData {
   id: string;
@@ -29,8 +23,13 @@ interface CardData {
   phone?: string;
   bio?: string;
   status: string;
-  socialLinks?: SocialLink[];
+  templateId?: string;
   theme?: Record<string, any>;
+}
+
+interface UserData {
+  id: string;
+  tier: string;
 }
 
 interface NfcTag {
@@ -42,6 +41,7 @@ interface NfcTag {
 
 export default function EditCardPage() {
   const [card, setCard] = useState<CardData | null>(null);
+  const [user, setUser] = useState<UserData | null>(null);
   const [nfcTags, setNfcTags] = useState<NfcTag[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -51,6 +51,7 @@ export default function EditCardPage() {
 
   useEffect(() => {
     loadCard();
+    loadUser();
     loadNfcTags();
   }, [cardId]);
 
@@ -76,6 +77,16 @@ export default function EditCardPage() {
       setNfcTags(cardTags);
     } catch (error) {
       console.error('Failed to load NFC tags:', error);
+    }
+  };
+
+  const loadUser = async () => {
+    try {
+      const apiClient = createApiClient();
+      const data = await apiClient.get<UserData>('/users/me');
+      setUser(data);
+    } catch (error) {
+      console.error('Failed to load user:', error);
     }
   };
 
@@ -189,7 +200,6 @@ export default function EditCardPage() {
         <TabsList>
           <TabsTrigger value="info">Info</TabsTrigger>
           <TabsTrigger value="design">Design</TabsTrigger>
-          <TabsTrigger value="social">Social Links</TabsTrigger>
           <TabsTrigger value="nfc">NFC Tags ({nfcTags.length})</TabsTrigger>
         </TabsList>
 
@@ -281,27 +291,30 @@ export default function EditCardPage() {
 
         <TabsContent value="design">
           <Card className="p-6">
-            <div className="text-center py-12">
-              <Paintbrush className="h-12 w-12 mx-auto text-gray-400 mb-4" />
-              <h3 className="text-lg font-semibold mb-2">Card Design Customization</h3>
-              <p className="text-gray-600 mb-4">
-                Customize colors, fonts, layout, and more
-              </p>
-              <Button onClick={() => router.push(`/dashboard/cards/${cardId}/customize`)}>
-                Open Customization Studio
-              </Button>
+            <div className="space-y-4 mb-6">
+              <div>
+                <h3 className="text-lg font-semibold mb-2">Choose a Template</h3>
+                <p className="text-gray-600">
+                  Select a template as the starting point for your card design. After selecting a template, you can customize the appearance in the Customization Studio.
+                </p>
+              </div>
             </div>
+            {user ? (
+              <TemplateSelector
+                cardId={cardId}
+                currentTemplateId={card.templateId}
+                userTier={user.tier}
+                onTemplateApplied={() => {
+                  loadCard();
+                }}
+              />
+            ) : (
+              <div className="text-center py-12">
+                <div className="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-indigo-600 border-r-transparent"></div>
+                <p className="mt-4 text-gray-600">Loading templates...</p>
+              </div>
+            )}
           </Card>
-        </TabsContent>
-
-        <TabsContent value="social">
-          <SocialLinksManager
-            cardId={cardId}
-            initialLinks={card?.socialLinks as any}
-            onUpdate={(links) => {
-              setCard(prev => prev ? { ...prev, socialLinks: links as any } : null);
-            }}
-          />
         </TabsContent>
 
         <TabsContent value="nfc">

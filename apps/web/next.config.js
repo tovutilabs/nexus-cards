@@ -20,6 +20,40 @@ const nextConfig = {
   env: {
     API_URL: process.env.API_URL || 'http://localhost:3001',
   },
+  images: {
+    // Disable image optimization in development to avoid IPv6 localhost connection issues in Docker
+    unoptimized: process.env.NODE_ENV === 'development',
+    remotePatterns: [
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '3001',
+        pathname: '/api/file-upload/**',
+      },
+      {
+        protocol: 'http',
+        hostname: 'nexus-api',
+        port: '3001',
+        pathname: '/api/file-upload/**',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: 'images.unsplash.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.cloudinary.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.amazonaws.com',
+      },
+    ],
+  },
   async rewrites() {
     const apiUrl = process.env.API_URL_INTERNAL || process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001';
     return [
@@ -28,12 +62,12 @@ const nextConfig = {
         destination: `${apiUrl}/api/:path*`,
       },
       {
-        source: '/templates/:path*',
-        destination: `${apiUrl}/templates/:path*`,
-      },
-      {
         source: '/cards/:path*',
         destination: `${apiUrl}/api/cards/:path*`,
+      },
+      {
+        source: '/proxy-image/:path*',
+        destination: `${apiUrl}/api/file-upload/:path*`,
       },
     ];
   },

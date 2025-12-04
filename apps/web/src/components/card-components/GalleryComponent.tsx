@@ -7,6 +7,17 @@ import { cn } from '@/lib/utils';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Image from 'next/image';
 
+// Helper to validate image URL
+const isValidImageUrl = (url: string): boolean => {
+  if (!url) return false;
+  try {
+    const parsedUrl = new URL(url);
+    return parsedUrl.protocol === 'http:' || parsedUrl.protocol === 'https:';
+  } catch {
+    return false;
+  }
+};
+
 /**
  * GalleryComponent
  * 
@@ -20,8 +31,8 @@ export function GalleryComponent({
 }: CardComponentRendererProps) {
   const config = component.config as GalleryConfig;
 
-  // Default values
-  const images = config.images || [];
+  // Default values - filter out invalid URLs
+  const images = (config.images || []).filter((img) => isValidImageUrl(img.url));
   const layout = config.layout || 'grid';
   const columns = config.columns || 3;
   const showCaptions = config.showCaptions !== false;

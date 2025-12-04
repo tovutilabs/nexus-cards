@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { Loader2, Plus } from 'lucide-react';
+import { Loader2, Plus, ArrowLeft } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CardComponentList } from '@/components/nexus/CardComponentList';
 import { ComponentPalette } from '@/components/card-components/ComponentPalette';
@@ -203,7 +203,16 @@ export default function CustomizeCardPage() {
   return (
     <div className="container mx-auto py-8 px-4">
       <div className="flex items-center justify-between mb-8">
-        <div>
+        <div className="space-y-2">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => router.push(`/dashboard/cards/${cardId}`)}
+            className="mb-2"
+          >
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Editor
+          </Button>
           <h1 className="text-3xl font-bold">Customize Your Card</h1>
           <p className="text-muted-foreground mt-1">
             Add, remove, and arrange components to create your perfect digital card

@@ -85,7 +85,7 @@ export function TemplateSelector({
     setApplying(templateId);
     try {
       const apiClient = createApiClient();
-      await apiClient.post(`/templates/apply/${cardId}`, {
+      await apiClient.post(`/cards/${cardId}/apply-template`, {
         templateId,
         preserveContent: true,
       });

@@ -5,6 +5,7 @@ import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea
 import { GripVertical, Edit2, Trash2, Eye, EyeOff } from 'lucide-react';
 import { CardComponentRenderer } from '@/components/card-components/CardComponentRenderer';
 import { CardComponent } from '@/components/card-components/types';
+import { TemplateTheme } from '@nexus-cards/shared';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -24,6 +25,7 @@ interface CardComponentListProps {
   onEdit?: (component: CardComponent) => void;
   onDelete?: (componentId: string) => void;
   onToggleEnabled?: (componentId: string, enabled: boolean) => void;
+  templateTheme?: TemplateTheme | null;
 }
 
 export function CardComponentList({
@@ -34,6 +36,7 @@ export function CardComponentList({
   onEdit,
   onDelete,
   onToggleEnabled,
+  templateTheme,
 }: CardComponentListProps) {
   const sortedComponents = [...components].sort((a, b) => a.order - b.order);
 
@@ -63,6 +66,7 @@ export function CardComponentList({
               <CardComponentRenderer
                 component={component}
                 cardData={cardData}
+                templateTheme={templateTheme}
               />
             </div>
           ))}
@@ -139,6 +143,7 @@ export function CardComponentList({
                         component={component}
                         cardData={cardData}
                         isEditing={isEditable}
+                        templateTheme={templateTheme}
                       />
                     </div>
                   </div>

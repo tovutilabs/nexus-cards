@@ -257,4 +257,204 @@ export class AnalyticsService {
 
     return null;
   }
+
+  /**
+   * Log customization events for card editing and template usage
+   */
+  async logCustomizationEvent(params: {
+    eventType: 'CUSTOMIZATION_SESSION_STARTED' | 'CUSTOMIZATION_SESSION_COMPLETED' | 
+               'COMPONENT_ADDED' | 'COMPONENT_REMOVED' | 'COMPONENT_UPDATED' | 
+               'COMPONENT_REORDERED' | 'CARD_TEMPLATE_APPLIED' | 
+               'CARD_STYLING_UPDATED' | 'CARD_CUSTOM_CSS_UPDATED';
+    userId: string;
+    cardId: string;
+    metadata: Record<string, any>;
+  }) {
+    const { eventType, userId, cardId, metadata } = params;
+
+    return this.analyticsRepository.logEvent({
+      cardId,
+      eventType,
+      metadata: {
+        userId,
+        ...metadata,
+      },
+    });
+  }
+
+  /**
+   * Helper: Log component added event
+   */
+  async logComponentAdded(params: {
+    userId: string;
+    cardId: string;
+    componentId: string;
+    componentType: string;
+    tier: string;
+    componentCount: number;
+    source?: string;
+  }) {
+    return this.logCustomizationEvent({
+      eventType: 'COMPONENT_ADDED',
+      userId: params.userId,
+      cardId: params.cardId,
+      metadata: {
+        componentId: params.componentId,
+        componentType: params.componentType,
+        tier: params.tier,
+        componentCount: params.componentCount,
+        source: params.source || 'palette',
+      },
+    });
+  }
+
+  /**
+   * Helper: Log component removed event
+   */
+  async logComponentRemoved(params: {
+    userId: string;
+    cardId: string;
+    componentId: string;
+    componentType: string;
+    tier: string;
+    componentCount: number;
+  }) {
+    return this.logCustomizationEvent({
+      eventType: 'COMPONENT_REMOVED',
+      userId: params.userId,
+      cardId: params.cardId,
+      metadata: {
+        componentId: params.componentId,
+        componentType: params.componentType,
+        tier: params.tier,
+        componentCount: params.componentCount,
+      },
+    });
+  }
+
+  /**
+   * Helper: Log component updated event
+   */
+  async logComponentUpdated(params: {
+    userId: string;
+    cardId: string;
+    componentId: string;
+    componentType: string;
+    tier: string;
+    configChanged: boolean;
+    stylingChanged: boolean;
+    enabledChanged: boolean;
+  }) {
+    return this.logCustomizationEvent({
+      eventType: 'COMPONENT_UPDATED',
+      userId: params.userId,
+      cardId: params.cardId,
+      metadata: {
+        componentId: params.componentId,
+        componentType: params.componentType,
+        tier: params.tier,
+        configChanged: params.configChanged,
+        stylingChanged: params.stylingChanged,
+        enabledChanged: params.enabledChanged,
+      },
+    });
+  }
+
+  /**
+   * Helper: Log component reordered event
+   */
+  async logComponentReordered(params: {
+    userId: string;
+    cardId: string;
+    tier: string;
+    componentCount: number;
+    reorderCount: number;
+  }) {
+    return this.logCustomizationEvent({
+      eventType: 'COMPONENT_REORDERED',
+      userId: params.userId,
+      cardId: params.cardId,
+      metadata: {
+        tier: params.tier,
+        componentCount: params.componentCount,
+        reorderCount: params.reorderCount,
+      },
+    });
+  }
+
+  /**
+   * Helper: Log template applied event
+   */
+  async logTemplateApplied(params: {
+    userId: string;
+    cardId: string;
+    templateId: string;
+    templateSlug: string;
+    templateCategory: string;
+    templateTier: string;
+    userTier: string;
+    previousTemplateId?: string;
+  }) {
+    return this.logCustomizationEvent({
+      eventType: 'CARD_TEMPLATE_APPLIED',
+      userId: params.userId,
+      cardId: params.cardId,
+      metadata: {
+        templateId: params.templateId,
+        templateSlug: params.templateSlug,
+        templateCategory: params.templateCategory,
+        templateTier: params.templateTier,
+        userTier: params.userTier,
+        previousTemplateId: params.previousTemplateId,
+      },
+    });
+  }
+
+  /**
+   * Helper: Log styling updated event
+   */
+  async logStylingUpdated(params: {
+    userId: string;
+    cardId: string;
+    tier: string;
+    changedFields: string[];
+    backgroundTypeChanged: boolean;
+    layoutChanged: boolean;
+    typographyChanged: boolean;
+  }) {
+    return this.logCustomizationEvent({
+      eventType: 'CARD_STYLING_UPDATED',
+      userId: params.userId,
+      cardId: params.cardId,
+      metadata: {
+        tier: params.tier,
+        changedFields: params.changedFields,
+        backgroundTypeChanged: params.backgroundTypeChanged,
+        layoutChanged: params.layoutChanged,
+        typographyChanged: params.typographyChanged,
+      },
+    });
+  }
+
+  /**
+   * Helper: Log custom CSS updated event
+   */
+  async logCustomCssUpdated(params: {
+    userId: string;
+    cardId: string;
+    tier: string;
+    cssLength: number;
+    hasCustomCss: boolean;
+  }) {
+    return this.logCustomizationEvent({
+      eventType: 'CARD_CUSTOM_CSS_UPDATED',
+      userId: params.userId,
+      cardId: params.cardId,
+      metadata: {
+        tier: params.tier,
+        cssLength: params.cssLength,
+        hasCustomCss: params.hasCustomCss,
+      },
+    });
+  }
 }

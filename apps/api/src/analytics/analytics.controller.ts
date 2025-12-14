@@ -1,8 +1,23 @@
-import { Controller, Get, Query, UseGuards, Res, HttpStatus } from '@nestjs/common';
+import { Controller, Get, Post, Body, Query, UseGuards, Res, HttpStatus } from '@nestjs/common';
 import { Response } from 'express';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { AnalyticsService } from './analytics.service';
+
+interface SessionStartedDto {
+  cardId: string;
+}
+
+interface SessionCompletedDto {
+  cardId: string;
+  durationSeconds?: number;
+  changesCount?: number;
+  componentsAdded?: number;
+  componentsRemoved?: number;
+  templateApplied?: boolean;
+  stylingChanged?: boolean;
+  customCssChanged?: boolean;
+}
 
 @Controller('analytics')
 @UseGuards(JwtAuthGuard)
@@ -113,5 +128,43 @@ export class AnalyticsController {
       granularity: granularity || 'daily',
       timeRange: range,
     };
+  }
+
+  @Post('customization/session-started')
+  async logSessionStarted(
+    @CurrentUser() user: { id: string },
+    @Body() dto: SessionStartedDto
+  ) {
+    await this.analyticsService.logCustomizationEvent({
+      userId: user.id,
+      cardId: dto.cardId,
+      eventType: 'CUSTOMIZATION_SESSION_STARTED',
+      metadata: {},
+    });
+
+    return { success: true };
+  }
+
+  @Post('customization/session-completed')
+  async logSessionCompleted(
+    @CurrentUser() user: { id: string },
+    @Body() dto: SessionCompletedDto
+  ) {
+    await this.analyticsService.logCustomizationEvent({
+      userId: user.id,
+      cardId: dto.cardId,
+      eventType: 'CUSTOMIZATION_SESSION_COMPLETED',
+      metadata: {
+        durationSeconds: dto.durationSeconds,
+        changesCount: dto.changesCount,
+        componentsAdded: dto.componentsAdded,
+        componentsRemoved: dto.componentsRemoved,
+        templateApplied: dto.templateApplied,
+        stylingChanged: dto.stylingChanged,
+        customCssChanged: dto.customCssChanged,
+      },
+    });
+
+    return { success: true };
   }
 }

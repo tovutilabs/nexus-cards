@@ -25,6 +25,7 @@ export function CardComponentRenderer({
   onEdit,
   onDelete,
   onToggle,
+  templateTheme,
 }: CardComponentRendererProps) {
   // Apply component background styles (moved before early return)
   const backgroundStyle = React.useMemo(() => {
@@ -59,6 +60,7 @@ export function CardComponentRenderer({
       onEdit,
       onDelete,
       onToggle,
+      templateTheme,
     };
 
     switch (component.type) {

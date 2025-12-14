@@ -27,6 +27,7 @@ import { RedirectController } from './redirect.controller';
 import { FileUploadModule } from './file-upload/file-upload.module';
 import { ActivityLogModule } from './activity-log/activity-log.module';
 import { CardComponentsModule } from './card-components/card-components.module';
+import { SharedModule } from './shared/shared.module';
 
 @Module({
   imports: [
@@ -41,6 +42,7 @@ import { CardComponentsModule } from './card-components/card-components.module';
       },
     ]),
     PrismaModule,
+    SharedModule,
     AuthModule,
     UsersModule,
     CardsModule,

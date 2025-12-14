@@ -2,16 +2,24 @@ import { Injectable, NotFoundException, BadRequestException, ForbiddenException 
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateTemplateDto, UpdateTemplateDto } from './dto/template.dto';
 import { SubscriptionTier } from '@prisma/client';
-import * as DOMPurify from 'isomorphic-dompurify';
+import { validateAndSanitizeCss } from './utils/css-sanitizer';
+import { AnalyticsService } from '../analytics/analytics.service';
 
 @Injectable()
 export class TemplatesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly analyticsService: AnalyticsService
+  ) {}
 
-  async findAll(userTier?: SubscriptionTier, category?: string) {
+  async findAll(userTier?: SubscriptionTier, category?: string, includeArchived = false) {
     const where: any = {
       isActive: true,
     };
+
+    if (!includeArchived) {
+      where.isArchived = false;
+    }
 
     if (category) {
       where.category = category;
@@ -83,10 +91,42 @@ export class TemplatesService {
   }
 
   async delete(id: string) {
-    await this.findOne(id); // Verify template exists
+    const template = await this.findOne(id); // Verify template exists
+
+    // Prevent hard delete if template is in use
+    if (template.usageCount > 0) {
+      throw new BadRequestException({
+        code: 'TEMPLATE_IN_USE',
+        message: `Cannot delete template with ${template.usageCount} active usage(s). Archive it instead.`,
+      });
+    }
 
     return this.prisma.cardTemplate.delete({
       where: { id },
+    });
+  }
+
+  async archive(id: string, reason?: string) {
+    const template = await this.findOne(id);
+
+    return this.prisma.cardTemplate.update({
+      where: { id },
+      data: {
+        isArchived: true,
+        isActive: false,
+      },
+    });
+  }
+
+  async unarchive(id: string) {
+    const template = await this.findOne(id);
+
+    return this.prisma.cardTemplate.update({
+      where: { id },
+      data: {
+        isArchived: false,
+        isActive: true,
+      },
     });
   }
 
@@ -97,21 +137,36 @@ export class TemplatesService {
     });
 
     if (!card) {
-      throw new NotFoundException(`Card with ID ${cardId} not found`);
+      throw new NotFoundException({
+        code: 'CARD_NOT_FOUND',
+        message: `Card with ID ${cardId} not found`,
+      });
     }
 
     if (card.userId !== userId) {
-      throw new ForbiddenException('You do not have permission to edit this card');
+      throw new ForbiddenException({
+        code: 'CARD_ACCESS_DENIED',
+        message: 'You do not have permission to edit this card',
+      });
     }
 
     const template = await this.findOne(templateId);
 
+    // Check if template is archived
+    if (template.isArchived) {
+      throw new BadRequestException({
+        code: 'TEMPLATE_ARCHIVED',
+        message: 'This template has been archived and cannot be applied',
+      });
+    }
+
     // Check tier access
     const userTier = card.user.subscription?.tier || SubscriptionTier.FREE;
     if (!this.canAccessTemplate(userTier, template.minTier)) {
-      throw new ForbiddenException(
-        `This template requires ${template.minTier} tier or higher`
-      );
+      throw new ForbiddenException({
+        code: 'TEMPLATE_TIER_INSUFFICIENT',
+        message: `This template requires ${template.minTier} tier or higher`,
+      });
     }
 
     const config = template.config as any;
@@ -146,6 +201,11 @@ export class TemplatesService {
       updateData.backgroundColor = config.colorScheme.background;
     }
 
+    // Apply custom CSS from template if available
+    if (config.customCss) {
+      updateData.customCss = config.customCss;
+    }
+
     // If not preserving content, we could reset other fields here
     // For now, we preserve user content and only apply template styling
 
@@ -159,13 +219,29 @@ export class TemplatesService {
       },
     });
 
-    return this.prisma.card.update({
+    const updatedCard = await this.prisma.card.update({
       where: { id: cardId },
       data: updateData,
       include: {
         template: true,
       },
     });
+
+    // Log analytics event (non-blocking)
+    this.analyticsService.logTemplateApplied({
+      userId,
+      cardId,
+      templateId,
+      templateSlug: template.slug,
+      templateCategory: template.category,
+      templateTier: template.minTier.toString(),
+      userTier: userTier.toString(),
+      previousTemplateId: card.templateId || undefined,
+    }).catch((err) => {
+      console.error('Failed to log card_template_applied analytics:', err);
+    });
+
+    return updatedCard;
   }
 
   canAccessTemplate(userTier: SubscriptionTier, requiredTier: SubscriptionTier): boolean {
@@ -178,42 +254,6 @@ export class TemplatesService {
     return tierHierarchy[userTier] >= tierHierarchy[requiredTier];
   }
 
-  sanitizeCustomCss(css: string): string {
-    if (!css) {
-      return '';
-    }
-
-    // Remove potentially dangerous CSS properties and values
-    const dangerousPatterns = [
-      /@import/gi,
-      /expression\(/gi,
-      /behavior:/gi,
-      /-moz-binding/gi,
-      /javascript:/gi,
-      /vbscript:/gi,
-      /<script/gi,
-      /<\/script/gi,
-      /<!DOCTYPE/gi,
-      /<html/gi,
-      /<head/gi,
-      /<body/gi,
-      /on\w+\s*=/gi, // onclick, onload, etc.
-    ];
-
-    let sanitized = css;
-
-    for (const pattern of dangerousPatterns) {
-      sanitized = sanitized.replace(pattern, '');
-    }
-
-    // Limit CSS size (100KB max)
-    if (sanitized.length > 100000) {
-      throw new BadRequestException('Custom CSS is too large (max 100KB)');
-    }
-
-    return sanitized.trim();
-  }
-
   async updateCardCustomCss(cardId: string, userId: string, customCss: string) {
     const card = await this.prisma.card.findUnique({
       where: { id: cardId },
@@ -221,35 +261,75 @@ export class TemplatesService {
     });
 
     if (!card) {
-      throw new NotFoundException(`Card with ID ${cardId} not found`);
+      throw new NotFoundException({
+        code: 'CARD_NOT_FOUND',
+        message: `Card with ID ${cardId} not found`,
+      });
     }
 
     if (card.userId !== userId) {
-      throw new ForbiddenException('You do not have permission to edit this card');
+      throw new ForbiddenException({
+        code: 'CARD_ACCESS_DENIED',
+        message: 'You do not have permission to edit this card',
+      });
     }
 
     // Check if user has PREMIUM tier for custom CSS
     const userTier = card.user.subscription?.tier || SubscriptionTier.FREE;
     if (userTier !== SubscriptionTier.PREMIUM) {
-      throw new ForbiddenException('Custom CSS is only available for PREMIUM tier users');
+      throw new ForbiddenException({
+        code: 'CUSTOM_CSS_TIER_INSUFFICIENT',
+        message: 'Custom CSS is only available for PREMIUM tier users',
+      });
     }
 
-    const sanitizedCss = this.sanitizeCustomCss(customCss);
+    // Sanitize and validate CSS
+    const sanitizedCss = validateAndSanitizeCss(customCss);
 
-    return this.prisma.card.update({
+    const updatedCard = await this.prisma.card.update({
       where: { id: cardId },
       data: {
         customCss: sanitizedCss,
       },
     });
+
+    // Log analytics event (non-blocking)
+    this.analyticsService.logCustomCssUpdated({
+      userId,
+      cardId,
+      tier: userTier.toString(),
+      cssLength: sanitizedCss.length,
+      hasCustomCss: sanitizedCss.length > 0,
+    }).catch((err) => {
+      console.error('Failed to log card_custom_css_updated analytics:', err);
+    });
+
+    return updatedCard;
   }
 
-  async getFeaturedTemplates() {
+  async getFeaturedTemplates(userTier?: SubscriptionTier) {
+    const where: any = {
+      isActive: true,
+      isFeatured: true,
+    };
+
+    // Filter by tier access
+    if (userTier) {
+      where.OR = [
+        { minTier: SubscriptionTier.FREE },
+        ...(userTier === SubscriptionTier.PRO || userTier === SubscriptionTier.PREMIUM
+          ? [{ minTier: SubscriptionTier.PRO }]
+          : []),
+        ...(userTier === SubscriptionTier.PREMIUM
+          ? [{ minTier: SubscriptionTier.PREMIUM }]
+          : []),
+      ];
+    } else {
+      where.minTier = SubscriptionTier.FREE;
+    }
+
     return this.prisma.cardTemplate.findMany({
-      where: {
-        isActive: true,
-        isFeatured: true,
-      },
+      where,
       orderBy: {
         usageCount: 'desc',
       },

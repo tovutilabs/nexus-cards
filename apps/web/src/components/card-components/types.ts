@@ -5,6 +5,8 @@
  * Each component type has specific config requirements.
  */
 
+import { TemplateTheme } from '@nexus-cards/shared';
+
 export type ComponentType =
   | 'PROFILE'
   | 'ABOUT'
@@ -41,6 +43,7 @@ export interface CardComponentRendererProps {
   onEdit?: (component: CardComponent) => void;
   onDelete?: (componentId: string) => void;
   onToggle?: (componentId: string, enabled: boolean) => void;
+  templateTheme?: TemplateTheme | null;
 }
 
 export interface ProfileConfig {

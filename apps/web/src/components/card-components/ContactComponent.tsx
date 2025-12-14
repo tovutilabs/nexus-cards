@@ -3,6 +3,7 @@ import { CardComponentRendererProps, ContactConfig } from './types';
 import { Mail, Phone, MessageSquare, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { applyTemplateStyles } from '@/lib/template-themes';
 
 /**
  * ContactComponent
@@ -14,6 +15,7 @@ export function ContactComponent({
   component,
   cardData,
   isEditing = false,
+  templateTheme,
 }: CardComponentRendererProps) {
   const config = component.config as ContactConfig;
 
@@ -24,6 +26,12 @@ export function ContactComponent({
   const showWhatsApp = config.showWhatsApp !== false;
   const customButtons = config.customButtons || [];
   const layout = config.layout || 'grid';
+
+  // Apply template theme styling
+  const containerStyles = applyTemplateStyles({
+    padding: templateTheme?.spacing.component || '1.5rem',
+    marginBottom: '1rem',
+  }, templateTheme);
 
   // Extract contact data
   const email = cardData?.email || null;
@@ -100,14 +108,20 @@ export function ContactComponent({
     list: 'flex flex-col gap-2',
   };
 
+  const headingColor = templateTheme?.colors.text || undefined;
+
   return (
     <div
+      style={containerStyles}
       className={cn(
-        'contact-component p-6',
+        'contact-component',
         isEditing && !component.enabled && 'opacity-50'
       )}
     >
-      <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+      <h3 
+        style={{ color: headingColor, fontSize: templateTheme?.typography.headingSize }}
+        className="text-lg font-semibold mb-4"
+      >
         Get in Touch
       </h3>
 

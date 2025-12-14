@@ -12,6 +12,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { applyTemplateStyles } from '@/lib/template-themes';
 
 /**
  * SocialLinksComponent
@@ -52,6 +53,7 @@ export function SocialLinksComponent({
   component,
   cardData,
   isEditing = false,
+  templateTheme,
 }: CardComponentRendererProps) {
   const config = component.config as SocialLinksConfig;
 
@@ -60,6 +62,14 @@ export function SocialLinksComponent({
   const layout = config.layout || 'icons';
   const iconSize = config.iconSize || 'medium';
   const showLabels = config.showLabels !== false;
+
+  // Apply template theme styling
+  const containerStyles = applyTemplateStyles({
+    padding: '1.5rem',
+    marginBottom: '1rem',
+  }, templateTheme);
+
+  const headingColor = templateTheme?.colors.text || undefined;
 
   const getIcon = (platform: string) => {
     const normalizedPlatform = platform.toLowerCase();
@@ -85,12 +95,13 @@ export function SocialLinksComponent({
   if (layout === 'icons') {
     return (
       <div
+        style={containerStyles}
         className={cn(
-          'social-links-component p-6',
+          'social-links-component',
           isEditing && !component.enabled && 'opacity-50'
         )}
       >
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4 text-center">
+        <h3 className="text-lg font-semibold mb-4 text-center" style={{ color: headingColor }}>
           Connect With Me
         </h3>
 

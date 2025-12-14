@@ -3,6 +3,7 @@ import Stripe from 'stripe';
 import { ConfigService } from '@nestjs/config';
 import { PrismaService } from '../prisma/prisma.service';
 import { SubscriptionTier, SubscriptionStatus } from '@prisma/client';
+import { CardComponentsService } from '../card-components/card-components.service';
 
 @Injectable()
 export class BillingService {
@@ -11,7 +12,8 @@ export class BillingService {
 
   constructor(
     private readonly configService: ConfigService,
-    private readonly prisma: PrismaService
+    private readonly prisma: PrismaService,
+    private readonly cardComponentsService: CardComponentsService
   ) {
     const stripeSecretKey = this.configService.get<string>('STRIPE_SECRET_KEY');
     if (!stripeSecretKey) {
@@ -239,14 +241,15 @@ export class BillingService {
       return;
     }
 
-    const tier = this.getTierFromPriceId(subscription.items.data[0]?.price?.id);
+    const oldTier = existingSub.tier;
+    const newTier = this.getTierFromPriceId(subscription.items.data[0]?.price?.id);
     const status = this.mapStripeStatus(subscription.status);
 
     await this.prisma.subscription.update({
       where: { stripeSubscriptionId: subscription.id },
       data: {
         stripePriceId: subscription.items.data[0]?.price?.id,
-        tier,
+        tier: newTier,
         status,
         currentPeriodStart: new Date(
           (subscription as any).current_period_start * 1000
@@ -259,8 +262,34 @@ export class BillingService {
     });
 
     this.logger.log(
-      `Subscription updated: ${subscription.id}, tier: ${tier}, status: ${status}`
+      `Subscription updated: ${subscription.id}, tier: ${oldTier} → ${newTier}, status: ${status}`
     );
+
+    // Handle tier downgrade - lock premium components
+    if (this.isTierDowngrade(oldTier, newTier)) {
+      this.logger.log(`Tier downgrade detected for user ${existingSub.userId}: ${oldTier} → ${newTier}`);
+      try {
+        const lockedCount = await this.cardComponentsService.lockComponentsAfterDowngrade(
+          existingSub.userId,
+          newTier
+        );
+        this.logger.log(`Locked ${lockedCount} premium components for user ${existingSub.userId}`);
+      } catch (error) {
+        this.logger.error(`Failed to lock components after downgrade:`, error);
+      }
+    }
+  }
+
+  /**
+   * Check if a tier change is a downgrade
+   */
+  private isTierDowngrade(oldTier: SubscriptionTier, newTier: SubscriptionTier): boolean {
+    const tierHierarchy = {
+      [SubscriptionTier.FREE]: 0,
+      [SubscriptionTier.PRO]: 1,
+      [SubscriptionTier.PREMIUM]: 2,
+    };
+    return tierHierarchy[oldTier] > tierHierarchy[newTier];
   }
 
   private async handleSubscriptionDeleted(
@@ -275,6 +304,8 @@ export class BillingService {
       return;
     }
 
+    const oldTier = existingSub.tier;
+
     await this.prisma.subscription.update({
       where: { stripeSubscriptionId: subscription.id },
       data: {
@@ -283,7 +314,21 @@ export class BillingService {
       },
     });
 
-    this.logger.log(`Subscription deleted: ${subscription.id}`);
+    this.logger.log(`Subscription deleted: ${subscription.id}, downgrading to FREE tier`);
+
+    // Handle tier downgrade to FREE - lock premium components
+    if (oldTier !== SubscriptionTier.FREE) {
+      this.logger.log(`Locking premium components for user ${existingSub.userId} after subscription cancellation`);
+      try {
+        const lockedCount = await this.cardComponentsService.lockComponentsAfterDowngrade(
+          existingSub.userId,
+          SubscriptionTier.FREE
+        );
+        this.logger.log(`Locked ${lockedCount} premium components for user ${existingSub.userId}`);
+      } catch (error) {
+        this.logger.error(`Failed to lock components after subscription cancellation:`, error);
+      }
+    }
   }
 
   private async handleInvoicePaymentSucceeded(

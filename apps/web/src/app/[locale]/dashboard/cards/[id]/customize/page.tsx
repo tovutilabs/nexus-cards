@@ -1,34 +1,51 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { Loader2, Plus, ArrowLeft } from 'lucide-react';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { CardComponentList } from '@/components/nexus/CardComponentList';
 import { ComponentPalette } from '@/components/card-components/ComponentPalette';
 import { ComponentEditDialog } from '@/components/nexus/ComponentEditDialog';
-import { PhoneMockup } from '@/components/nexus/PhoneMockup';
+import { PhoneMockup, CardPreview } from '@/components/nexus/PhoneMockup';
 import { CardComponent, ComponentType } from '@/components/card-components/types';
 import { Button } from '@/components/ui/button';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectLabel, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { createApiClient } from '@/lib/api-client';
+import { analyticsClient } from '@/lib/analytics-client';
+import { getTemplateTheme } from '@/lib/template-themes';
 import {
   useCardComponents,
   useCreateComponent,
   useDeleteComponent,
   useReorderComponents,
 } from '@/hooks/useCardComponents';
+import { useTemplates, useApplyTemplate } from '@/hooks/useTemplates';
+import { useCardStyling, useUpdateCardStyling, useUpdateCardCustomCss } from '@/hooks/useCardStyling';
+import { TemplateGallery } from '@/components/customization/TemplateGallery';
+import { BackgroundControls } from '@/components/customization/BackgroundControls';
+import { TypographyControls } from '@/components/customization/TypographyControls';
+import { LayoutShapeControls } from '@/components/customization/LayoutShapeControls';
+import { CustomCssEditor } from '@/components/customization/CustomCssEditor';
 
 interface CardData {
   id: string;
   firstName: string;
   lastName: string;
-  email?: string;
-  phone?: string;
-  company?: string;
-  jobTitle?: string;
-  avatarUrl?: string | null;
+  email: string | null;
+  phone: string | null;
+  company: string | null;
+  jobTitle: string | null;
+  avatarUrl: string | null;
+  website?: string | null;
+  socialLinks?: {
+    linkedin?: string;
+    twitter?: string;
+    github?: string;
+  };
+  templateId?: string | null;
 }
 
 export default function CustomizeCardPage() {
@@ -37,14 +54,33 @@ export default function CustomizeCardPage() {
   const cardId = params.id as string;
   const { toast } = useToast();
 
+  // Analytics tracking state
+  const sessionStartTime = useRef<number>(Date.now());
+  const sessionChanges = useRef({
+    componentsAdded: 0,
+    componentsRemoved: 0,
+    templateApplied: false,
+    stylingChanged: false,
+    customCssChanged: false,
+  });
+
   const [paletteOpen, setPaletteOpen] = useState(false);
   const [editingComponent, setEditingComponent] = useState<CardComponent | null>(null);
   const [selectedDevice, setSelectedDevice] = useState<'iphone-14' | 'iphone-14-pro' | 'iphone-15' | 'iphone-15-pro-max' | 'samsung-s23' | 'samsung-s24' | 'samsung-fold' | 'pixel-8' | 'ipad-air' | 'ipad-pro' | 'galaxy-tab'>('iphone-15');
   const [cardData, setCardData] = useState<CardData | null>(null);
   const [loadingCard, setLoadingCard] = useState(true);
+  const [customCssError, setCustomCssError] = useState<string | null>(null);
 
-  // Fetch components
+  // Fetch data
   const { data: components = [], isLoading } = useCardComponents(cardId);
+  const { data: templates = [], isLoading: templatesLoading } = useTemplates();
+  const { data: styling, isLoading: stylingLoading } = useCardStyling(cardId);
+
+  // Mutations
+  const applyTemplate = useApplyTemplate(cardId);
+  const updateStyling = useUpdateCardStyling(cardId);
+  const updateCustomCss = useUpdateCardCustomCss(cardId);
+
 
   // Fetch card data
   useEffect(() => {
@@ -52,7 +88,15 @@ export default function CustomizeCardPage() {
       try {
         const apiClient = createApiClient();
         const data = await apiClient.get<CardData>(`/cards/${cardId}`);
-        setCardData(data);
+        // Normalize undefined to null for consistency
+        setCardData({
+          ...data,
+          email: data.email ?? null,
+          phone: data.phone ?? null,
+          company: data.company ?? null,
+          jobTitle: data.jobTitle ?? null,
+          avatarUrl: data.avatarUrl ?? null,
+        });
       } catch (error) {
         console.error('Failed to load card:', error);
         toast({
@@ -68,7 +112,31 @@ export default function CustomizeCardPage() {
     loadCard();
   }, [cardId, router, toast]);
 
-  // Mutations
+  // Analytics: Track customization session
+  useEffect(() => {
+    // Log session started
+    analyticsClient.logSessionStarted(cardId);
+
+    // Cleanup: Log session completed on unmount
+    return () => {
+      const durationSeconds = Math.floor((Date.now() - sessionStartTime.current) / 1000);
+      const changesCount = 
+        sessionChanges.current.componentsAdded +
+        sessionChanges.current.componentsRemoved +
+        (sessionChanges.current.templateApplied ? 1 : 0) +
+        (sessionChanges.current.stylingChanged ? 1 : 0) +
+        (sessionChanges.current.customCssChanged ? 1 : 0);
+
+      analyticsClient.logSessionCompleted({
+        cardId,
+        durationSeconds,
+        changesCount,
+        ...sessionChanges.current,
+      });
+    };
+  }, [cardId]);
+
+  // Component Mutations
   const createComponent = useCreateComponent(cardId);
   const deleteComponent = useDeleteComponent(cardId);
   const reorderComponents = useReorderComponents(cardId);
@@ -94,6 +162,58 @@ export default function CustomizeCardPage() {
     },
   });
 
+  // Template & Styling Handlers
+  const handleApplyTemplate = async (templateId: string) => {
+    try {
+      await applyTemplate.mutateAsync(templateId);
+      sessionChanges.current.templateApplied = true;
+      toast({
+        title: 'Template applied',
+        description: 'Your card styling has been updated.',
+      });
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to apply template',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleStylingChange = async (updates: any) => {
+    try {
+      await updateStyling.mutateAsync(updates);
+      sessionChanges.current.stylingChanged = true;
+    } catch (error: any) {
+      toast({
+        title: 'Error',
+        description: error.message || 'Failed to update styling',
+        variant: 'destructive',
+      });
+    }
+  };
+
+  const handleCustomCssChange = async (css: string) => {
+    try {
+      setCustomCssError(null);
+      await updateCustomCss.mutateAsync(css);
+      sessionChanges.current.customCssChanged = true;
+      toast({
+        title: 'CSS saved',
+        description: 'Your custom CSS has been applied.',
+      });
+    } catch (error: any) {
+      const errorMessage = error.message || 'Failed to save custom CSS';
+      setCustomCssError(errorMessage);
+      toast({
+        title: 'Error',
+        description: errorMessage,
+        variant: 'destructive',
+      });
+    }
+  };
+
+  // Component Handlers
   const handleAddComponent = async (type: ComponentType) => {
     try {
       await createComponent.mutateAsync({
@@ -101,6 +221,7 @@ export default function CustomizeCardPage() {
         enabled: true,
         config: {},
       });
+      sessionChanges.current.componentsAdded++;
       toast({
         title: 'Component added',
         description: 'The component has been added to your card.',
@@ -141,6 +262,7 @@ export default function CustomizeCardPage() {
 
     try {
       await deleteComponent.mutateAsync(componentId);
+      sessionChanges.current.componentsRemoved++;
       toast({
         title: 'Component deleted',
         description: 'The component has been removed from your card.',
@@ -182,7 +304,7 @@ export default function CustomizeCardPage() {
     }
   };
 
-  if (isLoading || loadingCard) {
+  if (isLoading || loadingCard || templatesLoading || stylingLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <Loader2 className="h-8 w-8 animate-spin" />
@@ -190,7 +312,7 @@ export default function CustomizeCardPage() {
     );
   }
 
-  if (!cardData) {
+  if (!cardData || !styling) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <p className="text-muted-foreground">Card not found</p>
@@ -199,6 +321,7 @@ export default function CustomizeCardPage() {
   }
 
   const enabledComponents = components.filter(c => c.enabled);
+  const userTier = 'PREMIUM'; // TODO: Get from user context
 
   return (
     <div className="container mx-auto py-8 px-4">
@@ -215,41 +338,100 @@ export default function CustomizeCardPage() {
           </Button>
           <h1 className="text-3xl font-bold">Customize Your Card</h1>
           <p className="text-muted-foreground mt-1">
-            Add, remove, and arrange components to create your perfect digital card
+            Personalize your card with templates, styling, and components
           </p>
         </div>
-        <Button onClick={() => setPaletteOpen(true)}>
-          <Plus className="h-4 w-4 mr-2" />
-          Add Component
-        </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Left Column: Component List */}
-        <div className="space-y-4">
-          <h2 className="text-xl font-semibold">Your Components</h2>
-          {components.length === 0 ? (
-            <div className="border-2 border-dashed rounded-lg p-12 text-center">
-              <h3 className="text-lg font-semibold mb-2">No components yet</h3>
-              <p className="text-muted-foreground mb-4">
-                Get started by adding your first component
-              </p>
-              <Button onClick={() => setPaletteOpen(true)}>
-                <Plus className="h-4 w-4 mr-2" />
-                Add Component
-              </Button>
-            </div>
-          ) : (
-            <CardComponentList
-              components={components}
-              cardData={cardData}
-              isEditable={true}
-              onReorder={handleReorder}
-              onEdit={handleEditComponent}
-              onDelete={handleDeleteComponent}
-              onToggleEnabled={handleToggleEnabled}
-            />
-          )}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        {/* Left Column: Customization Tabs */}
+        <div className="lg:col-span-2 space-y-6">
+          <Tabs defaultValue="components" className="w-full">
+            <TabsList className="grid w-full grid-cols-6">
+              <TabsTrigger value="templates">Templates</TabsTrigger>
+              <TabsTrigger value="colors">Colors</TabsTrigger>
+              <TabsTrigger value="typography">Typography</TabsTrigger>
+              <TabsTrigger value="layout">Layout</TabsTrigger>
+              <TabsTrigger value="advanced">Advanced</TabsTrigger>
+              <TabsTrigger value="components">Components</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="templates" className="space-y-4 mt-6">
+              <TemplateGallery
+                templates={templates}
+                currentTemplateId={cardData.templateId || null}
+                userTier={userTier}
+                onApply={handleApplyTemplate}
+                isApplying={applyTemplate.isPending}
+              />
+            </TabsContent>
+
+            <TabsContent value="colors" className="space-y-4 mt-6">
+              <BackgroundControls
+                styling={styling}
+                userTier={userTier}
+                onChange={handleStylingChange}
+              />
+            </TabsContent>
+
+            <TabsContent value="typography" className="space-y-4 mt-6">
+              <TypographyControls
+                styling={styling}
+                onChange={handleStylingChange}
+              />
+            </TabsContent>
+
+            <TabsContent value="layout" className="space-y-4 mt-6">
+              <LayoutShapeControls
+                styling={styling}
+                userTier={userTier}
+                onChange={handleStylingChange}
+              />
+            </TabsContent>
+
+            <TabsContent value="advanced" className="space-y-4 mt-6">
+              <CustomCssEditor
+                customCss={styling.customCss}
+                userTier={userTier}
+                onSave={handleCustomCssChange}
+                isSaving={updateCustomCss.isPending}
+                error={customCssError}
+              />
+            </TabsContent>
+
+            <TabsContent value="components" className="space-y-4 mt-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold">Your Components</h2>
+                <Button onClick={() => setPaletteOpen(true)}>
+                  <Plus className="h-4 w-4 mr-2" />
+                  Add Component
+                </Button>
+              </div>
+              
+              {components.length === 0 ? (
+                <div className="border-2 border-dashed rounded-lg p-12 text-center">
+                  <h3 className="text-lg font-semibold mb-2">No components yet</h3>
+                  <p className="text-muted-foreground mb-4">
+                    Get started by adding your first component
+                  </p>
+                  <Button onClick={() => setPaletteOpen(true)}>
+                    <Plus className="h-4 w-4 mr-2" />
+                    Add Component
+                  </Button>
+                </div>
+              ) : (
+                <CardComponentList
+                  components={components}
+                  cardData={cardData}
+                  isEditable={true}
+                  onReorder={handleReorder}
+                  onEdit={handleEditComponent}
+                  onDelete={handleDeleteComponent}
+                  onToggleEnabled={handleToggleEnabled}
+                />
+              )}
+            </TabsContent>
+          </Tabs>
         </div>
 
         {/* Right Column: Live Preview */}
@@ -295,17 +477,59 @@ export default function CustomizeCardPage() {
           <div className="flex justify-center">
             <PhoneMockup variant={selectedDevice} deviceColor="black">
               <div className="h-full overflow-y-auto">
-                {enabledComponents.length === 0 ? (
+                {enabledComponents.length === 0 && !styling?.customCss?.includes('card-wave-divider') && !styling?.customCss?.includes('card-split-container') && !styling?.customCss?.includes('card-basic-container') ? (
                   <div className="flex items-center justify-center h-full text-center p-8">
                     <p className="text-sm text-muted-foreground">
                       Enable components using the eye icon to see them here
                     </p>
                   </div>
+                ) : styling?.customCss?.includes('card-wave-divider') || styling?.customCss?.includes('card-split-container') || styling?.customCss?.includes('card-basic-container') ? (
+                  // Template preview with components
+                  <>
+                    <CardPreview
+                      customization={{
+                        fontFamily: styling.fontFamily || undefined,
+                        fontSize: styling.fontSize || undefined,
+                        layout: styling.layout || undefined,
+                        backgroundType: styling.backgroundType || undefined,
+                        backgroundColor: styling.backgroundColor || undefined,
+                        backgroundImage: styling.backgroundImage || undefined,
+                        borderRadius: styling.borderRadius || undefined,
+                        shadowPreset: styling.shadowPreset || undefined,
+                        customCss: styling.customCss || undefined,
+                      }}
+                      cardData={{
+                        name: `${cardData?.firstName || ''} ${cardData?.lastName || ''}`.trim(),
+                        title: cardData?.jobTitle || '',
+                        company: cardData?.company || '',
+                        email: cardData?.email || '',
+                        phone: cardData?.phone || '',
+                        website: cardData?.website || '',
+                        address: (cardData?.socialLinks as any)?.address || '',
+                        avatarUrl: cardData?.avatarUrl || '',
+                        socialLinks: {
+                          linkedin: (cardData?.socialLinks as any)?.linkedinUrl || (cardData?.socialLinks as any)?.linkedin || '',
+                          twitter: (cardData?.socialLinks as any)?.twitterUrl || (cardData?.socialLinks as any)?.twitter || '',
+                          github: (cardData?.socialLinks as any)?.githubUrl || (cardData?.socialLinks as any)?.github || '',
+                        },
+                      }}
+                    />
+                    {/* Render additional components below the template */}
+                    <div className="px-4 pb-4">
+                      <CardComponentList
+                        components={enabledComponents.filter(c => c.type !== 'PROFILE')}
+                        cardData={cardData}
+                        isEditable={false}
+                        templateTheme={getTemplateTheme(styling?.customCss)}
+                      />
+                    </div>
+                  </>
                 ) : (
                   <CardComponentList
                     components={enabledComponents}
                     cardData={cardData}
                     isEditable={false}
+                    templateTheme={getTemplateTheme(styling?.customCss)}
                   />
                 )}
               </div>

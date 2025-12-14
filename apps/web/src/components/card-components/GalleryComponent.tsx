@@ -6,6 +6,7 @@ import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import Image from 'next/image';
+import { applyTemplateStyles } from '@/lib/template-themes';
 
 // Helper to validate image URL
 const isValidImageUrl = (url: string): boolean => {
@@ -28,6 +29,7 @@ export function GalleryComponent({
   component,
   cardData,
   isEditing = false,
+  templateTheme,
 }: CardComponentRendererProps) {
   const config = component.config as GalleryConfig;
 
@@ -37,6 +39,11 @@ export function GalleryComponent({
   const columns = config.columns || 3;
   const showCaptions = config.showCaptions !== false;
   const enableLightbox = config.lightbox !== false;
+
+  // Apply template theme styling
+  const galleryStyles = applyTemplateStyles({
+    marginBottom: '1.5rem',
+  }, templateTheme);
 
   // Lightbox state (must be declared before any conditional returns)
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -82,8 +89,9 @@ export function GalleryComponent({
           'gallery-component p-6',
           isEditing && !component.enabled && 'opacity-50'
         )}
+        style={galleryStyles}
       >
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+        <h3 className="text-lg font-semibold mb-4" style={{ color: templateTheme?.colors.text }}>
           Gallery
         </h3>
 

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { TemplatesService } from './templates.service';
 import { PrismaService } from '../prisma/prisma.service';
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
+import { ForbiddenException, NotFoundException, BadRequestException } from '@nestjs/common';
 import { SubscriptionTier } from '@prisma/client';
 
 describe('TemplatesService', () => {
@@ -39,6 +39,66 @@ describe('TemplatesService', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
+  });
+
+  describe('archive', () => {
+    it('should archive a template', async () => {
+      const mockTemplate = {
+        id: 'template-1',
+        name: 'Test Template',
+        usageCount: 5,
+        isArchived: false,
+      };
+
+      mockPrismaService.cardTemplate.findUnique.mockResolvedValue(mockTemplate);
+      mockPrismaService.cardTemplate.update.mockResolvedValue({
+        ...mockTemplate,
+        isArchived: true,
+        isActive: false,
+      });
+
+      const result = await service.archive('template-1');
+
+      expect(mockPrismaService.cardTemplate.update).toHaveBeenCalledWith({
+        where: { id: 'template-1' },
+        data: {
+          isArchived: true,
+          isActive: false,
+        },
+      });
+      expect(result.isArchived).toBe(true);
+    });
+  });
+
+  describe('delete', () => {
+    it('should prevent hard delete if template is in use', async () => {
+      const mockTemplate = {
+        id: 'template-1',
+        name: 'Test Template',
+        usageCount: 5,
+      };
+
+      mockPrismaService.cardTemplate.findUnique.mockResolvedValue(mockTemplate);
+
+      await expect(service.delete('template-1')).rejects.toThrow(BadRequestException);
+    });
+
+    it('should allow hard delete if template has no usage', async () => {
+      const mockTemplate = {
+        id: 'template-1',
+        name: 'Test Template',
+        usageCount: 0,
+      };
+
+      mockPrismaService.cardTemplate.findUnique.mockResolvedValue(mockTemplate);
+      mockPrismaService.cardTemplate.delete.mockResolvedValue(mockTemplate);
+
+      await service.delete('template-1');
+
+      expect(mockPrismaService.cardTemplate.delete).toHaveBeenCalledWith({
+        where: { id: 'template-1' },
+      });
+    });
   });
 
   describe('findAll', () => {
@@ -254,67 +314,6 @@ describe('TemplatesService', () => {
       await expect(
         service.applyTemplateToCard('card-1', 'template-1', 'user-1')
       ).rejects.toThrow(ForbiddenException);
-    });
-  });
-
-  describe('sanitizeCustomCss', () => {
-    it('should allow safe CSS', () => {
-      const safeCss = '.card { color: #333; font-size: 16px; }';
-      expect(service.sanitizeCustomCss(safeCss)).toBe(safeCss);
-    });
-
-    it('should strip @import statements', () => {
-      const dangerousCss = '@import url("evil.css"); .card { color: red; }';
-      const result = service.sanitizeCustomCss(dangerousCss);
-      expect(result).not.toContain('@import');
-      expect(result).toContain('.card');
-    });
-
-    it('should strip javascript: URLs', () => {
-      const dangerousCss = '.card { background: url("javascript:alert(1)"); }';
-      const result = service.sanitizeCustomCss(dangerousCss);
-      expect(result).not.toContain('javascript:');
-    });
-
-    it('should strip expression() function', () => {
-      const dangerousCss = '.card { width: expression(alert(1)); }';
-      const result = service.sanitizeCustomCss(dangerousCss);
-      expect(result).not.toContain('expression(');
-    });
-
-    it('should strip behavior property', () => {
-      const dangerousCss = '.card { behavior: url(evil.htc); }';
-      const result = service.sanitizeCustomCss(dangerousCss);
-      expect(result).not.toContain('behavior:');
-    });
-
-    it('should strip vbscript: URLs', () => {
-      const dangerousCss = '.card { background: url("vbscript:alert(1)"); }';
-      const result = service.sanitizeCustomCss(dangerousCss);
-      expect(result).not.toContain('vbscript:');
-    });
-
-    it('should strip script tags in comments', () => {
-      const dangerousCss = '/* <script>alert(1)</script> */ .card { color: red; }';
-      const result = service.sanitizeCustomCss(dangerousCss);
-      expect(result).not.toContain('<script>');
-      expect(result).not.toContain('</script>');
-    });
-
-    it('should strip on* event handlers', () => {
-      const dangerousCss = '.card { background: url("onclick=alert(1)"); }';
-      const result = service.sanitizeCustomCss(dangerousCss);
-      expect(result).not.toMatch(/on\w+\s*=/);
-    });
-
-    it('should enforce 100KB size limit', () => {
-      const largeCss = 'a'.repeat(101 * 1024);
-      expect(() => service.sanitizeCustomCss(largeCss)).toThrow();
-    });
-
-    it('should allow CSS within 100KB limit', () => {
-      const validCss = 'a'.repeat(50 * 1024);
-      expect(service.sanitizeCustomCss(validCss)).toBe(validCss);
     });
   });
 

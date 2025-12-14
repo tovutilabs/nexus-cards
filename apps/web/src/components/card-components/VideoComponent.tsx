@@ -4,15 +4,23 @@ import React, { useState } from 'react';
 import { Play, Pencil, Video as VideoIcon } from 'lucide-react';
 import { CardComponentRendererProps, VideoConfig } from './types';
 import { NexusButton } from '@/components/nexus';
+import { applyTemplateStyles } from '@/lib/template-themes';
 
 export function VideoComponent({
   component,
   cardData,
   isEditing = false,
   onEdit,
+  templateTheme,
 }: CardComponentRendererProps) {
   const config = component.config as VideoConfig;
   const [playing, setPlaying] = useState(false);
+
+  // Apply template theme styling
+  const containerStyles = applyTemplateStyles({
+    padding: templateTheme?.spacing.component || '1.5rem',
+    marginBottom: '1rem',
+  }, templateTheme);
 
   // Show placeholder in edit mode if no video configured
   if (!config?.url && isEditing) {
@@ -74,9 +82,10 @@ export function VideoComponent({
 
   const embedUrl = getVideoEmbedUrl();
   const isCustomVideo = config.platform === 'custom';
+  const headingColor = templateTheme?.colors.text || undefined;
 
   return (
-    <div className="p-6">
+    <div style={containerStyles}>
       {isEditing && onEdit && (
         <div className="flex justify-end mb-4">
           <button
@@ -90,7 +99,12 @@ export function VideoComponent({
       )}
 
       {config.title && (
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">{config.title}</h3>
+        <h3 
+          style={{ color: headingColor, fontSize: templateTheme?.typography.headingSize }}
+          className="text-xl font-semibold mb-4"
+        >
+          {config.title}
+        </h3>
       )}
 
       <div className="relative w-full" style={{ paddingBottom: '56.25%' }}>

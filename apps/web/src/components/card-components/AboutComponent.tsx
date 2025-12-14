@@ -1,6 +1,7 @@
 import React from 'react';
 import { CardComponentRendererProps, AboutConfig } from './types';
 import { cn } from '@/lib/utils';
+import { applyTemplateStyles } from '@/lib/template-themes';
 
 /**
  * AboutComponent
@@ -12,6 +13,7 @@ export function AboutComponent({
   component,
   cardData,
   isEditing = false,
+  templateTheme,
 }: CardComponentRendererProps) {
   const config = component.config as AboutConfig;
 
@@ -25,6 +27,15 @@ export function AboutComponent({
   // Truncate bio if needed
   const displayBio = bio.length > maxLength ? `${bio.slice(0, maxLength)}...` : bio;
 
+  // Apply template theme styling
+  const containerStyles = applyTemplateStyles({
+    padding: templateTheme?.spacing.component || '1.5rem',
+    marginBottom: '1rem',
+  }, templateTheme);
+
+  const headingColor = templateTheme?.colors.text || undefined;
+  const textColor = templateTheme?.colors.text || undefined;
+
   const alignmentClasses = {
     left: 'text-left',
     center: 'text-center',
@@ -37,14 +48,18 @@ export function AboutComponent({
 
   return (
     <div
+      style={containerStyles}
       className={cn(
-        'about-component p-6 space-y-4',
+        'about-component space-y-4',
         isEditing && !component.enabled && 'opacity-50'
       )}
     >
       {/* Title */}
       {showTitle && (
-        <h3 className={cn('text-xl font-semibold text-gray-900 dark:text-white', alignmentClasses[textAlign])}>
+        <h3 
+          style={{ color: headingColor, fontSize: templateTheme?.typography.headingSize }}
+          className={cn('text-xl font-semibold', alignmentClasses[textAlign])}
+        >
           {title}
         </h3>
       )}
@@ -52,8 +67,9 @@ export function AboutComponent({
       {/* Bio Content */}
       {bio ? (
         <div
+          style={{ color: textColor, fontSize: templateTheme?.typography.bodySize }}
           className={cn(
-            'text-gray-700 dark:text-gray-300 whitespace-pre-wrap leading-relaxed',
+            'whitespace-pre-wrap leading-relaxed',
             alignmentClasses[textAlign]
           )}
         >

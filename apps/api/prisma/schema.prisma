@@ -77,6 +77,15 @@ enum AnalyticsEventType {
   QR_SCAN
   NFC_TAP
   SHARE
+  CUSTOMIZATION_SESSION_STARTED
+  CUSTOMIZATION_SESSION_COMPLETED
+  COMPONENT_ADDED
+  COMPONENT_REMOVED
+  COMPONENT_UPDATED
+  COMPONENT_REORDERED
+  CARD_TEMPLATE_APPLIED
+  CARD_STYLING_UPDATED
+  CARD_CUSTOM_CSS_UPDATED
 }
 
 enum ContactSource {
@@ -277,6 +286,7 @@ model CardTemplate {
   // Status
   isActive        Boolean  @default(true)
   isFeatured      Boolean  @default(false)
+  isArchived      Boolean  @default(false)
   
   // Metadata
   usageCount      Int      @default(0)
@@ -289,6 +299,7 @@ model CardTemplate {
   @@index([slug])
   @@index([minTier])
   @@index([isActive])
+  @@index([isArchived])
   @@map("card_templates")
 }
 
@@ -804,6 +815,7 @@ model CardComponent {
   type                    ComponentType
   order                   Int           @default(0)
   enabled                 Boolean       @default(true)
+  locked                  Boolean       @default(false)
   config                  Json          @default("{}")
   backgroundType          String?       @default("solid")
   backgroundColor         String?       @default("#ffffff")
@@ -819,6 +831,7 @@ model CardComponent {
   @@index([cardId])
   @@index([type])
   @@index([cardId, order])
+  @@index([locked])
   @@map("card_components")
 }
 
@@ -835,4 +848,18 @@ model ComponentTemplate {
   @@index([type])
   @@index([isPremium])
   @@map("component_templates")
+}
+
+model TierComponentRule {
+  id             String           @id @default(cuid())
+  tier           SubscriptionTier
+  componentType  ComponentType
+  maxAllowed     Int?             // null = no explicit limit (unlimited)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
+
+  @@unique([tier, componentType])
+  @@index([tier])
+  @@index([componentType])
+  @@map("tier_component_rules")
 }

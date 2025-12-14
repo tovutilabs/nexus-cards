@@ -37,3 +37,5 @@ export { ImageUpload } from './ImageUpload';
 export { VideoUpload } from './VideoUpload';
 
 export { TemplateSelector } from './TemplateSelector';
+
+export { CardRenderView } from './CardRenderView';

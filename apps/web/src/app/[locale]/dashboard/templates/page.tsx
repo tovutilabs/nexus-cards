@@ -154,7 +154,7 @@ export default function TemplatesPage() {
     setApplying(true);
     try {
       const apiClient = createApiClient();
-      await apiClient.post(`/templates/apply/${selectedCardId}`, {
+      await apiClient.post(`/cards/${selectedCardId}/apply-template`, {
         templateId: selectedTemplate.id,
       });
 

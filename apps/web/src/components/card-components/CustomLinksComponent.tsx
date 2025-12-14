@@ -4,16 +4,24 @@ import React from 'react';
 import { ExternalLink, Plus, Pencil } from 'lucide-react';
 import { CardComponentRendererProps, CustomLinksConfig } from './types';
 import { NexusButton } from '@/components/nexus';
+import { applyTemplateStyles } from '@/lib/template-themes';
 
 export function CustomLinksComponent({
   component,
   cardData,
   isEditing = false,
   onEdit,
+  templateTheme,
 }: CardComponentRendererProps) {
   const config = component.config as CustomLinksConfig;
   const links = config?.links || [];
   const style = config?.style || 'button';
+
+  // Apply template theme styling
+  const containerStyles = applyTemplateStyles({
+    padding: templateTheme?.spacing.component || '1.5rem',
+    marginBottom: '1rem',
+  }, templateTheme);
 
   // Show placeholder in edit mode if no links configured
   if (links.length === 0 && isEditing) {
@@ -113,7 +121,7 @@ export function CustomLinksComponent({
   );
 
   return (
-    <div className="p-6">
+    <div style={containerStyles}>
       {isEditing && onEdit && (
         <div className="flex justify-end mb-4">
           <button

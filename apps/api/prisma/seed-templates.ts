@@ -4,22 +4,21 @@ import { PrismaClient, SubscriptionTier } from '@prisma/client';
 const prisma = new PrismaClient();
 
 const templates = [
-  // TECH TEMPLATES
   {
-    name: 'Modern Tech',
-    slug: 'modern-tech',
-    description: 'Clean, minimal design perfect for developers and tech professionals',
-    category: 'tech',
-    industry: ['technology', 'software', 'startup'],
+    name: 'Basic Business Card',
+    slug: 'basic-business',
+    description: 'Clean profile card with gradient header and quick contact actions',
+    category: 'corporate',
+    industry: ['business', 'corporate', 'general', 'networking'],
     minTier: SubscriptionTier.FREE,
     isActive: true,
-    isFeatured: true,
+    isFeatured: false,
     config: {
       colorScheme: {
-        primary: '#3B82F6',
-        secondary: '#1E293B',
-        accent: '#10B981',
-        background: '#FFFFFF',
+        primary: '#0EA5E9',
+        secondary: '#6366F1',
+        accent: '#0EA5E9',
+        background: '#F3F4F6',
         text: '#0F172A',
       },
       typography: {
@@ -30,437 +29,326 @@ const templates = [
       layout: 'vertical',
       spacing: 'comfortable',
       borderRadius: 'lg',
-      shadow: 'md',
-    },
-  },
-  {
-    name: 'Dark Mode Developer',
-    slug: 'dark-mode-dev',
-    description: 'Eye-friendly dark theme for developers and night owls',
-    category: 'tech',
-    industry: ['technology', 'software', 'gaming'],
-    minTier: SubscriptionTier.PRO,
-    isActive: true,
-    isFeatured: true,
-    config: {
-      colorScheme: {
-        primary: '#6366F1',
-        secondary: '#8B5CF6',
-        accent: '#EC4899',
-        background: '#0F172A',
-        text: '#F1F5F9',
-      },
-      typography: {
-        fontFamily: 'mono',
-        headingWeight: '600',
-        bodyWeight: '400',
-      },
-      layout: 'vertical',
-      spacing: 'comfortable',
-      borderRadius: 'md',
       shadow: 'lg',
-    },
-  },
-  {
-    name: 'Startup Minimal',
-    slug: 'startup-minimal',
-    description: 'Ultra-minimal design for modern startups',
-    category: 'tech',
-    industry: ['startup', 'technology', 'venture'],
-    minTier: SubscriptionTier.FREE,
-    isActive: true,
-    isFeatured: false,
-    config: {
-      colorScheme: {
-        primary: '#000000',
-        secondary: '#737373',
-        accent: '#FF6B6B',
-        background: '#FFFFFF',
-        text: '#171717',
-      },
-      typography: {
-        fontFamily: 'sans',
-        headingWeight: '800',
-        bodyWeight: '400',
-      },
-      layout: 'center',
-      spacing: 'compact',
-      borderRadius: 'none',
-      shadow: 'none',
-    },
-  },
+      customCss: `/* Basic Business Card - clean profile layout with gradient header */
 
-  // CORPORATE TEMPLATES
-  {
-    name: 'Executive Professional',
-    slug: 'executive-professional',
-    description: 'Sophisticated design for C-level executives and senior management',
-    category: 'corporate',
-    industry: ['finance', 'consulting', 'corporate'],
-    minTier: SubscriptionTier.PRO,
-    isActive: true,
-    isFeatured: true,
-    config: {
-      colorScheme: {
-        primary: '#1E40AF',
-        secondary: '#475569',
-        accent: '#D97706',
-        background: '#F8FAFC',
-        text: '#0F172A',
-      },
-      typography: {
-        fontFamily: 'serif',
-        headingWeight: '700',
-        bodyWeight: '400',
-      },
-      layout: 'horizontal',
-      spacing: 'comfortable',
-      borderRadius: 'sm',
-      shadow: 'sm',
-    },
-  },
-  {
-    name: 'Corporate Blue',
-    slug: 'corporate-blue',
-    description: 'Traditional corporate styling with professional blue tones',
-    category: 'corporate',
-    industry: ['corporate', 'business', 'consulting'],
-    minTier: SubscriptionTier.FREE,
-    isActive: true,
-    isFeatured: false,
-    config: {
-      colorScheme: {
-        primary: '#2563EB',
-        secondary: '#64748B',
-        accent: '#0891B2',
-        background: '#FFFFFF',
-        text: '#1E293B',
-      },
-      typography: {
-        fontFamily: 'sans',
-        headingWeight: '600',
-        bodyWeight: '400',
-      },
-      layout: 'vertical',
-      spacing: 'spacious',
-      borderRadius: 'md',
-      shadow: 'md',
-    },
-  },
-  {
-    name: 'Finance Pro',
-    slug: 'finance-pro',
-    description: 'Professional design for finance and banking professionals',
-    category: 'corporate',
-    industry: ['finance', 'banking', 'investment'],
-    minTier: SubscriptionTier.PRO,
-    isActive: true,
-    isFeatured: false,
-    config: {
-      colorScheme: {
-        primary: '#0F766E',
-        secondary: '#475569',
-        accent: '#CA8A04',
-        background: '#FAFAF9',
-        text: '#1C1917',
-      },
-      typography: {
-        fontFamily: 'serif',
-        headingWeight: '700',
-        bodyWeight: '400',
-      },
-      layout: 'vertical',
-      spacing: 'comfortable',
-      borderRadius: 'sm',
-      shadow: 'lg',
-    },
-  },
+.card-basic-container {
+  width: 100% !important;
+  max-width: 420px !important;
+  min-height: 780px !important;
+  margin: 0 auto !important;
+  background: #ffffff;
+  border-radius: 20px;
+  overflow: hidden;
+  box-shadow: 0 15px 45px rgba(15, 23, 42, 0.15);
+  border: 1px solid rgba(15, 23, 42, 0.06);
+  display: flex;
+  flex-direction: column;
+  font-family: 'Inter', 'Segoe UI', system-ui, -apple-system, sans-serif;
+}
 
-  // CREATIVE TEMPLATES
-  {
-    name: 'Creative Bold',
-    slug: 'creative-bold',
-    description: 'Vibrant and bold design for creatives and artists',
-    category: 'creative',
-    industry: ['design', 'art', 'photography'],
-    minTier: SubscriptionTier.FREE,
-    isActive: true,
-    isFeatured: true,
-    config: {
-      colorScheme: {
-        primary: '#EC4899',
-        secondary: '#8B5CF6',
-        accent: '#F59E0B',
-        background: '#FFFBEB',
-        text: '#1F2937',
-      },
-      typography: {
-        fontFamily: 'display',
-        headingWeight: '800',
-        bodyWeight: '400',
-      },
-      layout: 'image-first',
-      spacing: 'comfortable',
-      borderRadius: 'xl',
-      shadow: 'xl',
-    },
-  },
-  {
-    name: 'Artist Portfolio',
-    slug: 'artist-portfolio',
-    description: 'Showcase-focused design for artists and photographers',
-    category: 'creative',
-    industry: ['art', 'photography', 'design'],
-    minTier: SubscriptionTier.PRO,
-    isActive: true,
-    isFeatured: true,
-    config: {
-      colorScheme: {
-        primary: '#DC2626',
-        secondary: '#171717',
-        accent: '#FBBF24',
-        background: '#FFFFFF',
-        text: '#0A0A0A',
-      },
-      typography: {
-        fontFamily: 'sans',
-        headingWeight: '700',
-        bodyWeight: '300',
-      },
-      layout: 'image-first',
-      spacing: 'spacious',
-      borderRadius: 'none',
-      shadow: 'none',
-    },
-  },
-  {
-    name: 'Design Agency',
-    slug: 'design-agency',
-    description: 'Modern design for agencies and creative studios',
-    category: 'creative',
-    industry: ['design', 'agency', 'marketing'],
-    minTier: SubscriptionTier.PRO,
-    isActive: true,
-    isFeatured: false,
-    config: {
-      colorScheme: {
-        primary: '#7C3AED',
-        secondary: '#4338CA',
-        accent: '#14B8A6',
-        background: '#FAFAFA',
-        text: '#18181B',
-      },
-      typography: {
-        fontFamily: 'display',
-        headingWeight: '800',
-        bodyWeight: '400',
-      },
-      layout: 'vertical',
-      spacing: 'comfortable',
-      borderRadius: '2xl',
-      shadow: 'lg',
-    },
-  },
+.card-basic-header {
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  padding: 2.25rem 1.5rem 2.75rem;
+  text-align: center;
+  color: #ffffff;
+  position: relative;
+}
 
-  // LEGAL TEMPLATES
-  {
-    name: 'Legal Professional',
-    slug: 'legal-professional',
-    description: 'Conservative, trustworthy design for legal professionals',
-    category: 'legal',
-    industry: ['legal', 'law', 'attorney'],
-    minTier: SubscriptionTier.PRO,
-    isActive: true,
-    isFeatured: true,
-    config: {
-      colorScheme: {
-        primary: '#1F2937',
-        secondary: '#6B7280',
-        accent: '#92400E',
-        background: '#F9FAFB',
-        text: '#111827',
-      },
-      typography: {
-        fontFamily: 'serif',
-        headingWeight: '700',
-        bodyWeight: '400',
-      },
-      layout: 'vertical',
-      spacing: 'spacious',
-      borderRadius: 'sm',
-      shadow: 'sm',
-    },
-  },
-  {
-    name: 'Law Firm Classic',
-    slug: 'law-firm-classic',
-    description: 'Traditional design for established law firms',
-    category: 'legal',
-    industry: ['legal', 'law', 'corporate'],
-    minTier: SubscriptionTier.FREE,
-    isActive: true,
-    isFeatured: false,
-    config: {
-      colorScheme: {
-        primary: '#0F172A',
-        secondary: '#475569',
-        accent: '#B45309',
-        background: '#FFFFFF',
-        text: '#1E293B',
-      },
-      typography: {
-        fontFamily: 'serif',
-        headingWeight: '700',
-        bodyWeight: '400',
-      },
-      layout: 'horizontal',
-      spacing: 'comfortable',
-      borderRadius: 'none',
-      shadow: 'none',
-    },
-  },
+.card-basic-header::before,
+.card-basic-header::after {
+  content: '';
+  position: absolute;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.1);
+}
 
-  // HEALTHCARE TEMPLATES
-  {
-    name: 'Medical Professional',
-    slug: 'medical-professional',
-    description: 'Clean, trustworthy design for healthcare professionals',
-    category: 'healthcare',
-    industry: ['healthcare', 'medical', 'wellness'],
-    minTier: SubscriptionTier.FREE,
-    isActive: true,
-    isFeatured: true,
-    config: {
-      colorScheme: {
-        primary: '#0891B2',
-        secondary: '#0E7490',
-        accent: '#059669',
-        background: '#F0FDFA',
-        text: '#134E4A',
-      },
-      typography: {
-        fontFamily: 'sans',
-        headingWeight: '600',
-        bodyWeight: '400',
-      },
-      layout: 'vertical',
-      spacing: 'comfortable',
-      borderRadius: 'lg',
-      shadow: 'md',
-    },
-  },
-  {
-    name: 'Wellness Coach',
-    slug: 'wellness-coach',
-    description: 'Calming, nature-inspired design for wellness professionals',
-    category: 'healthcare',
-    industry: ['wellness', 'coaching', 'healthcare'],
-    minTier: SubscriptionTier.PRO,
-    isActive: true,
-    isFeatured: true,
-    config: {
-      colorScheme: {
-        primary: '#059669',
-        secondary: '#047857',
-        accent: '#F59E0B',
-        background: '#ECFDF5',
-        text: '#064E3B',
-      },
-      typography: {
-        fontFamily: 'sans',
-        headingWeight: '600',
-        bodyWeight: '400',
-      },
-      layout: 'center',
-      spacing: 'spacious',
-      borderRadius: 'xl',
-      shadow: 'lg',
-    },
-  },
-  {
-    name: 'Healthcare Provider',
-    slug: 'healthcare-provider',
-    description: 'Professional design for clinics and healthcare facilities',
-    category: 'healthcare',
-    industry: ['healthcare', 'medical', 'hospital'],
-    minTier: SubscriptionTier.PRO,
-    isActive: true,
-    isFeatured: false,
-    config: {
-      colorScheme: {
-        primary: '#1E40AF',
-        secondary: '#1E3A8A',
-        accent: '#10B981',
-        background: '#EFF6FF',
-        text: '#1E3A8A',
-      },
-      typography: {
-        fontFamily: 'sans',
-        headingWeight: '700',
-        bodyWeight: '400',
-      },
-      layout: 'vertical',
-      spacing: 'comfortable',
-      borderRadius: 'md',
-      shadow: 'md',
-    },
-  },
+.card-basic-header::before {
+  width: 128px;
+  height: 128px;
+  top: 0;
+  right: 0;
+  transform: translate(50%, -50%);
+}
 
-  // PREMIUM EXCLUSIVE
-  {
-    name: 'Luxury Gold',
-    slug: 'luxury-gold',
-    description: 'Premium design with gold accents for luxury brands',
-    category: 'creative',
-    industry: ['luxury', 'premium', 'fashion'],
-    minTier: SubscriptionTier.PREMIUM,
-    isActive: true,
-    isFeatured: true,
-    config: {
-      colorScheme: {
-        primary: '#000000',
-        secondary: '#78350F',
-        accent: '#F59E0B',
-        background: '#FFFBEB',
-        text: '#1C1917',
-      },
-      typography: {
-        fontFamily: 'serif',
-        headingWeight: '700',
-        bodyWeight: '400',
-      },
-      layout: 'center',
-      spacing: 'spacious',
-      borderRadius: 'none',
-      shadow: '2xl',
-    },
-  },
-  {
-    name: 'Elite Executive',
-    slug: 'elite-executive',
-    description: 'Ultra-premium design for top-tier executives',
-    category: 'corporate',
-    industry: ['executive', 'luxury', 'premium'],
-    minTier: SubscriptionTier.PREMIUM,
-    isActive: true,
-    isFeatured: true,
-    config: {
-      colorScheme: {
-        primary: '#0C4A6E',
-        secondary: '#1E293B',
-        accent: '#B45309',
-        background: '#F8FAFC',
-        text: '#0F172A',
-      },
-      typography: {
-        fontFamily: 'serif',
-        headingWeight: '800',
-        bodyWeight: '400',
-      },
-      layout: 'horizontal',
-      spacing: 'spacious',
-      borderRadius: 'sm',
-      shadow: 'xl',
+.card-basic-header::after {
+  width: 96px;
+  height: 96px;
+  bottom: 0;
+  left: 0;
+  transform: translate(-50%, 50%);
+}
+
+.card-basic-avatar {
+  width: 112px;
+  height: 112px;
+  margin: 0 auto 1rem;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 4px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  background: #e2e8f0;
+  position: relative;
+  z-index: 10;
+}
+
+.card-basic-avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.card-basic-avatar-fallback {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, #cbd5e1, #e2e8f0);
+}
+
+.card-basic-name {
+  font-size: 1.75rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.25rem;
+  position: relative;
+  z-index: 10;
+}
+
+.card-basic-title {
+  font-size: 1rem;
+  font-weight: 500;
+  opacity: 0.95;
+  color: #dbeafe;
+  position: relative;
+  z-index: 10;
+}
+
+.card-basic-company {
+  font-size: 0.9rem;
+  opacity: 0.8;
+  color: rgba(219, 234, 254, 0.8);
+  margin-top: 0.25rem;
+  position: relative;
+  z-index: 10;
+}
+
+.card-basic-contact {
+  padding: 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  background: #ffffff;
+}
+
+.card-basic-contact-item {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 1rem;
+  border-radius: 12px;
+  background: #f8fafc;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.card-basic-contact-item:hover {
+  background: #f1f5f9;
+  transform: scale(0.98);
+}
+
+.card-basic-contact-item:active {
+  transform: scale(0.96);
+}
+
+.card-basic-contact-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.card-basic-contact-icon.email {
+  background: #dbeafe;
+  color: #2563eb;
+}
+
+.card-basic-contact-icon.phone {
+  background: #dcfce7;
+  color: #16a34a;
+}
+
+.card-basic-contact-icon.website {
+  background: #f3e8ff;
+  color: #9333ea;
+}
+
+.card-basic-contact-icon.location {
+  background: #fed7aa;
+  color: #ea580c;
+}
+
+.card-basic-contact-icon svg {
+  width: 20px;
+  height: 20px;
+}
+
+.card-basic-contact-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.15rem;
+  flex: 1;
+  text-align: left;
+}
+
+.card-basic-contact-label {
+  font-size: 0.75rem;
+  text-transform: capitalize;
+  letter-spacing: 0.02em;
+  color: #64748b;
+  font-weight: 500;
+}
+
+.card-basic-contact-value {
+  font-size: 0.95rem;
+  color: #0f172a;
+  font-weight: 500;
+}
+
+.card-basic-social {
+  padding: 1.5rem 1.5rem;
+  border-top: 1px solid #e2e8f0;
+  background: #ffffff;
+}
+
+.card-basic-social-title {
+  font-size: 0.875rem;
+  color: #64748b;
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.card-basic-social-links {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+}
+
+.card-basic-social-link {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
+  color: #ffffff;
+}
+
+.card-basic-social-link.linkedin {
+  background: #2563eb;
+}
+
+.card-basic-social-link.linkedin:hover {
+  background: #1d4ed8;
+}
+
+.card-basic-social-link.twitter {
+  background: #0ea5e9;
+}
+
+.card-basic-social-link.twitter:hover {
+  background: #0284c7;
+}
+
+.card-basic-social-link.github {
+  background: #1e293b;
+}
+
+.card-basic-social-link.github:hover {
+  background: #0f172a;
+}
+
+.card-basic-social-link:active {
+  transform: scale(0.95);
+}
+
+.card-basic-social-link svg,
+.card-basic-social-link svg * {
+  width: 20px;
+  height: 20px;
+  color: #ffffff;
+  fill: currentColor;
+  stroke: currentColor;
+}
+
+.card-basic-actions {
+  padding: 1.5rem 1.5rem;
+  background: #ffffff;
+}
+
+.card-basic-button {
+  width: 100%;
+  padding: 1rem 1.5rem;
+  border-radius: 12px;
+  border: none;
+  background: linear-gradient(135deg, #0ea5e9, #6366f1);
+  color: #ffffff;
+  font-weight: 700;
+  font-size: 1rem;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(99, 102, 241, 0.3);
+  transition: all 0.2s ease;
+}
+
+.card-basic-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 15px 35px rgba(99, 102, 241, 0.4);
+}
+
+.card-basic-button:active {
+  transform: translateY(0);
+  box-shadow: 0 8px 20px rgba(99, 102, 241, 0.3);
+}
+
+@media (max-width: 480px) {
+  .card-basic-container {
+    border-radius: 16px;
+    min-height: 720px !important;
+  }
+
+  .card-basic-header {
+    padding: 1.75rem 1.25rem 2.25rem;
+  }
+
+  .card-basic-avatar {
+    width: 100px;
+    height: 100px;
+  }
+
+  .card-basic-name {
+    font-size: 1.5rem;
+  }
+  
+  .card-basic-title {
+    font-size: 0.9rem;
+  }
+  
+  .card-basic-contact {
+    padding: 1.25rem 1.25rem;
+  }
+  
+  .card-basic-social,
+  .card-basic-actions {
+    padding: 1.25rem 1.25rem;
+  }
+}`,
     },
   },
 ];

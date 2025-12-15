@@ -4,12 +4,14 @@ import { CreateTemplateDto, UpdateTemplateDto } from './dto/template.dto';
 import { SubscriptionTier } from '@prisma/client';
 import { validateAndSanitizeCss } from './utils/css-sanitizer';
 import { AnalyticsService } from '../analytics/analytics.service';
+import { TemplateComponentFactory } from './services/template-component-factory.service';
 
 @Injectable()
 export class TemplatesService {
   constructor(
     private readonly prisma: PrismaService,
-    private readonly analyticsService: AnalyticsService
+    private readonly analyticsService: AnalyticsService,
+    private readonly templateComponentFactory: TemplateComponentFactory,
   ) {}
 
   async findAll(userTier?: SubscriptionTier, category?: string, includeArchived = false) {
@@ -227,6 +229,25 @@ export class TemplatesService {
       },
     });
 
+    // Auto-create template components if card has no existing components
+    const existingComponentsCount = await this.prisma.cardComponent.count({
+      where: { cardId },
+    });
+
+    if (existingComponentsCount === 0) {
+      try {
+        await this.templateComponentFactory.createComponentsForTemplate(
+          template.slug,
+          cardId,
+          card,
+        );
+        console.log(`Auto-created components for template ${template.slug} on card ${cardId}`);
+      } catch (error) {
+        console.error(`Failed to auto-create components for card ${cardId}:`, error);
+        // Don't fail the entire template application if component creation fails
+      }
+    }
+
     // Log analytics event (non-blocking)
     this.analyticsService.logTemplateApplied({
       userId,
@@ -242,6 +263,95 @@ export class TemplatesService {
     });
 
     return updatedCard;
+  }
+
+  async getComponentBlueprint(templateId: string) {
+    const template = await this.findOne(templateId);
+    const blueprint = this.templateComponentFactory.getBlueprint(template.slug);
+    
+    if (!blueprint) {
+      throw new NotFoundException({
+        code: 'BLUEPRINT_NOT_FOUND',
+        message: `No component blueprint found for template: ${template.name}`,
+      });
+    }
+
+    return {
+      templateId: template.id,
+      templateSlug: template.slug,
+      templateName: template.name,
+      ...blueprint,
+    };
+  }
+
+  async migrateTemplateCards(templateSlug: string, dryRun = true) {
+    // Find template by slug
+    const template = await this.prisma.cardTemplate.findUnique({
+      where: { slug: templateSlug },
+    });
+
+    if (!template) {
+      throw new NotFoundException({
+        code: 'TEMPLATE_NOT_FOUND',
+        message: `Template with slug ${templateSlug} not found`,
+      });
+    }
+
+    // Find all cards using this template that have no components
+    const cards = await this.prisma.card.findMany({
+      where: {
+        templateId: template.id,
+      },
+      include: {
+        components: {
+          select: { id: true },
+        },
+      },
+    });
+
+    // Filter to only cards with zero components
+    const cardsWithoutComponents = cards.filter(card => card.components.length === 0);
+
+    console.log(`Found ${cards.length} cards with ${templateSlug} template`);
+    console.log(`${cardsWithoutComponents.length} cards have no components and need migration`);
+
+    if (dryRun) {
+      console.log('DRY RUN - no changes will be made');
+      return {
+        total: cards.length,
+        needsMigration: cardsWithoutComponents.length,
+        migrated: 0,
+        dryRun: true,
+      };
+    }
+
+    let migrated = 0;
+    const errors: Array<{ cardId: string; error: string }> = [];
+
+    for (const card of cardsWithoutComponents) {
+      try {
+        await this.templateComponentFactory.createComponentsForTemplate(
+          templateSlug,
+          card.id,
+          card,
+        );
+        migrated++;
+        console.log(`Migrated card ${card.id} (${migrated}/${cardsWithoutComponents.length})`);
+      } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        console.error(`Failed to migrate card ${card.id}:`, errorMessage);
+        errors.push({ cardId: card.id, error: errorMessage });
+      }
+    }
+
+    return {
+      total: cards.length,
+      needsMigration: cardsWithoutComponents.length,
+      migrated,
+      failed: errors.length,
+      errors: errors.length > 0 ? errors : undefined,
+      dryRun: false,
+    };
   }
 
   canAccessTemplate(userTier: SubscriptionTier, requiredTier: SubscriptionTier): boolean {

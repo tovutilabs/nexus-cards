@@ -106,6 +106,16 @@ export function CardComponentRenderer({
     }
   };
 
+  // For template components with variants, render without wrapper to avoid hydration issues
+  const hasTemplateVariant = component.config && 'variant' in component.config && component.config.variant !== 'default';
+  const hasBackgroundCustomization = component.backgroundType && component.backgroundType !== 'none';
+
+  if (hasTemplateVariant && !hasBackgroundCustomization) {
+    // Render directly without wrapper for template components
+    return <>{renderComponent()}</>;
+  }
+
+  // Render with wrapper for components with background customization or non-template components
   return (
     <div
       className="card-component-wrapper"

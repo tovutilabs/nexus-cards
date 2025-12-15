@@ -1,6 +1,6 @@
 import React from 'react';
 import { CardComponentRendererProps, ContactConfig } from './types';
-import { Mail, Phone, MessageSquare, Send } from 'lucide-react';
+import { Mail, Phone, MessageSquare, Send, Globe, MapPin } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { applyTemplateStyles } from '@/lib/template-themes';
@@ -24,8 +24,11 @@ export function ContactComponent({
   const showPhone = config.showPhone !== false;
   const showSMS = config.showSMS !== false;
   const showWhatsApp = config.showWhatsApp !== false;
+  const showWebsite = config.showWebsite !== false;
+  const showAddress = config.showAddress !== false;
   const customButtons = config.customButtons || [];
   const layout = config.layout || 'grid';
+  const variant = config.variant || 'default';
 
   // Apply template theme styling
   const containerStyles = applyTemplateStyles({
@@ -36,12 +39,98 @@ export function ContactComponent({
   // Extract contact data
   const email = cardData?.email || null;
   const phone = cardData?.phone || null;
+  const website = cardData?.website || null;
+  const address = cardData?.address || null;
 
   // Format phone for links (remove spaces, dashes, etc.)
   const formatPhoneForLink = (phoneNumber: string) => {
     return phoneNumber.replace(/[^\d+]/g, '');
   };
 
+  // Basic Business variant - matches CardRenderView lines 185-233
+  if (variant === 'basic-business' && layout === 'tiles') {
+    const contactItems = [];
+
+    if (showPhone && phone) {
+      contactItems.push({
+        id: 'phone',
+        label: 'Phone',
+        value: phone,
+        icon: Phone,
+        href: `tel:${formatPhoneForLink(phone)}`,
+        className: 'card-basic-contact-item-phone',
+      });
+    }
+
+    if (showEmail && email) {
+      contactItems.push({
+        id: 'email',
+        label: 'Email',
+        value: email,
+        icon: Mail,
+        href: `mailto:${email}`,
+        className: 'card-basic-contact-item-email',
+      });
+    }
+
+    if (showWebsite && website) {
+      contactItems.push({
+        id: 'website',
+        label: 'Website',
+        value: website,
+        icon: Globe,
+        href: website,
+        className: 'card-basic-contact-item-website',
+      });
+    }
+
+    if (showAddress && address) {
+      contactItems.push({
+        id: 'location',
+        label: 'Location',
+        value: address,
+        icon: MapPin,
+        href: `https://maps.google.com/?q=${encodeURIComponent(address)}`,
+        className: 'card-basic-contact-item-location',
+      });
+    }
+
+    if (contactItems.length === 0 && !isEditing) {
+      return null;
+    }
+
+    return (
+      <div className={cn('card-basic-contact', isEditing && !component.enabled && 'opacity-50')}>
+        {contactItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <a
+              key={item.id}
+              href={item.href}
+              className={cn('card-basic-contact-item', item.className)}
+              target={item.id === 'website' || item.id === 'location' ? '_blank' : undefined}
+              rel={item.id === 'website' || item.id === 'location' ? 'noopener noreferrer' : undefined}
+            >
+              <div className="card-basic-contact-icon">
+                <Icon />
+              </div>
+              <div className="card-basic-contact-content">
+                <span className="card-basic-contact-label">{item.label}</span>
+                <span className="card-basic-contact-value">{item.value}</span>
+              </div>
+            </a>
+          );
+        })}
+        {isEditing && (
+          <div className="mt-2 text-xs text-gray-500 italic">
+            Contact Component (Basic Business)
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Default variant
   const contactActions = [];
 
   // Email button

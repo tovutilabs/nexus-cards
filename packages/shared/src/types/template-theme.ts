@@ -80,4 +80,10 @@ export interface TemplateTheme {
     /** Icon style preference */
     iconStyle: 'solid' | 'outline' | 'minimal';
   };
+  
+  /** Default variant names for each component type (optional) */
+  defaultVariants?: Record<string, string>;
+  
+  /** List of component types that this template explicitly supports (optional) */
+  supportedComponents?: string[];
 }

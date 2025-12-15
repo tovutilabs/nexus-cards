@@ -135,6 +135,49 @@ ${identityHeader.jobTitle ? `TITLE:${identityHeader.jobTitle}\n` : ''}${identity
 
   // Basic Card Template Layout
   if (isBasic) {
+    // Check if card has template components (new component-based rendering)
+    const hasTemplateComponents = components?.some(c => 
+      ['PROFILE', 'CONTACT', 'SOCIAL_LINKS'].includes(c.type) && c.enabled
+    );
+
+    if (hasTemplateComponents) {
+      // NEW: Component-based rendering path
+      return (
+        <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f3f4f6' }}>
+          {styling.customCss && (
+            <style dangerouslySetInnerHTML={{ __html: styling.customCss }} />
+          )}
+
+          <div className="card-basic-container">
+            {components
+              .filter(c => c.enabled)
+              .sort((a, b) => a.order - b.order)
+              .map(component => (
+                <CardComponentRenderer
+                  key={component.id}
+                  component={component}
+                  cardData={identityHeader}
+                  isEditing={false}
+                  templateTheme={templateTheme}
+                />
+              ))}
+
+            {/* Save Contact button - always shown for basic-business template */}
+            <div className="card-basic-actions">
+              <button
+                className="card-basic-button"
+                onClick={downloadVCard}
+              >
+                <Download className="w-5 h-5" />
+                Save Contact
+              </button>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    // OLD: Fallback to hardcoded rendering (for unmigrated cards)
     return (
       <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#f3f4f6' }}>
         {styling.customCss && (

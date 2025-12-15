@@ -487,6 +487,7 @@ export default function CustomizeCardPage() {
                   // Template preview with components
                   <>
                     <CardPreview
+                      components={components}
                       customization={{
                         fontFamily: styling.fontFamily || undefined,
                         fontSize: styling.fontSize || undefined,

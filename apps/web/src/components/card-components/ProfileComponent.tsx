@@ -24,6 +24,7 @@ export function ProfileComponent({
   const showCompany = config.showCompany !== false;
   const avatarShape = config.avatarShape || 'circle';
   const layout = config.layout || 'center';
+  const variant = config.variant || 'default';
 
   // Extract data from cardData
   const firstName = cardData?.firstName || '';
@@ -37,6 +38,36 @@ export function ProfileComponent({
   // Generate initials for avatar fallback
   const initials = `${firstName?.[0] || ''}${lastName?.[0] || ''}`.toUpperCase() || 'U';
 
+  // Basic Business variant - matches CardRenderView lines 145-172
+  if (variant === 'basic-business') {
+    return (
+      <div className={cn('card-basic-header', isEditing && !component.enabled && 'opacity-50')}>
+        <div className="card-basic-avatar">
+          {avatarUrl ? (
+            <img src={avatarUrl} alt={fullName} />
+          ) : (
+            <div className="card-basic-avatar-fallback">
+              {initials}
+            </div>
+          )}
+        </div>
+        <h1 className="card-basic-name">{fullName}</h1>
+        {showJobTitle && jobTitle && (
+          <p className="card-basic-title">{jobTitle}</p>
+        )}
+        {showCompany && company && (
+          <p className="card-basic-company">{company}</p>
+        )}
+        {isEditing && (
+          <div className="mt-2 text-xs text-gray-500 italic">
+            Profile Component (Basic Business)
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Default variant
   const layoutClasses = {
     center: 'text-center items-center',
     left: 'text-left items-start',

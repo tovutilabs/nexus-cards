@@ -1,12 +1,28 @@
 'use client';
 
 import { useState } from 'react';
-import { Check, Lock } from 'lucide-react';
+import { Check, Lock, User, Phone, Share2, Sparkles } from 'lucide-react';
 import { CardTemplate } from '@/hooks/useTemplates';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+
+// Component icons mapping
+const COMPONENT_ICONS = {
+  PROFILE: User,
+  CONTACT: Phone,
+  SOCIAL_LINKS: Share2,
+} as const;
+
+// Get supported components from template config
+function getTemplateComponents(template: CardTemplate): string[] {
+  const supportedComponents = template.config?.supportedComponents;
+  if (Array.isArray(supportedComponents)) {
+    return supportedComponents;
+  }
+  return [];
+}
 
 interface TemplateGalleryProps {
   templates: CardTemplate[];
@@ -119,10 +135,44 @@ export function TemplateGallery({
                       </Badge>
                     </div>
                     {template.description && (
-                      <p className="text-sm text-muted-foreground line-clamp-2">
+                      <p className="text-sm text-muted-foreground line-clamp-2 mb-3">
                         {template.description}
                       </p>
                     )}
+
+                    {/* Component Breakdown */}
+                    {(() => {
+                      const components = getTemplateComponents(template);
+                      if (components.length > 0) {
+                        return (
+                          <div className="mb-3">
+                            <div className="flex items-center gap-1 mb-2">
+                              <Sparkles className="h-3 w-3 text-primary" />
+                              <span className="text-xs font-medium text-muted-foreground">
+                                Editable Components
+                              </span>
+                            </div>
+                            <div className="flex flex-wrap gap-1.5">
+                              {components.map((componentType) => {
+                                const Icon = COMPONENT_ICONS[componentType as keyof typeof COMPONENT_ICONS];
+                                if (!Icon) return null;
+                                return (
+                                  <Badge
+                                    key={componentType}
+                                    variant="secondary"
+                                    className="text-xs gap-1"
+                                  >
+                                    <Icon className="h-3 w-3" />
+                                    {componentType.replace('_', ' ')}
+                                  </Badge>
+                                );
+                              })}
+                            </div>
+                          </div>
+                        );
+                      }
+                      return null;
+                    })()}
 
                     {!isLocked && !isCurrent && isSelected && (
                       <Button

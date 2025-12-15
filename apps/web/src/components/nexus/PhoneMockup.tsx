@@ -1,6 +1,8 @@
 'use client';
 
 import { ReactNode } from 'react';
+import { CardComponentRenderer } from '@/components/card-components/CardComponentRenderer';
+import { getTemplateTheme } from '@/lib/template-themes';
 
 interface PhoneMockupProps {
   children: ReactNode;
@@ -139,6 +141,7 @@ export function PhoneMockup({ children, theme = 'light', deviceColor = 'midnight
 // Card Preview Component for use inside PhoneMockup
 interface CardPreviewProps {
   card?: any;
+  components?: any[];
   customization?: {
     fontFamily?: string;
     fontSize?: string;
@@ -175,6 +178,7 @@ interface CardPreviewProps {
 
 export function CardPreview({
   card,
+  components = [],
   customization,
   fontFamily: fontFamilyProp = 'inter',
   fontSize: fontSizeProp = 'base',
@@ -248,9 +252,39 @@ export function CardPreview({
   const isBasic = customCss.includes('card-basic-container');
   const isPhotographerSplit = customCss.includes('card-split-container');
   const isPhotographerWave = customCss.includes('card-wave-divider') && customCss.includes('card-photo-section');
+  const templateTheme = getTemplateTheme(customCss);
 
   // Basic Business Card Preview
   if (isBasic) {
+    // Check if card has template components (new component-based rendering)
+    const hasTemplateComponents = components?.some(c => 
+      ['PROFILE', 'CONTACT', 'SOCIAL_LINKS'].includes(c.type) && c.enabled
+    );
+
+    if (hasTemplateComponents) {
+      // NEW: Component-based rendering path
+      return (
+        <>
+          {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}
+          <div className="card-basic-container" style={{ maxWidth: '360px', margin: '0 auto', fontSize: '0.9rem' }}>
+            {components
+              .filter((c: any) => c.enabled)
+              .sort((a: any, b: any) => a.order - b.order)
+              .map((component: any) => (
+                <CardComponentRenderer
+                  key={component.id}
+                  component={component}
+                  cardData={cardData}
+                  isEditing={false}
+                  templateTheme={templateTheme}
+                />
+              ))}
+          </div>
+        </>
+      );
+    }
+
+    // OLD: Fallback to hardcoded rendering (for unmigrated cards)
     return (
       <>
         {customCss && <style dangerouslySetInnerHTML={{ __html: customCss }} />}

@@ -16,6 +16,46 @@ import { TemplateTheme } from '@nexus-cards/shared';
 export function getTemplateTheme(customCss?: string | null): TemplateTheme | null {
   if (!customCss) return null;
 
+  // Detect Basic Business template
+  if (customCss.includes('card-basic-container')) {
+    return {
+      id: 'basic-business',
+      name: 'Basic Business',
+      layout: 'vertical',
+      colors: {
+        primary: '#6366f1', // Indigo
+        secondary: '#8b5cf6', // Purple
+        text: '#111827',
+        accent: '#6366f1',
+      },
+      typography: {
+        fontFamily: 'system-ui, -apple-system, sans-serif',
+        headingSize: '1.75rem',
+        bodySize: '0.95rem',
+        headingWeight: 700,
+        bodyWeight: 400,
+      },
+      spacing: {
+        section: '1.5rem',
+        component: '1.25rem',
+        item: '0.75rem',
+      },
+      style: 'modern',
+      componentDefaults: {
+        showBorders: false,
+        showShadows: true,
+        roundedCorners: true,
+        iconStyle: 'solid',
+      },
+      defaultVariants: {
+        PROFILE: 'basic-business',
+        CONTACT: 'basic-business',
+        SOCIAL_LINKS: 'basic-business',
+      },
+      supportedComponents: ['PROFILE', 'CONTACT', 'SOCIAL_LINKS'],
+    };
+  }
+
   // Detect Photographer Split template
   if (customCss.includes('card-split-container')) {
     return {

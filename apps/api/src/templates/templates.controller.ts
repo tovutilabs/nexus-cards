@@ -56,6 +56,11 @@ export class TemplatesController {
     return this.templatesService.findOne(id);
   }
 
+  @Get(':id/component-blueprint')
+  async getComponentBlueprint(@Param('id') id: string) {
+    return this.templatesService.getComponentBlueprint(id);
+  }
+
   @Get('slug/:slug')
   async findBySlug(@Param('slug') slug: string) {
     return this.templatesService.findBySlug(slug);
@@ -100,5 +105,15 @@ export class AdminTemplatesController {
   @Delete(':id')
   async delete(@Param('id') id: string) {
     return this.templatesService.delete(id);
+  }
+
+  @Post('migrate-components')
+  async migrateTemplateComponents(
+    @Body() dto: { templateSlug: string; dryRun?: boolean },
+  ) {
+    return this.templatesService.migrateTemplateCards(
+      dto.templateSlug,
+      dto.dryRun !== false,
+    );
   }
 }

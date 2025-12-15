@@ -47,11 +47,13 @@ export interface CardComponentRendererProps {
 }
 
 export interface ProfileConfig {
+  variant?: 'default' | 'basic-business' | 'photographer-split' | 'photographer-wave';
   showAvatar?: boolean;
   showBio?: boolean;
   showJobTitle?: boolean;
   showCompany?: boolean;
   avatarShape?: 'circle' | 'square' | 'rounded';
+  avatarSize?: 'sm' | 'md' | 'lg';
   layout?: 'center' | 'left' | 'right';
 }
 
@@ -64,8 +66,11 @@ export interface AboutConfig {
 }
 
 export interface ContactConfig {
+  variant?: 'default' | 'basic-business';
   showEmail?: boolean;
   showPhone?: boolean;
+  showWebsite?: boolean;
+  showAddress?: boolean;
   showSMS?: boolean;
   showWhatsApp?: boolean;
   customButtons?: Array<{
@@ -73,7 +78,7 @@ export interface ContactConfig {
     url: string;
     icon?: string;
   }>;
-  layout?: 'grid' | 'list';
+  layout?: 'grid' | 'list' | 'tiles' | 'buttons';
 }
 
 export interface GalleryConfig {
@@ -89,13 +94,21 @@ export interface GalleryConfig {
 }
 
 export interface SocialLinksConfig {
-  links: Array<{
+  variant?: 'default' | 'basic-business';
+  title?: string;
+  platforms?: Array<{
+    platform: 'linkedin' | 'twitter' | 'github' | 'facebook' | 'instagram' | 'youtube' | 'tiktok';
+    url: string;
+    username?: string;
+    label?: string;
+  }>;
+  links?: Array<{
     platform: string;
     url: string;
     username?: string;
   }>;
-  layout?: 'icons' | 'buttons' | 'compact';
-  iconSize?: 'small' | 'medium' | 'large';
+  layout?: 'icons' | 'buttons' | 'compact' | 'horizontal' | 'circles' | 'grid';
+  iconSize?: 'small' | 'medium' | 'large' | 'sm' | 'md' | 'lg';
   showLabels?: boolean;
 }
 

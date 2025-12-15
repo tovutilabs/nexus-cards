@@ -62,6 +62,9 @@ export function SocialLinksComponent({
   const layout = config.layout || 'icons';
   const iconSize = config.iconSize || 'medium';
   const showLabels = config.showLabels !== false;
+  const variant = config.variant || 'default';
+  const title = config.title || 'Connect With Me';
+  const platforms = config.platforms || [];
 
   // Apply template theme styling
   const containerStyles = applyTemplateStyles({
@@ -87,6 +90,95 @@ export function SocialLinksComponent({
     large: 'h-8 w-8',
   };
 
+  // Basic Business variant - matches CardRenderView lines 244-279
+  if (variant === 'basic-business' && layout === 'circles') {
+    const socialLinks = cardData?.socialLinks || {};
+    const displayLinks = [];
+
+    // Build links from socialLinks object (supports both formats: linkedin and linkedinUrl)
+    if (platforms.includes('linkedin') && (socialLinks.linkedin || socialLinks.linkedinUrl)) {
+      displayLinks.push({
+        platform: 'linkedin',
+        url: socialLinks.linkedin || socialLinks.linkedinUrl,
+        icon: Linkedin,
+        className: 'card-basic-social-link-linkedin',
+      });
+    }
+    if (platforms.includes('twitter') && (socialLinks.twitter || socialLinks.twitterUrl)) {
+      displayLinks.push({
+        platform: 'twitter',
+        url: socialLinks.twitter || socialLinks.twitterUrl,
+        icon: Twitter,
+        className: 'card-basic-social-link-twitter',
+      });
+    }
+    if (platforms.includes('github') && (socialLinks.github || socialLinks.githubUrl)) {
+      displayLinks.push({
+        platform: 'github',
+        url: socialLinks.github || socialLinks.githubUrl,
+        icon: Github,
+        className: 'card-basic-social-link-github',
+      });
+    }
+    if (platforms.includes('facebook') && (socialLinks.facebook || socialLinks.facebookUrl)) {
+      displayLinks.push({
+        platform: 'facebook',
+        url: socialLinks.facebook || socialLinks.facebookUrl,
+        icon: Facebook,
+        className: 'card-basic-social-link-facebook',
+      });
+    }
+    if (platforms.includes('instagram') && (socialLinks.instagram || socialLinks.instagramUrl)) {
+      displayLinks.push({
+        platform: 'instagram',
+        url: socialLinks.instagram || socialLinks.instagramUrl,
+        icon: Instagram,
+        className: 'card-basic-social-link-instagram',
+      });
+    }
+    if (platforms.includes('youtube') && (socialLinks.youtube || socialLinks.youtubeUrl)) {
+      displayLinks.push({
+        platform: 'youtube',
+        url: socialLinks.youtube || socialLinks.youtubeUrl,
+        icon: Youtube,
+        className: 'card-basic-social-link-youtube',
+      });
+    }
+
+    if (displayLinks.length === 0 && !isEditing) {
+      return null;
+    }
+
+    return (
+      <div className={cn('card-basic-social', isEditing && !component.enabled && 'opacity-50')}>
+        <h3 className="card-basic-social-title">{title}</h3>
+        <div className="card-basic-social-links">
+          {displayLinks.map((link) => {
+            const Icon = link.icon;
+            return (
+              <a
+                key={link.platform}
+                href={link.url}
+                className={cn('card-basic-social-link', link.className)}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={getPlatformName(link.platform)}
+              >
+                <Icon />
+              </a>
+            );
+          })}
+        </div>
+        {isEditing && (
+          <div className="mt-2 text-xs text-gray-500 italic">
+            Social Links Component (Basic Business)
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // Default variant
   if (links.length === 0 && !isEditing) {
     return null;
   }
